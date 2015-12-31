@@ -30,3 +30,7 @@
 
 # Debug files
 *.dSYM/
+
+# kicad
+*.bak
+_saved*

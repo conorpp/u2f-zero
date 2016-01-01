@@ -1,4 +1,4 @@
-update=Thu 31 Dec 2015 02:13:14 PM EST
+update=Fri 01 Jan 2016 10:32:34 AM EST
 version=1
 last_client=kicad
 [pcbnew]
@@ -20,9 +20,6 @@ SolderMaskMinWidth=0.000000000000
 DrawSegmentWidth=0.200000000000
 BoardOutlineThickness=0.100000000000
 ModuleOutlineThickness=0.150000000000
-[cvpcb]
-version=1
-NetIExt=net
 [general]
 version=1
 [eeschema]
@@ -61,3 +58,6 @@ LibName29=valves
 LibName30=library/siliconlabs
 LibName31=library/atmel_cryptoauth
 LibName32=library/discrete
+[cvpcb]
+version=1
+NetIExt=net

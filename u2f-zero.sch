@@ -128,17 +128,6 @@ Wire Wire Line
 Connection ~ 6750 3450
 Wire Wire Line
 	6600 3250 6750 3250
-$Comp
-L R R?
-U 1 1 56857B9B
-P 7050 3450
-F 0 "R?" V 7130 3450 50  0000 C CNN
-F 1 "120" V 7050 3450 50  0000 C CNN
-F 2 "" V 6980 3450 50  0000 C CNN
-F 3 "" H 7050 3450 50  0000 C CNN
-	1    7050 3450
-	0    1    1    0   
-$EndComp
 Wire Wire Line
 	7200 3450 7350 3450
 Wire Wire Line
@@ -308,4 +297,18 @@ Wire Wire Line
 	4500 3400 4350 3400
 Text Label 4350 3400 2    60   ~ 0
 +3.3V
+$Comp
+L R R?
+U 1 1 56857B9B
+P 7050 3450
+F 0 "R?" V 7130 3450 50  0000 C CNN
+F 1 "100" V 7050 3450 50  0000 C CNN
+F 2 "" V 6980 3450 50  0000 C CNN
+F 3 "" H 7050 3450 50  0000 C CNN
+	1    7050 3450
+	0    1    1    0   
+$EndComp
+NoConn ~ 5050 5300
+NoConn ~ 5200 5300
+NoConn ~ 5350 5300
 $EndSCHEMATC

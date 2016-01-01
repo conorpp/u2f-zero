@@ -30,6 +30,7 @@ LIBS:contrib
 LIBS:valves
 LIBS:siliconlabs
 LIBS:atmel_cryptoauth
+LIBS:discrete
 LIBS:u2f-zero-cache
 EELAYER 25 0
 EELAYER END
@@ -80,19 +81,6 @@ F 3 "" H 6600 4950 60  0000 C CNN
 	-1   0    0    1   
 $EndComp
 NoConn ~ 7600 4750
-$Comp
-L GNDREF #PWR?
-U 1 1 568575A6
-P 6200 6050
-F 0 "#PWR?" H 6200 5800 50  0001 C CNN
-F 1 "GNDREF" H 6200 5900 50  0000 C CNN
-F 2 "" H 6200 6050 50  0000 C CNN
-F 3 "" H 6200 6050 50  0000 C CNN
-	1    6200 6050
-	1    0    0    -1  
-$EndComp
-Text Label 6200 5900 0    60   ~ 0
-GND
 Text Label 4350 4450 2    60   ~ 0
 GND
 NoConn ~ 7600 4850
@@ -105,8 +93,6 @@ Text Label 6400 5150 0    60   ~ 0
 GND
 Text Label 6050 4700 0    60   ~ 0
 GND
-Wire Wire Line
-	6200 5600 6200 6050
 Wire Wire Line
 	6050 4850 6300 4850
 Wire Wire Line
@@ -158,17 +144,6 @@ Wire Wire Line
 Wire Wire Line
 	7350 3450 7350 3600
 $Comp
-L +5V #PWR?
-U 1 1 56857C3F
-P 4900 6050
-F 0 "#PWR?" H 4900 5900 50  0001 C CNN
-F 1 "+5V" H 4900 6190 50  0000 C CNN
-F 2 "" H 4900 6050 50  0000 C CNN
-F 3 "" H 4900 6050 50  0000 C CNN
-	1    4900 6050
-	-1   0    0    1   
-$EndComp
-$Comp
 L C C?
 U 1 1 56857DEB
 P 5350 5600
@@ -191,14 +166,12 @@ F 3 "" H 5350 5950 50  0000 C CNN
 	0    1    1    0   
 $EndComp
 Wire Wire Line
-	4900 5300 4900 6050
+	4900 5300 4900 6150
 Wire Wire Line
 	4900 5950 5200 5950
 Wire Wire Line
 	4900 5600 5200 5600
 Connection ~ 4900 5950
-Wire Wire Line
-	5500 5600 6200 5600
 Wire Wire Line
 	5500 5950 5750 5950
 Wire Wire Line
@@ -243,14 +216,96 @@ Wire Wire Line
 Connection ~ 4050 5950
 Text Label 4050 6100 3    60   ~ 0
 GND
-Text Label 4900 5450 0    60   ~ 0
-+5V
 Text Label 4750 5450 2    60   ~ 0
 +3.3V
 Text Label 7350 3600 0    60   ~ 0
 +5V
 NoConn ~ 4950 3700
-NoConn ~ 5100 3700
 NoConn ~ 4350 4150
 NoConn ~ 4350 4300
+$Comp
+L DF5A5.6JE Z?
+U 1 1 56857EAF
+P 3700 5100
+F 0 "Z?" H 3300 5150 60  0000 C CNN
+F 1 "DF5A5.6JE" H 3150 5250 60  0000 C CNN
+F 2 "" H 3700 5100 60  0000 C CNN
+F 3 "" H 3700 5100 60  0000 C CNN
+	1    3700 5100
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3550 5400 3550 5650
+$Comp
+L GNDREF #PWR?
+U 1 1 568575A6
+P 6500 5850
+F 0 "#PWR?" H 6500 5600 50  0001 C CNN
+F 1 "GNDREF" H 6500 5700 50  0000 C CNN
+F 2 "" H 6500 5850 50  0000 C CNN
+F 3 "" H 6500 5850 50  0000 C CNN
+	1    6500 5850
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6500 5650 6500 5850
+Text Label 6500 5650 0    60   ~ 0
+GND
+$Comp
+L +5V #PWR?
+U 1 1 56858241
+P 6850 5850
+F 0 "#PWR?" H 6850 5700 50  0001 C CNN
+F 1 "+5V" H 6850 5990 50  0000 C CNN
+F 2 "" H 6850 5850 50  0000 C CNN
+F 3 "" H 6850 5850 50  0000 C CNN
+	1    6850 5850
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	6850 5850 6850 5650
+Text Label 6850 5650 0    60   ~ 0
++5V
+Wire Wire Line
+	5500 5600 5900 5600
+Text Label 5900 5600 0    60   ~ 0
+GND
+Text Label 4900 6150 0    60   ~ 0
++5V
+Text Label 3550 5650 0    60   ~ 0
++5V
+NoConn ~ 3850 5400
+Text Label 3700 4800 0    60   ~ 0
+GND
+Wire Wire Line
+	3500 4400 3500 4800
+Wire Wire Line
+	3500 4600 4350 4600
+Wire Wire Line
+	3900 4400 3900 4800
+Wire Wire Line
+	3900 4750 4350 4750
+Connection ~ 3500 4600
+Connection ~ 3900 4750
+Text Label 3500 4400 0    60   ~ 0
+HD+
+Text Label 3900 4400 0    60   ~ 0
+HD-
+$Comp
+L SW_PUSH SW?
+U 1 1 5685E9F9
+P 4800 3400
+F 0 "SW?" H 4950 3510 50  0000 C CNN
+F 1 "SW_PUSH" H 4800 3320 50  0000 C CNN
+F 2 "" H 4800 3400 50  0000 C CNN
+F 3 "" H 4800 3400 50  0000 C CNN
+	1    4800 3400
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5100 3700 5100 3400
+Wire Wire Line
+	4500 3400 4350 3400
+Text Label 4350 3400 2    60   ~ 0
++3.3V
 $EndSCHEMATC

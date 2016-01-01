@@ -1,4 +1,5 @@
 EESchema Schematic File Version 2
+LIBS:u2f-zero-rescue
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -47,17 +48,6 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L LED_RGB D1
-U 1 1 5685729F
-P 6400 3450
-F 0 "D1" H 6400 3875 50  0000 C CNN
-F 1 "LED_RGB" H 6400 3800 50  0000 C CNN
-F 2 "footprints:LED-0606" H 6400 3400 50  0001 C CNN
-F 3 "" H 6400 3400 50  0000 C CNN
-	1    6400 3450
-	1    0    0    -1  
-$EndComp
-$Comp
 L EFM8UB1 E1
 U 1 1 56857441
 P 5200 4500
@@ -70,7 +60,7 @@ F 3 "" H 4700 5000 60  0000 C CNN
 $EndComp
 NoConn ~ 7600 4650
 $Comp
-L ATECC508A A1
+L ATECC508A-RESCUE-u2f-zero A1
 U 1 1 56857313
 P 7000 4700
 F 0 "A1" H 7300 5000 60  0000 C CNN
@@ -90,48 +80,9 @@ NoConn ~ 6050 4250
 Text Label 7850 5050 0    60   ~ 0
 GND
 Text Label 6400 5150 0    60   ~ 0
-GND
++5V
 Text Label 6050 4700 0    60   ~ 0
 GND
-Wire Wire Line
-	6050 4850 6300 4850
-Wire Wire Line
-	6300 4850 6300 4650
-Wire Wire Line
-	6300 4650 6400 4650
-Wire Wire Line
-	6400 4550 6050 4550
-Wire Wire Line
-	6400 4850 6400 5150
-Wire Wire Line
-	7600 4550 7850 4550
-Wire Wire Line
-	7850 4550 7850 5050
-Wire Wire Line
-	6200 3650 5550 3650
-Wire Wire Line
-	5550 3650 5550 3700
-Wire Wire Line
-	6200 3450 5400 3450
-Wire Wire Line
-	5400 3450 5400 3700
-Wire Wire Line
-	6200 3250 5250 3250
-Wire Wire Line
-	5250 3250 5250 3700
-Wire Wire Line
-	6750 3650 6600 3650
-Wire Wire Line
-	6750 3250 6750 3650
-Wire Wire Line
-	6600 3450 6900 3450
-Connection ~ 6750 3450
-Wire Wire Line
-	6600 3250 6750 3250
-Wire Wire Line
-	7200 3450 7350 3450
-Wire Wire Line
-	7350 3450 7350 3600
 $Comp
 L C C3
 U 1 1 56857DEB
@@ -141,7 +92,7 @@ F 1 "0.1uF" H 5375 5500 50  0000 L CNN
 F 2 "Capacitors_SMD:C_0402" H 5388 5450 50  0001 C CNN
 F 3 "" H 5350 5600 50  0000 C CNN
 	1    5350 5600
-	0    1    1    0   
+	0    -1   1    0   
 $EndComp
 $Comp
 L C C4
@@ -154,18 +105,6 @@ F 3 "" H 5350 5950 50  0000 C CNN
 	1    5350 5950
 	0    1    1    0   
 $EndComp
-Wire Wire Line
-	4900 5300 4900 6150
-Wire Wire Line
-	4900 5950 5200 5950
-Wire Wire Line
-	4900 5600 5200 5600
-Connection ~ 4900 5950
-Wire Wire Line
-	5500 5950 5750 5950
-Wire Wire Line
-	5750 5950 5750 5600
-Connection ~ 5750 5600
 $Comp
 L C C1
 U 1 1 56858041
@@ -188,28 +127,12 @@ F 3 "" H 4400 5950 50  0000 C CNN
 	1    4400 5950
 	0    1    1    0   
 $EndComp
-Connection ~ 4900 5600
-Wire Wire Line
-	4750 5300 4750 5950
-Wire Wire Line
-	4750 5600 4550 5600
-Connection ~ 4750 5600
-Wire Wire Line
-	4050 5600 4250 5600
-Wire Wire Line
-	4750 5950 4550 5950
-Wire Wire Line
-	4050 5600 4050 6100
-Wire Wire Line
-	4050 5950 4250 5950
-Connection ~ 4050 5950
 Text Label 4050 6100 3    60   ~ 0
 GND
 Text Label 4750 5450 2    60   ~ 0
 +3.3V
 Text Label 7350 3600 0    60   ~ 0
 +5V
-NoConn ~ 4950 3700
 NoConn ~ 4350 4150
 NoConn ~ 4350 4300
 $Comp
@@ -223,40 +146,6 @@ F 3 "" H 3700 5100 60  0000 C CNN
 	1    3700 5100
 	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	3550 5400 3550 5650
-$Comp
-L GNDREF #PWR01
-U 1 1 568575A6
-P 6500 5850
-F 0 "#PWR01" H 6500 5600 50  0001 C CNN
-F 1 "GNDREF" H 6500 5700 50  0000 C CNN
-F 2 "" H 6500 5850 50  0000 C CNN
-F 3 "" H 6500 5850 50  0000 C CNN
-	1    6500 5850
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	6500 5650 6500 5850
-Text Label 6500 5650 0    60   ~ 0
-GND
-$Comp
-L +5V #PWR02
-U 1 1 56858241
-P 6850 5850
-F 0 "#PWR02" H 6850 5700 50  0001 C CNN
-F 1 "+5V" H 6850 5990 50  0000 C CNN
-F 2 "" H 6850 5850 50  0000 C CNN
-F 3 "" H 6850 5850 50  0000 C CNN
-	1    6850 5850
-	-1   0    0    1   
-$EndComp
-Wire Wire Line
-	6850 5850 6850 5650
-Text Label 6850 5650 0    60   ~ 0
-+5V
-Wire Wire Line
-	5500 5600 5900 5600
 Text Label 5900 5600 0    60   ~ 0
 GND
 Text Label 4900 6150 0    60   ~ 0
@@ -266,37 +155,12 @@ Text Label 3550 5650 0    60   ~ 0
 NoConn ~ 3850 5400
 Text Label 3700 4800 0    60   ~ 0
 GND
-Wire Wire Line
-	3500 4400 3500 4800
-Wire Wire Line
-	3500 4600 4350 4600
-Wire Wire Line
-	3900 4400 3900 4800
-Wire Wire Line
-	3900 4750 4350 4750
-Connection ~ 3500 4600
-Connection ~ 3900 4750
 Text Label 3500 4400 0    60   ~ 0
-HD+
-Text Label 3900 4400 0    60   ~ 0
 HD-
-$Comp
-L SW_PUSH SW1
-U 1 1 5685E9F9
-P 4800 3400
-F 0 "SW1" H 4950 3510 50  0000 C CNN
-F 1 "SW_PUSH" H 4800 3320 50  0000 C CNN
-F 2 "Buttons_Switches_ThroughHole:SW_PUSH_SMALL" H 4800 3400 50  0001 C CNN
-F 3 "" H 4800 3400 50  0000 C CNN
-	1    4800 3400
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	5100 3700 5100 3400
-Wire Wire Line
-	4500 3400 4350 3400
+Text Label 3900 4400 0    60   ~ 0
+HD+
 Text Label 4350 3400 2    60   ~ 0
-+3.3V
+GND
 $Comp
 L R R1
 U 1 1 56857B9B
@@ -317,4 +181,138 @@ Text Notes 3450 4250 0    60   ~ 0
 Host USB data
 Text Notes 6500 4350 0    60   ~ 0
 Secure element for EC
+$Comp
+L CA_RGB-RESCUE-u2f-zero RGB1
+U 1 1 5686DEFD
+P 6250 3250
+F 0 "RGB1" H 6500 3400 60  0000 C CNN
+F 1 "CA_RGB" H 6150 3400 60  0000 C CNN
+F 2 "footprints:LED-0606" H 7050 3300 60  0001 C CNN
+F 3 "" H 6250 3300 60  0000 C CNN
+	1    6250 3250
+	1    0    0    -1  
+$EndComp
+$Comp
+L GND #PWR01
+U 1 1 5686E5B0
+P 6550 5850
+F 0 "#PWR01" H 6550 5600 50  0001 C CNN
+F 1 "GND" H 6550 5700 50  0000 C CNN
+F 2 "" H 6550 5850 50  0000 C CNN
+F 3 "" H 6550 5850 50  0000 C CNN
+	1    6550 5850
+	1    0    0    -1  
+$EndComp
+$Comp
+L PWR_FLAG #FLG02
+U 1 1 5686E60B
+P 6850 5850
+F 0 "#FLG02" H 6850 5945 50  0001 C CNN
+F 1 "PWR_FLAG" H 6850 6030 50  0000 C CNN
+F 2 "" H 6850 5850 50  0000 C CNN
+F 3 "" H 6850 5850 50  0000 C CNN
+	1    6850 5850
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	6050 4850 6300 4850
+Wire Wire Line
+	6300 4850 6300 4650
+Wire Wire Line
+	6300 4650 6400 4650
+Wire Wire Line
+	6400 4550 6050 4550
+Wire Wire Line
+	6400 4850 6400 5150
+Wire Wire Line
+	7600 4550 7850 4550
+Wire Wire Line
+	7850 4550 7850 5050
+Wire Wire Line
+	7200 3450 7350 3450
+Wire Wire Line
+	7350 3450 7350 3600
+Wire Wire Line
+	4900 5300 4900 6150
+Wire Wire Line
+	4900 5950 5200 5950
+Wire Wire Line
+	4900 5600 5200 5600
+Connection ~ 4900 5950
+Wire Wire Line
+	5500 5950 5750 5950
+Wire Wire Line
+	5750 5950 5750 5600
+Connection ~ 5750 5600
+Connection ~ 4900 5600
+Wire Wire Line
+	4750 5300 4750 5950
+Wire Wire Line
+	4750 5600 4550 5600
+Connection ~ 4750 5600
+Wire Wire Line
+	4050 5600 4250 5600
+Wire Wire Line
+	4750 5950 4550 5950
+Wire Wire Line
+	4050 5600 4050 6100
+Wire Wire Line
+	4050 5950 4250 5950
+Connection ~ 4050 5950
+Wire Wire Line
+	3550 5400 3550 5650
+Wire Wire Line
+	5500 5600 5900 5600
+Wire Wire Line
+	5100 3400 5100 3700
+Wire Wire Line
+	4500 3400 4350 3400
+Wire Wire Line
+	6900 3450 6750 3450
+Wire Wire Line
+	5550 3700 5550 3600
+Wire Wire Line
+	5550 3600 5800 3600
+Wire Wire Line
+	5800 3450 5400 3450
+Wire Wire Line
+	5400 3450 5400 3700
+Wire Wire Line
+	5250 3700 5250 3300
+Wire Wire Line
+	5250 3300 5800 3300
+Wire Wire Line
+	6850 5850 6850 5650
+Wire Wire Line
+	6550 5650 6550 5850
+Text Label 6850 5650 0    60   ~ 0
++5V
+Text Label 6550 5650 0    60   ~ 0
+GND
+$Comp
+L SW_PUSH SW1
+U 1 1 5685E9F9
+P 4800 3400
+F 0 "SW1" H 4950 3510 50  0000 C CNN
+F 1 "SW_PUSH" H 4800 3320 50  0000 C CNN
+F 2 "Buttons_Switches_ThroughHole:SW_PUSH_SMALL" H 4800 3400 50  0001 C CNN
+F 3 "" H 4800 3400 50  0000 C CNN
+	1    4800 3400
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4950 3700 4950 3650
+Wire Wire Line
+	4950 3650 5100 3650
+Connection ~ 5100 3650
+Wire Wire Line
+	4350 4750 3500 4750
+Wire Wire Line
+	3500 4400 3500 4800
+Wire Wire Line
+	3900 4800 3900 4400
+Connection ~ 3500 4750
+Wire Wire Line
+	4350 4600 3900 4600
+Connection ~ 3900 4600
 $EndSCHEMATC

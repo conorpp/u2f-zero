@@ -80,7 +80,7 @@ NoConn ~ 6050 4250
 Text Label 7850 5050 0    60   ~ 0
 GND
 Text Label 6400 5150 0    60   ~ 0
-+5V
++3.3V
 Text Label 6050 4700 0    60   ~ 0
 GND
 $Comp
@@ -138,26 +138,25 @@ NoConn ~ 4350 4300
 $Comp
 L DF5A5.6JE Z1
 U 1 1 56857EAF
-P 3700 5100
-F 0 "Z1" H 3300 5150 60  0000 C CNN
-F 1 "DF5A5.6JE" H 3150 5250 60  0000 C CNN
-F 2 "TO_SOT_Packages_SMD:SOT-553" H 3700 5100 60  0001 C CNN
-F 3 "" H 3700 5100 60  0000 C CNN
-	1    3700 5100
+P 3450 4300
+F 0 "Z1" H 3050 4350 60  0000 C CNN
+F 1 "DF5A5.6JE" H 2900 4450 60  0000 C CNN
+F 2 "TO_SOT_Packages_SMD:SOT-553" H 3450 4300 60  0001 C CNN
+F 3 "" H 3450 4300 60  0000 C CNN
+	1    3450 4300
 	1    0    0    -1  
 $EndComp
 Text Label 5900 5600 0    60   ~ 0
 GND
 Text Label 4900 6150 0    60   ~ 0
 +5V
-Text Label 3550 5650 0    60   ~ 0
+Text Label 3650 3900 2    60   ~ 0
 +5V
-NoConn ~ 3850 5400
-Text Label 3700 4800 0    60   ~ 0
+Text Label 3450 3900 2    60   ~ 0
 GND
-Text Label 3500 4400 0    60   ~ 0
+Text Label 3750 4600 0    60   ~ 0
 HD-
-Text Label 3900 4400 0    60   ~ 0
+Text Label 3950 4750 2    60   ~ 0
 HD+
 Text Label 4350 3400 2    60   ~ 0
 GND
@@ -175,22 +174,22 @@ $EndComp
 NoConn ~ 5050 5300
 NoConn ~ 5200 5300
 NoConn ~ 5350 5300
-Text Notes 2550 5250 0    60   ~ 0
+Text Notes 3050 3750 0    60   ~ 0
 Protect from ESD
-Text Notes 3450 4250 0    60   ~ 0
+Text Notes 3350 4900 0    60   ~ 0
 Host USB data
 Text Notes 6500 4350 0    60   ~ 0
 Secure element for EC
 $Comp
 L CA_RGB-RESCUE-u2f-zero RGB1
 U 1 1 5686DEFD
-P 6250 3250
-F 0 "RGB1" H 6500 3400 60  0000 C CNN
-F 1 "CA_RGB" H 6150 3400 60  0000 C CNN
-F 2 "footprints:LED-0606" H 7050 3300 60  0001 C CNN
-F 3 "" H 6250 3300 60  0000 C CNN
-	1    6250 3250
-	1    0    0    -1  
+P 6250 3650
+F 0 "RGB1" H 6500 3800 60  0000 C CNN
+F 1 "CA_RGB" H 6150 3800 60  0000 C CNN
+F 2 "footprints:LED-0606" H 7050 3700 60  0001 C CNN
+F 3 "" H 6250 3700 60  0000 C CNN
+	1    6250 3650
+	1    0    0    1   
 $EndComp
 $Comp
 L GND #PWR01
@@ -260,8 +259,6 @@ Wire Wire Line
 	4050 5950 4250 5950
 Connection ~ 4050 5950
 Wire Wire Line
-	3550 5400 3550 5650
-Wire Wire Line
 	5500 5600 5900 5600
 Wire Wire Line
 	5100 3400 5100 3700
@@ -306,13 +303,14 @@ Wire Wire Line
 	4950 3650 5100 3650
 Connection ~ 5100 3650
 Wire Wire Line
-	4350 4750 3500 4750
+	3300 4600 3300 4750
 Wire Wire Line
-	3500 4400 3500 4800
+	3300 4750 4350 4750
 Wire Wire Line
-	3900 4800 3900 4400
-Connection ~ 3500 4750
+	3600 4600 4350 4600
+NoConn ~ 3250 4000
 Wire Wire Line
-	4350 4600 3900 4600
-Connection ~ 3900 4600
+	3450 4000 3450 3900
+Wire Wire Line
+	3650 4000 3650 3900
 $EndSCHEMATC

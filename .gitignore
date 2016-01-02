@@ -32,5 +32,6 @@
 
 # kicad
 *.bak
+*-bak
 _saved*
 _autosave*

@@ -1,0 +1,4 @@
+
+
+clean:
+	rm -rf gerbers/*

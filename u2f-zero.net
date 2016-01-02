@@ -1,7 +1,7 @@
 (export (version D)
   (design
     (source /home/wintermute/apps/u2f-zero/u2f-zero.sch)
-    (date "Fri 01 Jan 2016 05:25:13 PM EST")
+    (date "Fri 01 Jan 2016 10:24:01 PM EST")
     (tool "Eeschema 4.0.1-3.201512221402+6198~38~ubuntu15.04.1-stable")
     (sheet (number 1) (name /) (tstamps /)
       (title_block
@@ -71,7 +71,7 @@
       (tstamp 5686DEFD))
     (comp (ref SW1)
       (value SW_PUSH)
-      (footprint Buttons_Switches_ThroughHole:SW_PUSH_SMALL)
+      (footprint footprints:MJTP1230)
       (libsource (lib device) (part SW_PUSH))
       (sheetpath (names /) (tstamps /))
       (tstamp 5685E9F9)))
@@ -168,14 +168,14 @@
         (pin (num 1) (name 1) (type passive))
         (pin (num 2) (name 2) (type passive)))))
   (libraries
-    (library (logical discrete)
-      (uri /home/wintermute/apps/u2f-zero/library/discrete.lib))
-    (library (logical siliconlabs)
-      (uri /home/wintermute/apps/u2f-zero/library/siliconlabs.lib))
+    (library (logical u2f-zero-rescue)
+      (uri u2f-zero-rescue.lib))
     (library (logical device)
       (uri /usr/share/kicad/library/device.lib))
-    (library (logical u2f-zero-rescue)
-      (uri /home/wintermute/apps/u2f-zero/u2f-zero-rescue.lib)))
+    (library (logical siliconlabs)
+      (uri library/siliconlabs.lib))
+    (library (logical discrete)
+      (uri library/discrete.lib)))
   (nets
     (net (code 1) (name "Net-(A1-Pad5)")
       (node (ref A1) (pin 5))

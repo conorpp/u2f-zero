@@ -1,5 +1,5 @@
 
-name=u2f-zero
+name=EFM8UB1_setup_board
 gers=gerbers
 files=$(addprefix $(name)., GTL GBL GTS GBS GTO GBO GKO TXT)
 

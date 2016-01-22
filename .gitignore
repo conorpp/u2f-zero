@@ -33,5 +33,7 @@
 # kicad
 *.bak
 *-bak
+*_bak
 _saved*
 _autosave*
+gerbers/*

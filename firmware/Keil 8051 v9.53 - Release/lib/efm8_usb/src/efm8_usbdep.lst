@@ -1,0 +1,987 @@
+C51 COMPILER V9.53.0.0   EFM8_USBDEP                                                       01/21/2016 22:27:57 PAGE 1   
+
+
+C51 COMPILER V9.53.0.0, COMPILATION OF MODULE EFM8_USBDEP
+OBJECT MODULE PLACED IN .\lib/efm8_usb/src/efm8_usbdep.OBJ
+COMPILER INVOKED BY: Z:\home\pp\SimplicityStudio_v3\developer\toolchains\keil_8051\9.53\BIN\C51.exe /home/pp/SimplicityS
+                    -tudio/v3_workspace/u2f-firmware/lib/efm8_usb/src/efm8_usbdep.c OMF2 SMALL DEBUG OBJECTEXTEND ROM(LARGE) WARNINGLEVEL(2) 
+                    -FLOATFUZZY(3) OPTIMIZE(9,SPEED) INTVECTOR(0X0000) INTPROMOTE INCDIR(/home/pp/SimplicityStudio/v3_workspace/u2f-firmware/
+                    -inc/config;/home/pp/SimplicityStudio/v3_workspace/u2f-firmware/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3
+                    -//Device/shared/si8051Base;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1;/home/pp/SimplicityStud
+                    -io_v3/developer/sdks/si8051/v3//Device/EFM8UB1/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Lib/efm8_usb/i
+                    -nc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1/peripheral_driver/inc;/home/pp/SimplicityStudio
+                    -_v3/developer/sdks/si8051/v3//Lib/efm8_assert) REGFILE(u2f-firmware.ORC) PRINT(.\lib/efm8_usb/src/efm8_usbdep.lst) COND 
+                    -PAGEWIDTH(120) PAGELENGTH(65) OBJECT(.\lib/efm8_usb/src/efm8_usbdep.OBJ)
+
+line level    source
+
+   1          /**************************************************************************//**
+   2           * Copyright (c) 2015 by Silicon Laboratories Inc. All rights reserved.
+   3           *
+   4           * http://developer.silabs.com/legal/version/v11/Silicon_Labs_Software_License_Agreement.txt
+   5           *****************************************************************************/
+   6          
+   7          #include "si_toolchain.h"
+   8          #include "efm8_usb.h"
+   9          #include <stdint.h>
+  10          #include <endian.h>
+  11          
+  12          extern SI_SEGMENT_VARIABLE(myUsbDevice, USBD_Device_TypeDef, MEM_MODEL_SEG);
+  13          
+  14          // -----------------------------------------------------------------------------
+  15          // Function Prototypes
+  16          
+  17          // -------------------------------
+  18          // Memory-specific FIFO access functions
+  19          #ifdef SI_GPTR
+  20          
+  21          static void USB_ReadFIFO_Idata(uint8_t numBytes, SI_VARIABLE_SEGMENT_POINTER(dat, uint8_t, SI_SEG_IDATA), 
+             -uint8_t fifoNum);
+  22          static void USB_WriteFIFO_Idata(uint8_t numBytes, SI_VARIABLE_SEGMENT_POINTER(dat, uint8_t, SI_SEG_IDATA))
+             -;
+  23          
+  24          static void USB_ReadFIFO_Xdata(uint8_t numBytes, SI_VARIABLE_SEGMENT_POINTER(dat, uint8_t, SI_SEG_XDATA), 
+             -uint8_t fifoNum);
+  25          static void USB_WriteFIFO_Xdata(uint8_t numBytes, SI_VARIABLE_SEGMENT_POINTER(dat, uint8_t, SI_SEG_XDATA))
+             -;
+  26          
+  27          #if SI_GPTR_MTYPE_PDATA != SI_GPTR_MTYPE_XDATA
+  28          static void USB_ReadFIFO_Pdata(uint8_t numBytes, SI_VARIABLE_SEGMENT_POINTER(dat, uint8_t, SI_SEG_PDATA), 
+             -uint8_t fifoNum);
+  29          static void USB_WriteFIFO_Pdata(uint8_t numBytes, SI_VARIABLE_SEGMENT_POINTER(dat, uint8_t, SI_SEG_PDATA))
+             -;
+  30          #endif
+  31          
+  32          #if SI_GPTR_MTYPE_DATA != SI_GPTR_MTYPE_IDATA
+              static void USB_ReadFIFO_Data(uint8_t numBytes, SI_VARIABLE_SEGMENT_POINTER(dat, uint8_t, SI_SEG_DATA), ui
+             -nt8_t fifoNum);
+              static void USB_WriteFIFO_Data(uint8_t numBytes, uint8_t SI_VARIABLE_SEGMENT_POINTER(dat, uint8_t, SI_SEG_
+             -DATA));
+              #endif
+  36          
+  37          static void USB_WriteFIFO_Code(uint8_t numBytes, SI_VARIABLE_SEGMENT_POINTER(dat, uint8_t, SI_SEG_CODE));
+  38          
+  39          #else
+              
+C51 COMPILER V9.53.0.0   EFM8_USBDEP                                                       01/21/2016 22:27:57 PAGE 2   
+
+              // -------------------------------
+              // Generic FIFO access functions
+              static void USB_ReadFIFO_Generic(uint8_t numBytes, uint8_t *dat, uint8_t fifoNum);
+              static void USB_WriteFIFO_Generic(uint8_t numBytes, uint8_t *dat);
+              
+              #endif  // #ifdef SI_GPTR
+  47          
+  48          // -----------------------------------------------------------------------------
+  49          // Functions
+  50          
+  51          /***************************************************************************//**
+  52           * @brief       Reads Isochronous data from the Endpoint FIFO
+  53           * @param       fifoNum
+  54           *              USB Endpoint FIFO to read
+  55           * @param       numBytes
+  56           *              Number of bytes to read from the FIFO
+  57           * @param       dat
+  58           *              Pointer to buffer to hold data read from the FIFO
+  59           ******************************************************************************/
+  60          #if (SLAB_USB_EP3OUT_USED && (SLAB_USB_EP3OUT_TRANSFER_TYPE == USB_EPTYPE_ISOC) && (SLAB_USB_EP3OUT_MAX_PA
+             -CKET_SIZE > 255))
+              // ----------------------------------------------------------------------------
+              // If Isochronous mode is enabled and the max packet size is greater than 255,
+              // break the FIFO reads up into multiple reads of 255 or less bytes.
+              // ----------------------------------------------------------------------------
+              void USB_ReadFIFOIso(uint8_t fifoNum, uint16_t numBytes, uint8_t *dat)
+              {
+                uint8_t numBytesRead;
+              
+                // USB_ReadFIFO() accepts a maximum of 255 bytes. If the number of bytes to
+                // send is greated than 255, call USB_ReadFIFO() multiple times.
+                while (numBytes > 0)
+                {
+                  numBytesRead = (numBytes > 255) ? 255 : numBytes;
+                  USB_ReadFIFO(fifoNum, numBytesRead, dat);
+                  numBytes -= numBytesRead;
+                  dat += numBytesRead;
+                }
+              }
+              #else
+  80          #define USB_ReadFIFOIso(a, b, c) USB_ReadFIFO(a, b, c)
+  81          #endif
+  82          
+  83          /***************************************************************************//**
+  84           * @brief       Writes Isochronous data to the Endpoint FIFO
+  85           * @param       fifoNum
+  86           *              USB Endpoint FIFO to write
+  87           * @param       numBytes
+  88           *              Number of bytes to write to the FIFO
+  89           * @param       dat
+  90           *              Pointer to buffer hoding data to write to the FIFO
+  91           ******************************************************************************/
+  92          #if (SLAB_USB_EP3IN_USED && (SLAB_USB_EP3IN_TRANSFER_TYPE == USB_EPTYPE_ISOC) && (SLAB_USB_EP3IN_MAX_PACKE
+             -T_SIZE > 255))
+              // ----------------------------------------------------------------------------
+              // If Isochronous mode is enabled and the max packet size is greater than 255,
+              // break the FIFO writes up into multiple writes of 255 or less bytes.
+              // ----------------------------------------------------------------------------
+              void USB_WriteFIFOIso(uint8_t fifoNum, uint16_t numBytes, uint8_t *dat)
+              {
+                uint8_t numBytesWrite;
+              
+                // USB_WriteFIFO() accepts a maximum of 255 bytes. If the number of bytes to
+C51 COMPILER V9.53.0.0   EFM8_USBDEP                                                       01/21/2016 22:27:57 PAGE 3   
+
+                // send is greated than 255, call USB_WriteFIFO() multiple times.
+                while (numBytes > 0)
+                {
+                  numBytesWrite = (numBytes > 255) ? 255 : numBytes;
+                  numBytes -= numBytesWrite;
+                  USB_WriteFIFO(fifoNum, numBytesWrite, dat, (numBytes == 0));
+                  dat += numBytesWrite;
+                }
+              }
+              #else
+ 112          #define USB_WriteFIFOIso(a, b, c) USB_WriteFIFO(a, b, c, true)
+ 113          #endif
+ 114          
+ 115          #if SLAB_USB_EP1IN_USED
+ 116          /***************************************************************************//**
+ 117           * @brief       Handle Endpoint 1 IN transfer interrupt
+ 118           * @note        This function takes no parameters, but it uses the EP1IN status
+ 119           *              variables stored in @ref myUsbDevice.ep1in.
+ 120           ******************************************************************************/
+ 121          void handleUsbIn1Int(void)
+ 122          {
+ 123   1        uint8_t xferred;
+ 124   1        bool callback;
+ 125   1      
+ 126   1        USB_SetIndex(1);
+ 127   1      
+ 128   1        if (USB_EpnInGetSentStall())
+ 129   1        {
+ 130   2          USB_EpnInClearSentStall();
+ 131   2        }
+ 132   1        else if (myUsbDevice.ep1in.state == D_EP_TRANSMITTING)
+ 133   1        {
+ 134   2          xferred = (myUsbDevice.ep1in.remaining > SLAB_USB_EP1IN_MAX_PACKET_SIZE)
+ 135   2                    ? SLAB_USB_EP1IN_MAX_PACKET_SIZE : myUsbDevice.ep1in.remaining;
+ 136   2          myUsbDevice.ep1in.remaining -= xferred;
+ 137   2          myUsbDevice.ep1in.buf += xferred;
+ 138   2      
+ 139   2          callback = myUsbDevice.ep1in.misc.bits.callback;
+ 140   2      
+ 141   2          // Load more data
+ 142   2          if (myUsbDevice.ep1in.remaining > 0)
+ 143   2          {
+ 144   3            USB_WriteFIFO(1,
+ 145   3                          (myUsbDevice.ep1in.remaining > SLAB_USB_EP1IN_MAX_PACKET_SIZE)
+ 146   3                            ? SLAB_USB_EP1IN_MAX_PACKET_SIZE
+ 147   3                            : myUsbDevice.ep1in.remaining,
+ 148   3                          myUsbDevice.ep1in.buf,
+ 149   3                          true);
+ 150   3          }
+ 151   2          else
+ 152   2          {
+ 153   3            myUsbDevice.ep1in.misc.bits.callback = false;
+ 154   3            myUsbDevice.ep1in.state = D_EP_IDLE;
+ 155   3          }
+ 156   2      
+ 157   2          if (callback == true)
+ 158   2          {
+ 159   3            USBD_XferCompleteCb(EP1IN, USB_STATUS_OK, xferred, myUsbDevice.ep1in.remaining);
+ 160   3          }
+ 161   2      
+ 162   2        }
+ 163   1      }
+ 164          #endif // SLAB_USB_EP1IN_USED
+C51 COMPILER V9.53.0.0   EFM8_USBDEP                                                       01/21/2016 22:27:57 PAGE 4   
+
+ 165          
+ 166          #if SLAB_USB_EP2IN_USED
+              /***************************************************************************//**
+               * @brief       Handle Endpoint 2 IN transfer interrupt
+               * @note        This function takes no parameters, but it uses the EP2IN status
+               *              variables stored in @ref myUsbDevice.ep2in.
+               ******************************************************************************/
+              void handleUsbIn2Int(void)
+              {
+                uint8_t xferred;
+                bool callback;
+              
+                USB_SetIndex(2);
+              
+                if (USB_EpnInGetSentStall())
+                {
+                  USB_EpnInClearSentStall();
+                }
+                else if (myUsbDevice.ep2in.state == D_EP_TRANSMITTING)
+                {
+                  xferred = (myUsbDevice.ep2in.remaining > SLAB_USB_EP2IN_MAX_PACKET_SIZE)
+                            ? SLAB_USB_EP2IN_MAX_PACKET_SIZE : myUsbDevice.ep2in.remaining;
+                  myUsbDevice.ep2in.remaining -= xferred;
+                  myUsbDevice.ep2in.buf += xferred;
+              
+                  callback = myUsbDevice.ep2in.misc.bits.callback;
+              
+                  // Load more data
+                  if (myUsbDevice.ep2in.remaining > 0)
+                  {
+                    USB_WriteFIFO(2,
+                                  (myUsbDevice.ep2in.remaining > SLAB_USB_EP2IN_MAX_PACKET_SIZE)
+                                    ? SLAB_USB_EP2IN_MAX_PACKET_SIZE
+                                    : myUsbDevice.ep2in.remaining,
+                                  myUsbDevice.ep2in.buf,
+                                  true);
+                  }
+                  else
+                  {
+                    myUsbDevice.ep2in.misc.bits.callback = false;
+                    myUsbDevice.ep2in.state = D_EP_IDLE;
+                  }
+              
+                  if (callback == true)
+                  {
+                    USBD_XferCompleteCb(EP2IN, USB_STATUS_OK, xferred, myUsbDevice.ep2in.remaining);
+                  }
+              
+                }
+              }
+              #endif // SLAB_USB_EP2IN_USED
+ 216          
+ 217          #if SLAB_USB_EP3IN_USED
+              /***************************************************************************//**
+               * @brief       Handle Endpoint 3 IN transfer interrupt
+               * @details     Endpoint 3 IN is the only IN endpoint that supports isochronous
+               *              transfers.
+               * @note        This function takes no parameters, but it uses the EP3IN status
+               *              variables stored in @ref myUsbDevice.ep3in.
+               ******************************************************************************/
+              void handleUsbIn3Int(void)
+              {
+              #if SLAB_USB_EP3IN_TRANSFER_TYPE == USB_EPTYPE_ISOC
+C51 COMPILER V9.53.0.0   EFM8_USBDEP                                                       01/21/2016 22:27:57 PAGE 5   
+
+                uint16_t xferred, nextIdx;
+              #else
+                uint8_t xferred;
+                bool callback;
+              #endif
+              
+                USB_SetIndex(3);
+              
+                if (USB_EpnInGetSentStall())
+                {
+                  USB_EpnInClearSentStall();
+                }
+                else if (myUsbDevice.ep3in.state == D_EP_TRANSMITTING)
+                {
+              #if  ((SLAB_USB_EP3IN_TRANSFER_TYPE == USB_EPTYPE_BULK) || (SLAB_USB_EP3IN_TRANSFER_TYPE == USB_EPTYPE_INT
+             -R))
+                  xferred = (myUsbDevice.ep3in.remaining > SLAB_USB_EP3IN_MAX_PACKET_SIZE)
+                            ? SLAB_USB_EP3IN_MAX_PACKET_SIZE : myUsbDevice.ep3in.remaining;
+                  myUsbDevice.ep3in.remaining -= xferred;
+                  myUsbDevice.ep3in.buf += xferred;
+              #endif
+              
+              #if  ((SLAB_USB_EP3IN_TRANSFER_TYPE == USB_EPTYPE_BULK) || (SLAB_USB_EP3IN_TRANSFER_TYPE == USB_EPTYPE_INT
+             -R))
+              
+                  callback = myUsbDevice.ep3in.misc.bits.callback;
+              
+              #elif (SLAB_USB_EP3IN_TRANSFER_TYPE == USB_EPTYPE_ISOC)
+                  if (myUsbDevice.ep3in.misc.bits.callback == true)
+                  {
+                    // In Isochronous mode, the meaning of the USBD_XferCompleteCb parameters changes:
+                    //   xferred is ignored
+                    //   remaining is the current index into the circular buffer
+                    //   the return value is the number of bytes to transmit in the next packet
+                    xferred = USBD_XferCompleteCb(EP3IN, USB_STATUS_OK, 0, myUsbDevice.ep3inIsoIdx);
+                    if (xferred == 0)
+                    {
+                      myUsbDevice.ep3in.misc.bits.inPacketPending = true;
+                      return;
+                    }
+                  }
+              #endif
+                  // Load more data
+              #if  ((SLAB_USB_EP3IN_TRANSFER_TYPE == USB_EPTYPE_BULK) || (SLAB_USB_EP3IN_TRANSFER_TYPE == USB_EPTYPE_INT
+             -R))
+                  if (myUsbDevice.ep3in.remaining > 0)
+                  {
+                    USB_WriteFIFO(3,
+                                  (myUsbDevice.ep3in.remaining > SLAB_USB_EP3IN_MAX_PACKET_SIZE)
+                                    ? SLAB_USB_EP3IN_MAX_PACKET_SIZE
+                                    : myUsbDevice.ep3in.remaining,
+                                  myUsbDevice.ep3in.buf,
+                                  true);
+                  }
+                  else
+                  {
+                    myUsbDevice.ep3in.misc.bits.callback = false;
+                    myUsbDevice.ep3in.state = D_EP_IDLE;
+                  }
+              
+                  if (callback == true)
+                  {
+                    USBD_XferCompleteCb(EP3IN, USB_STATUS_OK, xferred, myUsbDevice.ep3in.remaining);
+C51 COMPILER V9.53.0.0   EFM8_USBDEP                                                       01/21/2016 22:27:57 PAGE 6   
+
+                  }
+              #elif (SLAB_USB_EP3IN_TRANSFER_TYPE == USB_EPTYPE_ISOC)
+                  nextIdx = xferred + myUsbDevice.ep3inIsoIdx;
+                  myUsbDevice.ep3in.misc.bits.inPacketPending = false;
+              
+                  // Check if the next index is past the end of the circular buffer.
+                  // If so, break the write up into two calls to USB_WriteFIFOIso()
+                  if (nextIdx > myUsbDevice.ep3in.remaining)
+                  {
+                    USB_WriteFIFOIso(3, myUsbDevice.ep3in.remaining - myUsbDevice.ep3inIsoIdx, &myUsbDevice.ep3in.buf[my
+             -UsbDevice.ep3inIsoIdx]);
+                    myUsbDevice.ep3inIsoIdx = nextIdx - myUsbDevice.ep3in.remaining;
+                    USB_WriteFIFOIso(3, myUsbDevice.ep3inIsoIdx, myUsbDevice.ep3in.buf);
+                  }
+                  else
+                  {
+                    USB_WriteFIFOIso(3, xferred, &myUsbDevice.ep3in.buf[myUsbDevice.ep3inIsoIdx]);
+                    myUsbDevice.ep3inIsoIdx = nextIdx;
+                  }
+              #endif // ( ( SLAB_USB_EP3IN_TRANSFER_TYPE == USB_EPTYPE_BULK ) || ( SLAB_USB_EP3IN_TRANSFER_TYPE == USB_E
+             -PTYPE_INTR ) )
+                }
+              }
+              #endif // SLAB_USB_EP3IN_USED
+ 310          
+ 311          #if SLAB_USB_EP1OUT_USED
+              /***************************************************************************//**
+               * @brief       Handle Endpoint 1 OUT transfer interrupt
+               * @note        This function takes no parameters, but it uses the EP1OUT status
+               *              variables stored in @ref myUsbDevice.ep1out.
+               ******************************************************************************/
+              void handleUsbOut1Int(void)
+              {
+                uint8_t count;
+              
+                USB_Status_TypeDef status;
+                bool xferComplete = false;
+              
+                USB_SetIndex(1);
+              
+                if (USB_EpnOutGetSentStall())
+                {
+                  USB_EpnOutClearSentStall();
+                }
+                else if (USB_EpnGetOutPacketReady())
+                {
+                  count = USB_EpOutGetCount();
+              
+                  // If USBD_Read() has not been called, return an error
+                  if (myUsbDevice.ep1out.state != D_EP_RECEIVING)
+                  {
+                    myUsbDevice.ep1out.misc.bits.outPacketPending = true;
+                    status = USB_STATUS_EP_ERROR;
+                  }
+                  // Check for overrun of user buffer
+                  else if (myUsbDevice.ep1out.remaining < count)
+                  {
+                    myUsbDevice.ep1out.state = D_EP_IDLE;
+                    myUsbDevice.ep1out.misc.bits.outPacketPending = true;
+                    status = USB_STATUS_EP_RX_BUFFER_OVERRUN;
+                  }
+                  else
+                  {
+C51 COMPILER V9.53.0.0   EFM8_USBDEP                                                       01/21/2016 22:27:57 PAGE 7   
+
+                    USB_ReadFIFO(1, count, myUsbDevice.ep1out.buf);
+              
+                    myUsbDevice.ep1out.misc.bits.outPacketPending = false;
+                    myUsbDevice.ep1out.remaining -= count;
+                    myUsbDevice.ep1out.buf += count;
+              
+                    if ((myUsbDevice.ep1out.remaining == 0) || (count != SLAB_USB_EP1OUT_MAX_PACKET_SIZE))
+                    {
+                      myUsbDevice.ep1out.state = D_EP_IDLE;
+                      xferComplete = true;
+                    }
+              
+                    status = USB_STATUS_OK;
+                    USB_EpnClearOutPacketReady();
+                  }
+                  if (myUsbDevice.ep1out.misc.bits.callback == true)
+                  {
+                    if (xferComplete == true)
+                    {
+                      myUsbDevice.ep1out.misc.bits.callback = false;
+                    }
+              
+                    USBD_XferCompleteCb(EP1OUT, status, count, myUsbDevice.ep1out.remaining);
+                  }
+                }
+              }
+              #endif  // EP1OUT_USED
+ 376          
+ 377          #if SLAB_USB_EP2OUT_USED
+              /***************************************************************************//**
+               * @brief       Handle Endpoint 2 OUT transfer interrupt
+               * @note        This function takes no parameters, but it uses the EP2OUT status
+               *              variables stored in @ref myUsbDevice.ep2out.
+               ******************************************************************************/
+              void handleUsbOut2Int(void)
+              {
+                uint8_t count;
+              
+                USB_Status_TypeDef status;
+                bool xferComplete = false;
+              
+                USB_SetIndex(2);
+              
+                if (USB_EpnOutGetSentStall())
+                {
+                  USB_EpnOutClearSentStall();
+                }
+                else if (USB_EpnGetOutPacketReady())
+                {
+                  count = USB_EpOutGetCount();
+              
+                  // If USBD_Read() has not been called, return an error
+                  if (myUsbDevice.ep2out.state != D_EP_RECEIVING)
+                  {
+                    myUsbDevice.ep2out.misc.bits.outPacketPending = true;
+                    status = USB_STATUS_EP_ERROR;
+                  }
+                  // Check for overrun of user buffer
+                  else if (myUsbDevice.ep2out.remaining < count)
+                  {
+                    myUsbDevice.ep2out.state = D_EP_IDLE;
+                    myUsbDevice.ep2out.misc.bits.outPacketPending = true;
+                    status = USB_STATUS_EP_RX_BUFFER_OVERRUN;
+C51 COMPILER V9.53.0.0   EFM8_USBDEP                                                       01/21/2016 22:27:57 PAGE 8   
+
+                  }
+                  else
+                  {
+                    USB_ReadFIFO(2, count, myUsbDevice.ep2out.buf);
+              
+                    myUsbDevice.ep2out.misc.bits.outPacketPending = false;
+                    myUsbDevice.ep2out.remaining -= count;
+                    myUsbDevice.ep2out.buf += count;
+              
+                    if ((myUsbDevice.ep2out.remaining == 0) || (count != SLAB_USB_EP2OUT_MAX_PACKET_SIZE))
+                    {
+                      myUsbDevice.ep2out.state = D_EP_IDLE;
+                      xferComplete = true;
+                    }
+              
+                    status = USB_STATUS_OK;
+                    USB_EpnClearOutPacketReady();
+                  }
+                  if (myUsbDevice.ep2out.misc.bits.callback == true)
+                  {
+                    if (xferComplete == true)
+                    {
+                      myUsbDevice.ep2out.misc.bits.callback = false;
+                    }
+              
+                    USBD_XferCompleteCb(EP2OUT, status, count, myUsbDevice.ep2out.remaining);
+                  }
+                }
+              }
+              #endif  // EP2OUT_USED
+ 442          
+ 443          #if SLAB_USB_EP3OUT_USED
+              /***************************************************************************//**
+               * @brief       Handle Endpoint 3 OUT transfer interrupt
+               * @details     Endpoint 3 OUT is the only OUT endpoint that supports
+               *              isochronous transfers.
+               * @note        This function takes no parameters, but it uses the EP3OUT status
+               *              variables stored in @ref myUsbDevice.ep3out.
+               ******************************************************************************/
+              void handleUsbOut3Int(void)
+              {
+              #if (SLAB_USB_EP3OUT_TRANSFER_TYPE == USB_EPTYPE_ISOC)
+                uint16_t nextIdx;
+              #if (SLAB_USB_EP3OUT_MAX_PACKET_SIZE > 255)
+                uint16_t count;
+              #else
+                uint8_t count;
+              #endif // ( SLAB_USB_EP3OUT_MAX_PACKET_SIZE > 255 )
+              #else
+                uint8_t count;
+              #endif // ( SLAB_USB_EP3OUT_TRANSFER_TYPE == USB_EPTYPE_ISOC )
+              
+                USB_Status_TypeDef status;
+                bool xferComplete = false;
+              
+                USB_SetIndex(3);
+              
+                if (USB_EpnOutGetSentStall())
+                {
+                  USB_EpnOutClearSentStall();
+                }
+                else if (USB_EpnGetOutPacketReady())
+                {
+C51 COMPILER V9.53.0.0   EFM8_USBDEP                                                       01/21/2016 22:27:57 PAGE 9   
+
+                  count = USB_EpOutGetCount();
+              
+                  // If USBD_Read() has not been called, return an error
+                  if (myUsbDevice.ep3out.state != D_EP_RECEIVING)
+                  {
+                    myUsbDevice.ep3out.misc.bits.outPacketPending = true;
+                    status = USB_STATUS_EP_ERROR;
+                  }
+              #if  ((SLAB_USB_EP3OUT_TRANSFER_TYPE == USB_EPTYPE_BULK) || (SLAB_USB_EP3OUT_TRANSFER_TYPE == USB_EPTYPE_I
+             -NTR))
+                  // Check for overrun of user buffer
+                  else if (myUsbDevice.ep3out.remaining < count)
+                  {
+                    myUsbDevice.ep3out.state = D_EP_IDLE;
+                    myUsbDevice.ep3out.misc.bits.outPacketPending = true;
+                    status = USB_STATUS_EP_RX_BUFFER_OVERRUN;
+                  }
+              #endif
+                  else
+                  {
+              #if  ((SLAB_USB_EP3OUT_TRANSFER_TYPE == USB_EPTYPE_BULK) || (SLAB_USB_EP3OUT_TRANSFER_TYPE == USB_EPTYPE_I
+             -NTR))
+                    USB_ReadFIFO(3, count, myUsbDevice.ep3out.buf);
+              
+                    myUsbDevice.ep3out.remaining -= count;
+                    myUsbDevice.ep3out.buf += count;
+              
+                    if ((myUsbDevice.ep3out.remaining == 0) || (count != SLAB_USB_EP3OUT_MAX_PACKET_SIZE))
+                    {
+                      myUsbDevice.ep3out.state = D_EP_IDLE;
+                      xferComplete = true;
+                    }
+              #elif (SLAB_USB_EP3OUT_TRANSFER_TYPE == USB_EPTYPE_ISOC)
+                    nextIdx = count + myUsbDevice.ep3outIsoIdx;
+              
+                    // In isochronous mode, a circular buffer is used to hold the data
+                    // If the next index into the circular buffer passes the end of the
+                    // buffer, make two calls to USB_ReadFIFOIso()
+                    if (nextIdx > myUsbDevice.ep3out.remaining)
+                    {
+                      USB_ReadFIFOIso(3, myUsbDevice.ep3out.remaining - myUsbDevice.ep3outIsoIdx, &myUsbDevice.ep3out.bu
+             -f[myUsbDevice.ep3outIsoIdx]);
+                      myUsbDevice.ep3outIsoIdx = nextIdx - myUsbDevice.ep3out.remaining;
+                      USB_ReadFIFOIso(3, myUsbDevice.ep3outIsoIdx, myUsbDevice.ep3out.buf);
+                    }
+                    else
+                    {
+                      USB_ReadFIFOIso(3, count, &myUsbDevice.ep3out.buf[myUsbDevice.ep3outIsoIdx]);
+                      myUsbDevice.ep3outIsoIdx = nextIdx;
+                    }
+              #endif // ( ( SLAB_USB_EP3OUT_TRANSFER_TYPE == USB_EPTYPE_BULK ) || ( SLAB_USB_EP3OUT_TRANSFER_TYPE == USB
+             -_EPTYPE_INTR ) )
+              
+                    myUsbDevice.ep3out.misc.bits.outPacketPending = false;
+                    status = USB_STATUS_OK;
+                    USB_EpnClearOutPacketReady();
+                  }
+                  if (myUsbDevice.ep3out.misc.bits.callback == true)
+                  {
+                    if (xferComplete == true)
+                    {
+                      myUsbDevice.ep3out.misc.bits.callback = false;
+                    }
+C51 COMPILER V9.53.0.0   EFM8_USBDEP                                                       01/21/2016 22:27:57 PAGE 10  
+
+              
+              #if  ((SLAB_USB_EP3OUT_TRANSFER_TYPE == USB_EPTYPE_BULK) || (SLAB_USB_EP3OUT_TRANSFER_TYPE == USB_EPTYPE_I
+             -NTR))
+                    USBD_XferCompleteCb(EP3OUT, status, count, myUsbDevice.ep3out.remaining);
+              #elif (SLAB_USB_EP3OUT_TRANSFER_TYPE == USB_EPTYPE_ISOC)
+              
+                    // In Isochronous mode, the meaning of the USBD_XferCompleteCb parameters changes:
+                    //   xferred is the number of bytes received in the last packet
+                    //   remaining is the current index into the circular buffer
+                    USBD_XferCompleteCb(EP3OUT, status, count, myUsbDevice.ep3outIsoIdx);
+              #endif
+                  }
+                }
+              }
+              #endif  // EP3OUT_USED
+ 548          
+ 549          /***************************************************************************//**
+ 550           * @brief       Reads data from the USB FIFO
+ 551           * @param       fifoNum
+ 552           *              USB Endpoint FIFO to read
+ 553           * @param       numBytes
+ 554           *              Number of bytes to read from the FIFO
+ 555           * @param       dat
+ 556           *              Pointer to buffer to hold data read from the FIFO
+ 557           ******************************************************************************/
+ 558          void USB_ReadFIFO(uint8_t fifoNum, uint8_t numBytes, uint8_t *dat)
+ 559          {
+ 560   1        if (numBytes > 0)
+ 561   1        {
+ 562   2          USB_EnableReadFIFO(fifoNum);
+ 563   2      
+ 564   2          // Convert generic pointer to memory-specific pointer and call the
+ 565   2          // the corresponding memory-specific function, if possible.
+ 566   2          // The memory-specific functions are much faster than the generic functions.
+ 567   2      #ifdef SI_GPTR
+ 568   2      
+ 569   2          switch (((SI_GEN_PTR_t *)&dat)->gptr.memtype)
+ 570   2          {
+ 571   3            case SI_GPTR_MTYPE_IDATA:
+ 572   3              USB_ReadFIFO_Idata(numBytes, dat, fifoNum);
+ 573   3              break;
+ 574   3      
+ 575   3            // For some compilers, IDATA and DATA are treated the same.
+ 576   3            // Only call the USB_ReadFIFO_Data() if the compiler differentiates
+ 577   3            // between DATA and IDATA.
+ 578   3      #if (SI_GPTR_MTYPE_DATA != SI_GPTR_MTYPE_IDATA)
+                    case SI_GPTR_MTYPE_DATA:
+                      USB_ReadFIFO_Data(numBytes, dat, fifoNum);
+                      break;
+              #endif
+ 583   3      
+ 584   3            case SI_GPTR_MTYPE_XDATA:
+ 585   3              USB_ReadFIFO_Xdata(numBytes, dat, fifoNum);
+ 586   3              break;
+ 587   3      
+ 588   3            // For some compilers, XDATA and PDATA are treated the same.
+ 589   3            // Only call the USB_ReadFIFO_Pdata() if the compiler differentiates
+ 590   3            // between XDATA and PDATA.
+ 591   3      #if (SI_GPTR_MTYPE_PDATA != SI_GPTR_MTYPE_XDATA)
+ 592   3            case SI_GPTR_MTYPE_PDATA:
+ 593   3              USB_ReadFIFO_Pdata(numBytes, dat, fifoNum);
+ 594   3              break;
+ 595   3      #endif
+C51 COMPILER V9.53.0.0   EFM8_USBDEP                                                       01/21/2016 22:27:57 PAGE 11  
+
+ 596   3      
+ 597   3            default:
+ 598   3              break;
+ 599   3          }
+ 600   2      
+ 601   2      #else
+                  USB_ReadFIFO_Generic(numBytes, dat, fifoNum);
+              #endif  // #ifdef SI_GPTR
+ 604   2      
+ 605   2          USB_DisableReadFIFO(fifoNum);
+ 606   2        }
+ 607   1      }
+ 608          
+ 609          /***************************************************************************//**
+ 610           * @brief       Writes data to the USB FIFO
+ 611           * @param       fifoNum
+ 612           *              USB Endpoint FIFO to write
+ 613           * @param       numBytes
+ 614           *              Number of bytes to write to the FIFO
+ 615           * @param       dat
+ 616           *              Pointer to buffer hoding data to write to the FIFO
+ 617           * @param       txPacket
+ 618           *              If TRUE, the packet will be sent immediately after loading the
+ 619           *              FIFO
+ 620           *              If FALSE, the packet will be stored in the FIFO and the
+ 621           *              transmission must be started at a later time
+ 622           ******************************************************************************/
+ 623          void USB_WriteFIFO(uint8_t fifoNum, uint8_t numBytes, uint8_t *dat, bool txPacket)
+ 624          {
+ 625   1        USB_EnableWriteFIFO(fifoNum);
+ 626   1      
+ 627   1        // Convert generic pointer to memory-specific pointer and call the
+ 628   1        // the corresponding memory-specific function, if possible.
+ 629   1        // The memory-specific functions are much faster than the generic functions.
+ 630   1      #ifdef SI_GPTR
+ 631   1      
+ 632   1        switch (((SI_GEN_PTR_t *)&dat)->gptr.memtype)
+ 633   1        {
+ 634   2          case SI_GPTR_MTYPE_IDATA:
+ 635   2            USB_WriteFIFO_Idata(numBytes, dat);
+ 636   2            break;
+ 637   2      
+ 638   2          // For some compilers, IDATA and DATA are treated the same.
+ 639   2          // Only call the USB_WriteFIFO_Data() if the compiler differentiates between
+ 640   2          // DATA and IDATA.
+ 641   2      #if (SI_GPTR_MTYPE_DATA != SI_GPTR_MTYPE_IDATA)
+                  case SI_GPTR_MTYPE_DATA:
+                    USB_WriteFIFO_Data(numBytes, dat);
+                    break;
+              #endif
+ 646   2      
+ 647   2          case SI_GPTR_MTYPE_XDATA:
+ 648   2            USB_WriteFIFO_Xdata(numBytes, dat);
+ 649   2            break;
+ 650   2      
+ 651   2          // For some compilers, XDATA and PDATA are treated the same.
+ 652   2          // Only call the USB_WriteFIFO_Pdata() if the compiler differentiates
+ 653   2          // between XDATA and PDATA.
+ 654   2      #if (SI_GPTR_MTYPE_PDATA != SI_GPTR_MTYPE_XDATA)
+ 655   2          case SI_GPTR_MTYPE_PDATA:
+ 656   2            USB_WriteFIFO_Pdata(numBytes, dat);
+ 657   2            break;
+ 658   2      #endif
+C51 COMPILER V9.53.0.0   EFM8_USBDEP                                                       01/21/2016 22:27:57 PAGE 12  
+
+ 659   2      
+ 660   2          case SI_GPTR_MTYPE_CODE:
+ 661   2            USB_WriteFIFO_Code(numBytes, dat);
+ 662   2            break;
+ 663   2      
+ 664   2          default:
+ 665   2            break;
+ 666   2        }
+ 667   1      
+ 668   1      #else
+                USB_WriteFIFO_Generic(numBytes, dat);
+              #endif  // #ifdef SI_GPTR
+ 671   1      
+ 672   1        USB_DisableWriteFIFO(fifoNum);
+ 673   1      
+ 674   1        if ((txPacket == true) && (fifoNum > 0))
+ 675   1        {
+ 676   2          USB_SetIndex(fifoNum);
+ 677   2          USB_EpnSetInPacketReady();
+ 678   2        }
+ 679   1      }
+ 680          
+ 681          // -----------------------------------------------------------------------------
+ 682          // Memory-Specific FIFO Access Functions
+ 683          //
+ 684          // Memory-specific functions are much faster (more than 2x) than generic
+ 685          // generic functions, so we will use memory-specific functions if possible.
+ 686          // -----------------------------------------------------------------------------
+ 687          
+ 688          #ifdef SI_GPTR
+ 689          /***************************************************************************//**
+ 690           * @brief       Reads data from the USB FIFO to a buffer in IRAM
+ 691           * @param       numBytes
+ 692           *              Number of bytes to read from the FIFO
+ 693           * @param       dat
+ 694           *              Pointer to IDATA buffer to hold data read from the FIFO
+ 695           * @param       fifoNum
+ 696           *              USB FIFO to read
+ 697           ******************************************************************************/
+ 698          static void USB_ReadFIFO_Idata(uint8_t numBytes, SI_VARIABLE_SEGMENT_POINTER(dat, uint8_t, SI_SEG_IDATA), 
+             -uint8_t fifoNum)
+ 699          {
+ 700   1        while (--numBytes)
+ 701   1        {
+ 702   2          USB_GetFIFOByte(*dat);
+ 703   2          dat++;
+ 704   2        }
+ 705   1        USB_GetLastFIFOByte(*dat, fifoNum);
+ 706   1      }
+ 707          
+ 708          /***************************************************************************//**
+ 709           * @brief       Writes data held in IRAM to the USB FIFO
+ 710           * @details     The FIFO to write must be set before calling the function with
+ 711           *              @ref USB_EnableWriteFIFO().
+ 712           * @param       numBytes
+ 713           *              Number of bytes to write to the FIFO
+ 714           * @param       dat
+ 715           *              Pointer to IDATA buffer holding data to write to the FIFO
+ 716           ******************************************************************************/
+ 717          static void USB_WriteFIFO_Idata(uint8_t numBytes, SI_VARIABLE_SEGMENT_POINTER(dat, uint8_t, SI_SEG_IDATA))
+ 718          {
+ 719   1        while (numBytes--)
+ 720   1        {
+C51 COMPILER V9.53.0.0   EFM8_USBDEP                                                       01/21/2016 22:27:57 PAGE 13  
+
+ 721   2          USB_SetFIFOByte(*dat);
+ 722   2          dat++;
+ 723   2        }
+ 724   1      }
+ 725          
+ 726          /***************************************************************************//**
+ 727           * @brief       Reads data from the USB FIFO to a buffer in XRAM
+ 728           * @param       numBytes
+ 729           *              Number of bytes to read from the FIFO
+ 730           * @param       dat
+ 731           *              Pointer to XDATA buffer to hold data read from the FIFO
+ 732           * @param       fifoNum
+ 733           *              USB FIFO to read
+ 734           ******************************************************************************/
+ 735          static void USB_ReadFIFO_Xdata(uint8_t numBytes, SI_VARIABLE_SEGMENT_POINTER(dat, uint8_t, SI_SEG_XDATA), 
+             -uint8_t fifoNum)
+ 736          {
+ 737   1        while (--numBytes)
+ 738   1        {
+ 739   2          USB_GetFIFOByte(*dat);
+ 740   2          dat++;
+ 741   2        }
+ 742   1        USB_GetLastFIFOByte(*dat, fifoNum);
+ 743   1      }
+ 744          
+ 745          /***************************************************************************//**
+ 746           * @brief       Writes data held in XRAM to the USB FIFO
+ 747           * @details     The FIFO to write must be set before calling the function with
+ 748           *              @ref USB_EnableWriteFIFO().
+ 749           * @param       numBytes
+ 750           *              Number of bytes to write to the FIFO
+ 751           * @param       dat
+ 752           *              Pointer to XDATA buffer holding data to write to the FIFO
+ 753           ******************************************************************************/
+ 754          static void USB_WriteFIFO_Xdata(uint8_t numBytes, SI_VARIABLE_SEGMENT_POINTER(dat, uint8_t, SI_SEG_XDATA))
+ 755          {
+ 756   1        while (numBytes--)
+ 757   1        {
+ 758   2          USB_SetFIFOByte(*dat);
+ 759   2          dat++;
+ 760   2        }
+ 761   1      }
+ 762          
+ 763          #if SI_GPTR_MTYPE_PDATA != SI_GPTR_MTYPE_XDATA
+ 764          /***************************************************************************//**
+ 765           * @brief       Reads data from the USB FIFO to a buffer in paged XRAM
+ 766           * @param       numBytes
+ 767           *              Number of bytes to read from the FIFO
+ 768           * @param       dat
+ 769           *              Pointer to PDATA buffer to hold data read from the FIFO
+ 770           * @param       fifoNum
+ 771           *              USB FIFO to read
+ 772           ******************************************************************************/
+ 773          static void USB_ReadFIFO_Pdata(uint8_t numBytes, SI_VARIABLE_SEGMENT_POINTER(dat, uint8_t, SI_SEG_PDATA), 
+             -uint8_t fifoNum)
+ 774          {
+ 775   1        while (--numBytes)
+ 776   1        {
+ 777   2          USB_GetFIFOByte(*dat);
+ 778   2          dat++;
+ 779   2        }
+ 780   1        USB_GetLastFIFOByte(*dat, fifoNum);
+ 781   1      }
+C51 COMPILER V9.53.0.0   EFM8_USBDEP                                                       01/21/2016 22:27:57 PAGE 14  
+
+ 782          
+ 783          /***************************************************************************//**
+ 784           * @brief       Writes data held in paged XRAM to the USB FIFO
+ 785           * @details     The FIFO to write must be set before calling the function with
+ 786           *              @ref USB_EnableWriteFIFO().
+ 787           * @param       numBytes
+ 788           *              Number of bytes to write to the FIFO
+ 789           * @param       dat
+ 790           *              Pointer to PDATA buffer holding data to write to the FIFO
+ 791           ******************************************************************************/
+ 792          static void USB_WriteFIFO_Pdata(uint8_t numBytes, SI_VARIABLE_SEGMENT_POINTER(dat, uint8_t, SI_SEG_PDATA))
+ 793          {
+ 794   1        while (numBytes--)
+ 795   1        {
+ 796   2          USB_SetFIFOByte(*dat);
+ 797   2          dat++;
+ 798   2        }
+ 799   1      }
+ 800          
+ 801          #endif
+ 802          
+ 803          #if SI_GPTR_MTYPE_DATA != SI_GPTR_MTYPE_IDATA
+              /***************************************************************************//**
+               * @brief       Reads data from the USB FIFO to a buffer in DRAM
+               * @param       numBytes
+               *              Number of bytes to read from the FIFO
+               * @param       dat
+               *              Pointer to DATA buffer to hold data read from the FIFO
+               * @param       fifoNum
+               *              USB FIFO to read
+               ******************************************************************************/
+              static void USB_ReadFIFO_Data(uint8_t numBytes, SI_VARIABLE_SEGMENT_POINTER(dat, uint8_t, SI_SEG_DATA), ui
+             -nt8_t fifoNum)
+              {
+                while (--numBytes)
+                {
+                  USB_GetFIFOByte(*dat);
+                  dat++;
+                }
+                USB_GetLastFIFOByte(*dat, fifoNum);
+              }
+              
+              /***************************************************************************//**
+               * @brief       Writes data held in DRAM to the USB FIFO
+               * @details     The FIFO to write must be set before calling the function with
+               *              @ref USB_EnableWriteFIFO().
+               * @param       numBytes
+               *              Number of bytes to write to the FIFO
+               * @param       dat
+               *              Pointer to DATA buffer to hold data read from the FIFO
+               ******************************************************************************/
+              static void USB_WriteFIFO_Data(uint8_t numBytes, SI_VARIABLE_SEGMENT_POINTER(dat, uint8_t, SI_SEG_DATA))
+              {
+                while (numBytes--)
+                {
+                  USB_SetFIFOByte(*dat);
+                  dat++;
+                }
+              }
+              #endif
+ 841          
+ 842          /***************************************************************************//**
+ 843           * @brief       Writes data held in code space to the USB FIFO
+C51 COMPILER V9.53.0.0   EFM8_USBDEP                                                       01/21/2016 22:27:57 PAGE 15  
+
+ 844           * @details     The FIFO to write must be set before calling the function with
+ 845           *              @ref USB_EnableWriteFIFO().
+ 846           * @param       numBytes
+ 847           *              Number of bytes to write to the FIFO
+ 848           * @param       dat
+ 849           *              Pointer to CODE buffer holding data to write to the FIFO
+ 850           ******************************************************************************/
+ 851          static void USB_WriteFIFO_Code(uint8_t numBytes, SI_VARIABLE_SEGMENT_POINTER(dat, uint8_t, SI_SEG_CODE))
+ 852          {
+ 853   1        while (numBytes--)
+ 854   1        {
+ 855   2          USB_SetFIFOByte(*dat);
+ 856   2          dat++;
+ 857   2        }
+ 858   1      }
+ 859          
+ 860          #else
+              /***************************************************************************//**
+               * @brief       Reads data from the USB FIFO to a buffer in generic memory space
+               * @param       numBytes
+               *              Number of bytes to read from the FIFO
+               * @param       dat
+               *              Pointer to generic buffer to hold data read from the FIFO
+               * @param       fifoNum
+               *              USB FIFO to read
+               ******************************************************************************/
+              static void USB_ReadFIFO_Generic(uint8_t numBytes, uint8_t *dat, uint8_t fifoNum)
+              {
+                while (--numBytes)
+                {
+                  USB_GetFIFOByte(*dat);
+                  dat++;
+                }
+                USB_GetLastFIFOByte(*dat, fifoNum);
+              }
+              
+              /***************************************************************************//**
+               * @brief       Writes data held in generic memory space to the USB FIFO
+               * @details     The FIFO to write must be set before calling the function with
+               *              @ref USB_EnableWriteFIFO().
+               * @param       numBytes
+               *              Number of bytes to write to the FIFO
+               * @param       dat
+               *              Pointer to generic buffer holding data to write to the FIFO
+               ******************************************************************************/
+              static void USB_WriteFIFO_Generic(uint8_t numBytes, uint8_t *dat)
+              {
+                while (numBytes--)
+                {
+                  USB_SetFIFOByte(*dat);
+                  dat++;
+                }
+              }
+              
+              #endif  // #ifdef SI_GPTR
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    521    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----      11
+C51 COMPILER V9.53.0.0   EFM8_USBDEP                                                       01/21/2016 22:27:57 PAGE 16  
+
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----       2
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

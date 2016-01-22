@@ -1,0 +1,131 @@
+C51 COMPILER V9.53.0.0   U2F_FIRMWARE_MAIN                                                 01/21/2016 23:19:39 PAGE 1   
+
+
+C51 COMPILER V9.53.0.0, COMPILATION OF MODULE U2F_FIRMWARE_MAIN
+OBJECT MODULE PLACED IN .\src/u2f-firmware_main.OBJ
+COMPILER INVOKED BY: Z:\home\pp\SimplicityStudio_v3\developer\toolchains\keil_8051\9.53\BIN\C51.exe /home/pp/apps/u2f-ze
+                    -ro/u2f-firmware/src/u2f-firmware_main.c OMF2 SMALL DEBUG OBJECTEXTEND ROM(LARGE) WARNINGLEVEL(2) FLOATFUZZY(3) OPTIMIZE(
+                    -8,SPEED) INTVECTOR(0X0000) INTPROMOTE INCDIR(/home/pp/apps/u2f-zero/u2f-firmware/inc/config;/home/pp/apps/u2f-zero/u2f-f
+                    -irmware/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/shared/si8051Base;/home/pp/SimplicityStudio_v3
+                    -/developer/sdks/si8051/v3//Device/EFM8UB1;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1/inc;/hom
+                    -e/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Lib/efm8_usb/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v
+                    -3//Device/EFM8UB1/peripheral_driver/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Lib/efm8_assert) PRINT(.\
+                    -src/u2f-firmware_main.lst) COND PAGEWIDTH(120) PAGELENGTH(65) OBJECT(.\src/u2f-firmware_main.OBJ)
+
+line level    source
+
+   1          //-----------------------------------------------------------------------------
+   2          // main.c
+   3          //-----------------------------------------------------------------------------
+   4          // Copyright 2014 Silicon Laboratories, Inc.
+   5          // http://developer.silabs.com/legal/version/v11/Silicon_Labs_Software_License_Agreement.txt
+   6          //
+   7          // Program Description:
+   8          //
+   9          // This program enumerates as a USB keyboard. Each time a button is pressed
+  10          // a character is sent to the host. A series of presses will spell out
+  11          // "HID Keyboard ". The status of the Caps Lock and Num Lock on the host will
+  12          // be indicated by the color of the LED.
+  13          //
+  14          // Resources:
+  15          // SYSCLK - 48 MHz HFOSC1 / 1
+  16          // USB0   - Full speed
+  17          // P0.2 - push button
+  18          // P0.3 - push button
+  19          // P2.3 - Display enable
+  20          //
+  21          //-----------------------------------------------------------------------------
+  22          // How To Test: EFM8UB1 STK
+  23          //-----------------------------------------------------------------------------
+  24          // 1) Place the switch in "AEM" mode.
+  25          // 2) Connect the EFM8UB1 STK board to a PC using a mini USB cable.
+  26          // 3) Compile and download code to the EFM8UB1 STK board.
+  27          //    In Simplicity Studio IDE, select Run -> Debug from the menu bar,
+  28          //    click the Debug button in the quick menu, or press F11.
+  29          // 4) Run the code.
+  30          //    In Simplicity Studio IDE, select Run -> Resume from the menu bar,
+  31          //    click the Resume button in the quick menu, or press F8.
+  32          // 5) The HID keyboard demo should start.
+  33          // 6) Connect a micro USB cable from the PC to the STK.
+  34          // 7) The device should enumerate on the PC as a HID keyboard.
+  35          // 8) Press either push-button (PB0 or PB1) to send one character in the
+  36          //    string "HID Keyboard ".
+  37          // 9) Pressing Caps Lock or Num Lock on the host keyboard will change the color
+  38          //    of the LED.
+  39          //
+  40          // Target:         EFM8UB1
+  41          // Tool chain:     Generic
+  42          //
+  43          // Release 0.1 (JM)
+  44          //    - Initial Revision
+  45          //    - 26 JAN 2015
+  46          //
+  47          #include <SI_EFM8UB1_Register_Enums.h>
+  48          #include <stdio.h>
+  49          
+C51 COMPILER V9.53.0.0   U2F_FIRMWARE_MAIN                                                 01/21/2016 23:19:39 PAGE 2   
+
+  50          #include "efm8_usb.h"
+  51          #include "usb_0.h"
+  52          #include "descriptors.h"
+  53          #include "idle.h"
+  54          #include "bsp.h"
+*** WARNING C318 IN LINE 54 OF /home/pp/apps/u2f-zero/u2f-firmware/src/u2f-firmware_main.c: can't open file 'bsp.h'
+  55          #include "InitDevice.h"
+  56          
+  57          uint8_t keySeqNo = 0;        // Current position in report table.
+  58          bool keyPushed = 0;          // Current pushbutton status.
+  59          
+  60          void Delay(int16_t ms) {
+  61   1              int16_t x;
+  62   1              int16_t y;
+  63   1              for (y = 0; y < ms; y++) {
+  64   2                      for (x = 0; x < 1000; x) {
+  65   3                              x++;
+  66   3                      }
+  67   2              }
+  68   1      }
+  69          
+  70          int16_t main(void) {
+  71   1              int i = 0;
+  72   1      
+  73   1              enter_DefaultMode_from_RESET();
+  74   1      
+  75   1              SCON0_TI = 1;                       // This STDIO library requires TI to
+  76   1                                                                                      // be set for prints to occur
+  77   1              printf("wat \r\n");
+  78   1      
+  79   1              IE_EA = 1;
+  80   1      
+  81   1              printf("welcome \r\n");
+  82   1      
+  83   1              while (1) {
+  84   2                      ++i;
+  85   2      
+  86   2                      printf("%d\r\n", i);
+  87   2                      Delay(1000);
+  88   2      
+  89   2              }
+  90   1      }
+  91          
+  92          SI_INTERRUPT(PMATCH_IrqHandler, PMATCH_IRQn) {
+  93   1              keyPushed = 1;
+  94   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    105    ----
+   CONSTANT SIZE    =     23    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      1       2
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)

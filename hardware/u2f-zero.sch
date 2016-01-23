@@ -32,6 +32,7 @@ LIBS:valves
 LIBS:siliconlabs
 LIBS:atmel_cryptoauth
 LIBS:discrete
+LIBS:debug
 LIBS:u2f-zero-cache
 EELAYER 25 0
 EELAYER END
@@ -65,7 +66,7 @@ U 1 1 56857313
 P 7000 4700
 F 0 "A1" H 7300 5000 60  0000 C CNN
 F 1 "ATECC508A" H 6900 5000 60  0000 C CNN
-F 2 "SMD_Packages:SOIC-8-N" H 6600 4950 60  0001 C CNN
+F 2 "footprints:UDFN-8Pad" H 6600 4950 60  0001 C CNN
 F 3 "" H 6600 4950 60  0000 C CNN
 	1    7000 4700
 	-1   0    0    1   
@@ -75,8 +76,6 @@ Text Label 4350 4450 2    60   ~ 0
 GND
 NoConn ~ 7600 4850
 NoConn ~ 6400 4750
-NoConn ~ 6050 4400
-NoConn ~ 6050 4250
 Text Label 7850 5050 0    60   ~ 0
 GND
 Text Label 6400 5150 0    60   ~ 0
@@ -131,10 +130,8 @@ Text Label 4050 6100 3    60   ~ 0
 GND
 Text Label 4750 5450 2    60   ~ 0
 +3.3V
-Text Label 7350 3600 0    60   ~ 0
+Text Label 5450 2700 0    60   ~ 0
 +5V
-NoConn ~ 4350 4150
-NoConn ~ 4350 4300
 $Comp
 L DF5A5.6JE Z1
 U 1 1 56857EAF
@@ -158,22 +155,20 @@ Text Label 3750 4600 0    60   ~ 0
 HD-
 Text Label 3950 4750 2    60   ~ 0
 HD+
-Text Label 4350 3400 2    60   ~ 0
+Text Label 7100 3900 0    60   ~ 0
 GND
 $Comp
 L R R1
 U 1 1 56857B9B
-P 7050 3450
-F 0 "R1" V 7130 3450 50  0000 C CNN
-F 1 "100" V 7050 3450 50  0000 C CNN
-F 2 "Resistors_SMD:R_0603" V 6980 3450 50  0001 C CNN
-F 3 "" H 7050 3450 50  0000 C CNN
-	1    7050 3450
+P 5100 2700
+F 0 "R1" V 5180 2700 50  0000 C CNN
+F 1 "100" V 5100 2700 50  0000 C CNN
+F 2 "Resistors_SMD:R_0603" V 5030 2700 50  0001 C CNN
+F 3 "" H 5100 2700 50  0000 C CNN
+	1    5100 2700
 	0    1    1    0   
 $EndComp
 NoConn ~ 5050 5300
-NoConn ~ 5200 5300
-NoConn ~ 5350 5300
 Text Notes 3050 3750 0    60   ~ 0
 Protect from ESD
 Text Notes 3350 4900 0    60   ~ 0
@@ -183,13 +178,13 @@ Secure element for EC
 $Comp
 L CA_RGB-RESCUE-u2f-zero RGB1
 U 1 1 5686DEFD
-P 6250 3650
-F 0 "RGB1" H 6500 3800 60  0000 C CNN
-F 1 "CA_RGB" H 6150 3800 60  0000 C CNN
-F 2 "footprints:LED-0606" H 7050 3700 60  0001 C CNN
-F 3 "" H 6250 3700 60  0000 C CNN
-	1    6250 3650
-	1    0    0    1   
+P 4500 3200
+F 0 "RGB1" H 4750 3350 60  0000 C CNN
+F 1 "CA_RGB" H 4400 3350 60  0000 C CNN
+F 2 "footprints:LED-0606" H 5300 3250 60  0001 C CNN
+F 3 "" H 4500 3250 60  0000 C CNN
+	1    4500 3200
+	0    1    -1   0   
 $EndComp
 $Comp
 L GND #PWR01
@@ -228,10 +223,6 @@ Wire Wire Line
 Wire Wire Line
 	7850 4550 7850 5050
 Wire Wire Line
-	7200 3450 7350 3450
-Wire Wire Line
-	7350 3450 7350 3600
-Wire Wire Line
 	4900 5300 4900 6150
 Wire Wire Line
 	4900 5950 5200 5950
@@ -261,24 +252,6 @@ Connection ~ 4050 5950
 Wire Wire Line
 	5500 5600 5900 5600
 Wire Wire Line
-	5100 3400 5100 3700
-Wire Wire Line
-	4500 3400 4350 3400
-Wire Wire Line
-	6900 3450 6750 3450
-Wire Wire Line
-	5550 3700 5550 3600
-Wire Wire Line
-	5550 3600 5800 3600
-Wire Wire Line
-	5800 3450 5400 3450
-Wire Wire Line
-	5400 3450 5400 3700
-Wire Wire Line
-	5250 3700 5250 3300
-Wire Wire Line
-	5250 3300 5800 3300
-Wire Wire Line
 	6850 5850 6850 5650
 Wire Wire Line
 	6550 5650 6550 5850
@@ -289,19 +262,14 @@ GND
 $Comp
 L SW_PUSH SW1
 U 1 1 5685E9F9
-P 4800 3400
-F 0 "SW1" H 4950 3510 50  0000 C CNN
-F 1 "SW_PUSH" H 4800 3320 50  0000 C CNN
-F 2 "footprints:MJTP1230" H 4800 3400 50  0001 C CNN
-F 3 "" H 4800 3400 50  0000 C CNN
-	1    4800 3400
+P 6650 3900
+F 0 "SW1" H 6800 4010 50  0000 C CNN
+F 1 "SW_PUSH" H 6650 3820 50  0000 C CNN
+F 2 "footprints:MJTP1230" H 6650 3900 50  0001 C CNN
+F 3 "" H 6650 3900 50  0000 C CNN
+	1    6650 3900
 	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	4950 3700 4950 3650
-Wire Wire Line
-	4950 3650 5100 3650
-Connection ~ 5100 3650
 Wire Wire Line
 	3300 4600 3300 4750
 Wire Wire Line
@@ -313,4 +281,64 @@ Wire Wire Line
 	3450 4000 3450 3900
 Wire Wire Line
 	3650 4000 3650 3900
+Wire Wire Line
+	6050 4250 6050 4400
+Wire Wire Line
+	6050 4300 6200 4300
+Wire Wire Line
+	6200 4300 6200 3900
+Wire Wire Line
+	6200 3900 6350 3900
+Connection ~ 6050 4300
+Wire Wire Line
+	7100 3900 6950 3900
+Wire Wire Line
+	4350 4300 4150 4300
+Wire Wire Line
+	4150 4300 4150 3650
+Wire Wire Line
+	4350 4150 4300 4150
+Wire Wire Line
+	4300 4150 4300 3650
+Wire Wire Line
+	4950 3700 4450 3700
+Wire Wire Line
+	4450 3700 4450 3650
+Wire Wire Line
+	5450 2700 5250 2700
+Wire Wire Line
+	4950 2700 4300 2700
+NoConn ~ 5100 3700
+NoConn ~ 5550 3700
+$Comp
+L debug-header DBG1
+U 1 1 56A3CC65
+P 6000 3350
+F 0 "DBG1" H 5650 3100 60  0000 C CNN
+F 1 "debug-header" H 6450 3100 60  0000 C CNN
+F 2 "footprints:debug" H 5350 3200 60  0000 C CNN
+F 3 "" H 6000 3350 60  0000 C CNN
+	1    6000 3350
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	5250 3700 5250 3350
+Wire Wire Line
+	5250 3350 5900 3350
+Wire Wire Line
+	5900 3350 5900 3200
+Wire Wire Line
+	5400 3700 5400 3400
+Wire Wire Line
+	5400 3400 6000 3400
+Wire Wire Line
+	6000 3400 6000 3200
+Text Label 5200 5300 3    60   ~ 0
+C2CK
+Text Label 5350 5300 3    60   ~ 0
+C2D
+Text Label 6100 3200 3    60   ~ 0
+C2CK
+Text Label 6200 3200 3    60   ~ 0
+C2D
 $EndSCHEMATC

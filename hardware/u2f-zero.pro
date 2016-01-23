@@ -1,4 +1,4 @@
-update=Fri 01 Jan 2016 02:45:21 PM EST
+update=1/23/2016 12:43:37 PM
 version=1
 last_client=kicad
 [pcbnew]
@@ -62,3 +62,4 @@ LibName30=valves
 LibName31=library/siliconlabs
 LibName32=library/atmel_cryptoauth
 LibName33=library/discrete
+LibName34=library/debug

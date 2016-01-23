@@ -265,7 +265,7 @@ U 1 1 5685E9F9
 P 6650 3900
 F 0 "SW1" H 6800 4010 50  0000 C CNN
 F 1 "SW_PUSH" H 6650 3820 50  0000 C CNN
-F 2 "footprints:MJTP1230" H 6650 3900 50  0001 C CNN
+F 2 "footprints:u2f-button" H 6650 3900 50  0001 C CNN
 F 3 "" H 6650 3900 50  0000 C CNN
 	1    6650 3900
 	1    0    0    -1  
@@ -293,40 +293,19 @@ Connection ~ 6050 4300
 Wire Wire Line
 	7100 3900 6950 3900
 Wire Wire Line
-	4350 4300 4150 4300
-Wire Wire Line
-	4150 4300 4150 3650
-Wire Wire Line
 	4350 4150 4300 4150
-Wire Wire Line
-	4300 4150 4300 3650
-Wire Wire Line
-	4950 3700 4450 3700
-Wire Wire Line
-	4450 3700 4450 3650
 Wire Wire Line
 	5450 2700 5250 2700
 Wire Wire Line
 	4950 2700 4300 2700
 NoConn ~ 5100 3700
 NoConn ~ 5550 3700
-$Comp
-L debug-header DBG1
-U 1 1 56A3CC65
-P 6000 3350
-F 0 "DBG1" H 5650 3100 60  0000 C CNN
-F 1 "debug-header" H 6450 3100 60  0000 C CNN
-F 2 "footprints:debug" H 5350 3200 60  0000 C CNN
-F 3 "" H 6000 3350 60  0000 C CNN
-	1    6000 3350
-	-1   0    0    1   
-$EndComp
 Wire Wire Line
-	5250 3700 5250 3350
+	5250 3700 5250 3300
 Wire Wire Line
-	5250 3350 5900 3350
+	5250 3300 5900 3300
 Wire Wire Line
-	5900 3350 5900 3200
+	5900 3300 5900 3200
 Wire Wire Line
 	5400 3700 5400 3400
 Wire Wire Line
@@ -341,4 +320,70 @@ Text Label 6100 3200 3    60   ~ 0
 C2CK
 Text Label 6200 3200 3    60   ~ 0
 C2D
+Wire Wire Line
+	4450 3650 4450 3900
+Wire Wire Line
+	4300 4150 4300 3900
+Wire Wire Line
+	4300 3900 4450 3900
+Wire Wire Line
+	4950 3700 4150 3700
+Wire Wire Line
+	4150 3700 4150 3650
+Wire Wire Line
+	4350 4300 4250 4300
+Wire Wire Line
+	4250 4300 4250 3800
+Wire Wire Line
+	4250 3800 4300 3800
+Wire Wire Line
+	4300 3800 4300 3650
+$Comp
+L debug-pin TX1
+U 1 1 56A3F7EB
+P 5700 3350
+F 0 "TX1" V 5500 2850 60  0000 C CNN
+F 1 "debug-pin" H 5800 3100 60  0001 C CNN
+F 2 "footprints:debug" H 5700 3350 60  0000 C CNN
+F 3 "" H 5700 3350 60  0000 C CNN
+	1    5700 3350
+	-1   0    0    1   
+$EndComp
+$Comp
+L debug-pin RX1
+U 1 1 56A3F89E
+P 5800 3350
+F 0 "RX1" V 5600 2850 60  0000 C CNN
+F 1 "debug-pin" H 5900 3100 60  0001 C CNN
+F 2 "footprints:debug" H 5800 3350 60  0000 C CNN
+F 3 "" H 5800 3350 60  0000 C CNN
+	1    5800 3350
+	-1   0    0    1   
+$EndComp
+$Comp
+L debug-pin C2CK1
+U 1 1 56A3F8D6
+P 5900 3350
+F 0 "C2CK1" V 5700 2800 60  0000 C CNN
+F 1 "debug-pin" H 6000 3100 60  0001 C CNN
+F 2 "footprints:debug" H 5900 3350 60  0000 C CNN
+F 3 "" H 5900 3350 60  0000 C CNN
+	1    5900 3350
+	-1   0    0    1   
+$EndComp
+$Comp
+L debug-pin C2D1
+U 1 1 56A3F90D
+P 6000 3350
+F 0 "C2D1" V 5800 2800 60  0000 C CNN
+F 1 "debug-pin" H 6100 3100 60  0001 C CNN
+F 2 "footprints:debug" H 6000 3350 60  0000 C CNN
+F 3 "" H 6000 3350 60  0000 C CNN
+	1    6000 3350
+	-1   0    0    1   
+$EndComp
+Text Label 5750 3300 0    60   ~ 0
+TX
+Text Label 5550 3400 0    60   ~ 0
+RX
 $EndSCHEMATC

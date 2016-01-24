@@ -1,17 +1,17 @@
-AX51 MACRO ASSEMBLER  SILABS_STARTUP                                                        01/21/16 22:15:49 PAGE     1
+AX51 MACRO ASSEMBLER  SILABS_STARTUP                                                        01/24/16 16:36:57 PAGE     1
 
 
 MACRO ASSEMBLER AX51 V3.12.0.0
 OBJECT MODULE PLACED IN .\src\SILABS_STARTUP.OBJ
-ASSEMBLER INVOKED BY: Z:\home\pp\SimplicityStudio_v3\developer\toolchains\keil_8051\9.53\BIN\AX51.exe /home/pp/Simplicit
-                      yStudio/v3_workspace/u2f-firmware/src/SILABS_STARTUP.A51 ERRORPRINT SET(SMALL) DEBUG MACRO NOMOD51
-                       INCDIR(/home/pp/SimplicityStudio/v3_workspace/u2f-firmware/inc/config;/home/pp/SimplicityStudio/v
-                      3_workspace/u2f-firmware/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/shared/
-                      si8051Base;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1;/home/pp/Simplici
-                      tyStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1/inc;/home/pp/SimplicityStudio_v3/developer/sd
-                      ks/si8051/v3//Lib/efm8_usb/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/EFM8U
-                      B1/peripheral_driver/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Lib/efm8_assert) P
-                      RINT(.\src\SILABS_STARTUP.lst) COND SYMBOLS PAGEWIDTH(120) PAGELENGTH(65) OBJECT(.\src\SILABS_STARTUP.OBJ) 
+ASSEMBLER INVOKED BY: Z:\home\pp\SimplicityStudio_v3\developer\toolchains\keil_8051\9.53\BIN\AX51.exe /home/pp/apps/u2f-
+                      zero/firmware/src/SILABS_STARTUP.A51 ERRORPRINT SET(SMALL) DEBUG MACRO NOMOD51 INCDIR(/home/pp/app
+                      s/u2f-zero/firmware/inc/config;/home/pp/apps/u2f-zero/firmware/inc;/home/pp/SimplicityStudio_v3/de
+                      veloper/sdks/si8051/v3//Device/shared/si8051Base;/home/pp/SimplicityStudio_v3/developer/sdks/si805
+                      1/v3//Device/EFM8UB1;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1/inc;/ho
+                      me/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Lib/efm8_usb/inc;/home/pp/SimplicityStudio_v3/
+                      developer/sdks/si8051/v3//Device/EFM8UB1/peripheral_driver/inc;/home/pp/SimplicityStudio_v3/develo
+                      per/sdks/si8051/v3//Lib/efm8_assert) PRINT(.\src\SILABS_STARTUP.lst) COND SYMBOLS PAGEWIDTH(120) P
+                      AGELENGTH(65) OBJECT(.\src\SILABS_STARTUP.OBJ) 
 
 LOC    OBJ             LINE     SOURCE
 
@@ -62,7 +62,7 @@ LOC    OBJ             LINE     SOURCE
                          45     ;     <i> The length of PDATA memory in bytes.
  0000                    46     PDATALEN        EQU     0H
                          47     ;
-AX51 MACRO ASSEMBLER  SILABS_STARTUP                                                        01/21/16 22:15:49 PAGE     2
+AX51 MACRO ASSEMBLER  SILABS_STARTUP                                                        01/24/16 16:36:57 PAGE     2
 
                          48     ;</h>
                          49     ;------------------------------------------------------------------------------
@@ -127,7 +127,7 @@ LOC    OBJ             LINE     SOURCE
  00F0                   108     B       DATA    0F0H
  0081                   109     SP      DATA    81H
  0082                   110     DPL     DATA    82H
-AX51 MACRO ASSEMBLER  SILABS_STARTUP                                                        01/21/16 22:15:49 PAGE     3
+AX51 MACRO ASSEMBLER  SILABS_STARTUP                                                        01/24/16 16:36:57 PAGE     3
 
  0083                   111     DPH     DATA    83H
                         112     
@@ -192,7 +192,7 @@ LOC    OBJ             LINE     SOURCE
                         171     
                         172     IF IBPSTACK <> 0
                                 EXTRN DATA (?C_IBP)
-AX51 MACRO ASSEMBLER  SILABS_STARTUP                                                        01/21/16 22:15:49 PAGE     4
+AX51 MACRO ASSEMBLER  SILABS_STARTUP                                                        01/24/16 16:36:57 PAGE     4
 
                                 
                                                 MOV     ?C_IBP,#LOW IBPSTACKTOP
@@ -225,7 +225,7 @@ LOC    OBJ             LINE     SOURCE
 000009 020000     E     201                     LJMP    ?C_START
                         202     
                         203                     END
-AX51 MACRO ASSEMBLER  SILABS_STARTUP                                                        01/21/16 22:15:49 PAGE     5
+AX51 MACRO ASSEMBLER  SILABS_STARTUP                                                        01/24/16 16:36:57 PAGE     5
 
 SYMBOL TABLE LISTING
 ------ ----- -------

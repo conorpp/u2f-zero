@@ -16,7 +16,7 @@
 // Specify bus- or self-powered
 // -----------------------------------------------------------------------------
 // $[Device Power]
-#define SLAB_USB_BUS_POWERED                   0
+#define SLAB_USB_BUS_POWERED                   1
 // [Device Power]$
 
 // -----------------------------------------------------------------------------
@@ -54,7 +54,7 @@
 // -----------------------------------------------------------------------------
 // $[Endpoints Used]
 #define SLAB_USB_EP1IN_USED                    1
-#define SLAB_USB_EP1OUT_USED                   0
+#define SLAB_USB_EP1OUT_USED                   1
 #define SLAB_USB_EP2IN_USED                    0
 #define SLAB_USB_EP2OUT_USED                   0
 #define SLAB_USB_EP3IN_USED                    0
@@ -78,7 +78,7 @@
 // -----------------------------------------------------------------------------
 // $[Endpoint Transfer Type]
 #define SLAB_USB_EP1IN_TRANSFER_TYPE           USB_EPTYPE_INTR
-#define SLAB_USB_EP1OUT_TRANSFER_TYPE          USB_EPTYPE_BULK
+#define SLAB_USB_EP1OUT_TRANSFER_TYPE          USB_EPTYPE_INTR
 #define SLAB_USB_EP2IN_TRANSFER_TYPE           USB_EPTYPE_BULK
 #define SLAB_USB_EP2OUT_TRANSFER_TYPE          USB_EPTYPE_BULK
 #define SLAB_USB_EP3IN_TRANSFER_TYPE           USB_EPTYPE_ISOC

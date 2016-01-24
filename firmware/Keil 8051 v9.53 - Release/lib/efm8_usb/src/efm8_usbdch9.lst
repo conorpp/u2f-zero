@@ -1,17 +1,17 @@
-C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      01/21/2016 22:27:57 PAGE 1   
+C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      01/24/2016 17:34:24 PAGE 1   
 
 
 C51 COMPILER V9.53.0.0, COMPILATION OF MODULE EFM8_USBDCH9
 OBJECT MODULE PLACED IN .\lib/efm8_usb/src/efm8_usbdch9.OBJ
-COMPILER INVOKED BY: Z:\home\pp\SimplicityStudio_v3\developer\toolchains\keil_8051\9.53\BIN\C51.exe /home/pp/SimplicityS
-                    -tudio/v3_workspace/u2f-firmware/lib/efm8_usb/src/efm8_usbdch9.c OMF2 SMALL DEBUG OBJECTEXTEND ROM(LARGE) WARNINGLEVEL(2)
-                    - FLOATFUZZY(3) OPTIMIZE(9,SPEED) INTVECTOR(0X0000) INTPROMOTE INCDIR(/home/pp/SimplicityStudio/v3_workspace/u2f-firmware
-                    -/inc/config;/home/pp/SimplicityStudio/v3_workspace/u2f-firmware/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v
-                    -3//Device/shared/si8051Base;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1;/home/pp/SimplicityStu
-                    -dio_v3/developer/sdks/si8051/v3//Device/EFM8UB1/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Lib/efm8_usb/
-                    -inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1/peripheral_driver/inc;/home/pp/SimplicityStudi
-                    -o_v3/developer/sdks/si8051/v3//Lib/efm8_assert) REGFILE(u2f-firmware.ORC) PRINT(.\lib/efm8_usb/src/efm8_usbdch9.lst) CON
-                    -D PAGEWIDTH(120) PAGELENGTH(65) OBJECT(.\lib/efm8_usb/src/efm8_usbdch9.OBJ)
+COMPILER INVOKED BY: Z:\home\pp\SimplicityStudio_v3\developer\toolchains\keil_8051\9.53\BIN\C51.exe /home/pp/apps/u2f-ze
+                    -ro/firmware/lib/efm8_usb/src/efm8_usbdch9.c OMF2 SMALL DEBUG OBJECTEXTEND ROM(LARGE) WARNINGLEVEL(2) FLOATFUZZY(3) OPTIM
+                    -IZE(9,SPEED) INTVECTOR(0X0000) INTPROMOTE INCDIR(/home/pp/apps/u2f-zero/firmware/inc/config;/home/pp/apps/u2f-zero/firmw
+                    -are/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/shared/si8051Base;/home/pp/SimplicityStudio_v3/dev
+                    -eloper/sdks/si8051/v3//Device/EFM8UB1;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1/inc;/home/pp
+                    -/SimplicityStudio_v3/developer/sdks/si8051/v3//Lib/efm8_usb/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//D
+                    -evice/EFM8UB1/peripheral_driver/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Lib/efm8_assert) REGFILE(u2f-
+                    -firmware.ORC) PRINT(.\lib/efm8_usb/src/efm8_usbdch9.lst) COND PAGEWIDTH(120) PAGELENGTH(65) OBJECT(.\lib/efm8_usb/src/ef
+                    -m8_usbdch9.OBJ)
 
 line level    source
 
@@ -63,7 +63,7 @@ line level    source
   46           *              stored in @ref myUsbDevice.setup.
   47           ******************************************************************************/
   48          USB_Status_TypeDef USBDCH9_SetupCmd(void)
-C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      01/21/2016 22:27:57 PAGE 2   
+C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      01/24/2016 17:34:24 PAGE 2   
 
   49          {
   50   1        USB_Status_TypeDef status = USB_STATUS_OK;
@@ -128,7 +128,7 @@ line level    source
  109           * @details     Supports CLEAR_FEATURE for Remote Wakeup and Endpoint Halt
  110           * @return      Status of request (type @ref USB_Status_TypeDef)
  111           * @note        This function takes no parameters, but it uses the setup command
-C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      01/21/2016 22:27:57 PAGE 3   
+C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      01/24/2016 17:34:24 PAGE 3   
 
  112           *              stored in @ref myUsbDevice.setup.
  113           ******************************************************************************/
@@ -175,25 +175,25 @@ line level    source
  154   6                  }
  155   5      #endif
  156   5      #if (SLAB_USB_EP1OUT_USED || SLAB_USB_EP2OUT_USED || SLAB_USB_EP3OUT_USED)
-                          if (((myUsbDevice.setup.wIndex & 0xFF) & USB_EP_DIR_IN) == 0)
-                          {
-                            USB_EpnOutEndStallAndClearDataToggle();
-                          }
-              #endif
+ 157   5                  if (((myUsbDevice.setup.wIndex & 0xFF) & USB_EP_DIR_IN) == 0)
+ 158   5                  {
+ 159   6                    USB_EpnOutEndStallAndClearDataToggle();
+ 160   6                  }
+ 161   5      #endif
  162   5      
  163   5                  switch (myUsbDevice.setup.wIndex & 0xFF)
  164   5                  {
  165   6      #if SLAB_USB_EP1OUT_USED
-                            case (USB_EP_DIR_OUT | 1):
-                              if (myUsbDevice.ep1out.state != D_EP_RECEIVING)
-                              {
-                                myUsbDevice.ep1out.state = D_EP_IDLE;
-                              }
-                              break;
-              #endif
+ 166   6                    case (USB_EP_DIR_OUT | 1):
+ 167   6                      if (myUsbDevice.ep1out.state != D_EP_RECEIVING)
+ 168   6                      {
+ 169   7                        myUsbDevice.ep1out.state = D_EP_IDLE;
+ 170   7                      }
+ 171   6                      break;
+ 172   6      #endif
  173   6      #if SLAB_USB_EP2OUT_USED
                             case (USB_EP_DIR_OUT | 2):
-C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      01/21/2016 22:27:57 PAGE 4   
+C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      01/24/2016 17:34:24 PAGE 4   
 
                               if (myUsbDevice.ep2out.state != D_EP_RECEIVING)
                               {
@@ -258,7 +258,7 @@ line level    source
  235   1            && (myUsbDevice.setup.wLength == 1)
  236   1            && (myUsbDevice.setup.bmRequestType.Direction == USB_SETUP_DIR_IN)
  237   1            && (myUsbDevice.setup.bmRequestType.Recipient == USB_SETUP_RECIPIENT_DEVICE))
-C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      01/21/2016 22:27:57 PAGE 5   
+C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      01/24/2016 17:34:24 PAGE 5   
 
  238   1        {
  239   2          if (myUsbDevice.state == USBD_STATE_ADDRESSED)
@@ -323,7 +323,7 @@ line level    source
  298   3            case USB_STRING_DESCRIPTOR:
  299   3        #if (SLAB_USB_NUM_LANGUAGES == 1)
  300   3      
-C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      01/21/2016 22:27:57 PAGE 6   
+C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      01/24/2016 17:34:24 PAGE 6   
 
  301   3              dat = (uint8_t *)myUsbDevice.stringDescriptors[index];
  302   3      
@@ -388,7 +388,7 @@ line level    source
                         }
                       }
                 #endif // ( SLAB_USB_NUM_LANGUAGES == 1 )
-C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      01/21/2016 22:27:57 PAGE 7   
+C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      01/24/2016 17:34:24 PAGE 7   
 
  364   3          }
  365   2      
@@ -453,7 +453,7 @@ line level    source
  424          static USB_Status_TypeDef GetStatus(void)
  425          {
  426   1        USB_Status_TypeDef retVal = USB_STATUS_REQ_ERR;
-C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      01/21/2016 22:27:57 PAGE 8   
+C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      01/24/2016 17:34:24 PAGE 8   
 
  427   1      
  428   1        if ((myUsbDevice.setup.wLength == 2)
@@ -511,16 +511,16 @@ line level    source
  480   4                switch (myUsbDevice.setup.wIndex & 0xFF)
  481   4                {
  482   5        #if SLAB_USB_EP1OUT_USED
-                          case (USB_EP_DIR_OUT | 1):
-                            if (myUsbDevice.ep1out.state == D_EP_HALT)
-                            {
-                              pStatus = htole16(1);
-                            }
-                            retVal = USB_STATUS_OK;
-                            break;
-C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      01/21/2016 22:27:57 PAGE 9   
+ 483   5                  case (USB_EP_DIR_OUT | 1):
+ 484   5                    if (myUsbDevice.ep1out.state == D_EP_HALT)
+ 485   5                    {
+ 486   6                      pStatus = htole16(1);
+ 487   6                    }
+ 488   5                    retVal = USB_STATUS_OK;
+ 489   5                    break;
+C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      01/24/2016 17:34:24 PAGE 9   
 
-                #endif
+ 490   5        #endif
  491   5        #if SLAB_USB_EP2OUT_USED
                           case (USB_EP_DIR_OUT | 2):
                             if (myUsbDevice.ep2out.state == D_EP_HALT)
@@ -583,7 +583,7 @@ line level    source
  550          
  551          /***************************************************************************//**
  552           * @brief       Sets the Address
-C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      01/21/2016 22:27:57 PAGE 10  
+C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      01/24/2016 17:34:24 PAGE 10  
 
  553           * @return      Status of request (type @ref USB_Status_TypeDef)
  554           * @note        This function takes no parameters, but it uses the setup command
@@ -648,7 +648,7 @@ line level    source
  613   2          // was sent, enter the Configured state.
  614   2          if (myUsbDevice.state == USBD_STATE_ADDRESSED)
  615   2          {
-C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      01/21/2016 22:27:57 PAGE 11  
+C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      01/24/2016 17:34:24 PAGE 11  
 
  616   3            if ((myUsbDevice.setup.wValue == 0)
  617   3                || (myUsbDevice.setup.wValue == myUsbDevice.configDescriptor->bConfigurationValue))
@@ -713,7 +713,7 @@ line level    source
                       }
                       break;
                 #endif // SLAB_USB_REMOTE_WAKEUP_ENABLED
-C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      01/21/2016 22:27:57 PAGE 12  
+C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      01/24/2016 17:34:24 PAGE 12  
 
  679   3            case USB_SETUP_RECIPIENT_ENDPOINT:
  680   3              // Device does not support halting endpoint 0, but do not return
@@ -738,20 +738,20 @@ line level    source
  699   5                }
  700   4      #endif
  701   4      #if (SLAB_USB_EP1OUT_USED || SLAB_USB_EP2OUT_USED || SLAB_USB_EP3OUT_USED)
-                        if (((myUsbDevice.setup.wIndex & 0xFF) & USB_EP_DIR_IN) == 0)
-                        {
-                          USB_EpnOutStall();
-                        }
-              #endif
+ 702   4                if (((myUsbDevice.setup.wIndex & 0xFF) & USB_EP_DIR_IN) == 0)
+ 703   4                {
+ 704   5                  USB_EpnOutStall();
+ 705   5                }
+ 706   4      #endif
  707   4      
  708   4                // Put the specified endpoint in the Halted state.
  709   4                switch (myUsbDevice.setup.wIndex & 0xFF)
  710   4                {
  711   5        #if SLAB_USB_EP1OUT_USED
-                          case (USB_EP_DIR_OUT | 1):
-                            myUsbDevice.ep1out.state = D_EP_HALT;
-                            break;
-                #endif
+ 712   5                  case (USB_EP_DIR_OUT | 1):
+ 713   5                    myUsbDevice.ep1out.state = D_EP_HALT;
+ 714   5                    break;
+ 715   5        #endif
  716   5        #if SLAB_USB_EP2OUT_USED
                           case (USB_EP_DIR_OUT | 2):
                             myUsbDevice.ep2out.state = D_EP_HALT;
@@ -778,7 +778,7 @@ line level    source
                             break;
                 #endif
  741   5                }
-C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      01/21/2016 22:27:57 PAGE 13  
+C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      01/24/2016 17:34:24 PAGE 13  
 
  742   4              }
  743   3          }
@@ -843,15 +843,15 @@ line level    source
  802   2      #endif
  803   2      #if SLAB_USB_EP2IN_USED
                   myUsbDevice.ep2in.state = D_EP_IDLE;
-C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      01/21/2016 22:27:57 PAGE 14  
+C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      01/24/2016 17:34:24 PAGE 14  
 
               #endif
  806   2      #if SLAB_USB_EP3IN_USED
                   myUsbDevice.ep3in.state = D_EP_IDLE;
               #endif
  809   2      #if SLAB_USB_EP1OUT_USED
-                  myUsbDevice.ep1out.state = D_EP_IDLE;
-              #endif
+ 810   2          myUsbDevice.ep1out.state = D_EP_IDLE;
+ 811   2      #endif
  812   2      #if SLAB_USB_EP2OUT_USED
                   myUsbDevice.ep2out.state = D_EP_IDLE;
               #endif
@@ -882,12 +882,12 @@ line level    source
                                (SLAB_USB_EP3IN_TRANSFER_TYPE == USB_EPTYPE_ISOC));  // isoMod
               #endif // SLAB_USB_EP3IN_USED
  841   1      #if SLAB_USB_EP1OUT_USED
-                USB_ActivateEp(1,                                                   // ep
-                               SLAB_USB_EP1OUT_MAX_PACKET_SIZE,                     // packetSize
-                               0,                                                   // inDir
-                               SLAB_USB_EP1IN_USED,                                 // splitMode
-                               0);                                                  // isoMod
-              #endif // SLAB_USB_EP1OUT_USED
+ 842   1        USB_ActivateEp(1,                                                   // ep
+ 843   1                       SLAB_USB_EP1OUT_MAX_PACKET_SIZE,                     // packetSize
+ 844   1                       0,                                                   // inDir
+ 845   1                       SLAB_USB_EP1IN_USED,                                 // splitMode
+ 846   1                       0);                                                  // isoMod
+ 847   1      #endif // SLAB_USB_EP1OUT_USED
  848   1      #if SLAB_USB_EP2OUT_USED
                 USB_ActivateEp(2,                                                   // ep
                                SLAB_USB_EP2OUT_MAX_PACKET_SIZE,                     // packetSize
@@ -908,7 +908,7 @@ line level    source
  865           * @brief       Sets up an Endpoint 0 Write
  866           * @param       dat
  867           *              Data to transmit on Endpoint 0
-C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      01/21/2016 22:27:57 PAGE 15  
+C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      01/24/2016 17:34:24 PAGE 15  
 
  868           * @param       numBytes
  869           *              Number of bytes to transmit on Endpoint 0
@@ -926,7 +926,7 @@ line level    source
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   1264    ----
+   CODE SIZE        =   1390    ----
    CONSTANT SIZE    =      2    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----

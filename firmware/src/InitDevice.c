@@ -43,6 +43,9 @@ extern void enter_DefaultMode_from_RESET(void) {
 
 }
 
+//================================================================================
+// WDT_0_enter_DefaultMode_from_RESET
+//================================================================================
 extern void WDT_0_enter_DefaultMode_from_RESET(void) {
 	// $[WDTCN - Watchdog Timer Control]
 	SFRPAGE = 0x00;
@@ -53,109 +56,9 @@ extern void WDT_0_enter_DefaultMode_from_RESET(void) {
 
 }
 
-extern void TIMER01_0_enter_DefaultMode_from_RESET(void) {
-	// $[Timer Initialization]
-	//Save Timer Configuration
-	uint8_t TCON_save;
-	TCON_save = TCON;
-	//Stop Timers
-	TCON &= ~TCON_TR0__BMASK & ~TCON_TR1__BMASK;
-
-	// [Timer Initialization]$
-
-	// $[TH0 - Timer 0 High Byte]
-	// [TH0 - Timer 0 High Byte]$
-
-	// $[TL0 - Timer 0 Low Byte]
-	// [TL0 - Timer 0 Low Byte]$
-
-	// $[TH1 - Timer 1 High Byte]
-	/*
-	 // TH1 (Timer 1 High Byte) = 0x30
-	 */
-	TH1 = (0x30 << TH1_TH1__SHIFT);
-	// [TH1 - Timer 1 High Byte]$
-
-	// $[TL1 - Timer 1 Low Byte]
-	// [TL1 - Timer 1 Low Byte]$
-
-	// $[Timer Restoration]
-	//Restore Timer Configuration
-	TCON |= (TCON_save & TCON_TR0__BMASK) | (TCON_save & TCON_TR1__BMASK);
-
-	// [Timer Restoration]$
-
-}
-
-extern void TIMER_SETUP_0_enter_DefaultMode_from_RESET(void) {
-	// $[CKCON0 - Clock Control 0]
-	/*
-	 // SCA (Timer 0/1 Prescale) = SYSCLK_DIV_12 (System clock divided by 12.)
-	 // T0M (Timer 0 Clock Select) = PRESCALE (Counter/Timer 0 uses the clock
-	 //     defined by the prescale field, SCA.)
-	 // T2MH (Timer 2 High Byte Clock Select) = EXTERNAL_CLOCK (Timer 2 high
-	 //     byte uses the clock defined by T2XCLK in TMR2CN0.)
-	 // T2ML (Timer 2 Low Byte Clock Select) = EXTERNAL_CLOCK (Timer 2 low
-	 //     byte uses the clock defined by T2XCLK in TMR2CN0.)
-	 // T3MH (Timer 3 High Byte Clock Select) = EXTERNAL_CLOCK (Timer 3 high
-	 //     byte uses the clock defined by T3XCLK in TMR3CN0.)
-	 // T3ML (Timer 3 Low Byte Clock Select) = EXTERNAL_CLOCK (Timer 3 low
-	 //     byte uses the clock defined by T3XCLK in TMR3CN0.)
-	 // T1M (Timer 1 Clock Select) = SYSCLK (Timer 1 uses the system clock.)
-	 */
-	CKCON0 = CKCON0_SCA__SYSCLK_DIV_12 | CKCON0_T0M__PRESCALE
-			| CKCON0_T2MH__EXTERNAL_CLOCK | CKCON0_T2ML__EXTERNAL_CLOCK
-			| CKCON0_T3MH__EXTERNAL_CLOCK | CKCON0_T3ML__EXTERNAL_CLOCK
-			| CKCON0_T1M__SYSCLK;
-	// [CKCON0 - Clock Control 0]$
-
-	// $[CKCON1 - Clock Control 1]
-	// [CKCON1 - Clock Control 1]$
-
-	// $[TMOD - Timer 0/1 Mode]
-	/*
-	 // T0M (Timer 0 Mode Select) = MODE0 (Mode 0, 13-bit Counter/Timer)
-	 // T1M (Timer 1 Mode Select) = MODE2 (Mode 2, 8-bit Counter/Timer with
-	 //     Auto-Reload)
-	 // CT0 (Counter/Timer 0 Select) = TIMER (Timer Mode. Timer 0 increments
-	 //     on the clock defined by T0M in the CKCON0 register.)
-	 // GATE0 (Timer 0 Gate Control) = DISABLED (Timer 0 enabled when TR0 = 1
-	 //     irrespective of INT0 logic level.)
-	 // CT1 (Counter/Timer 1 Select) = TIMER (Timer Mode. Timer 1 increments
-	 //     on the clock defined by T1M in the CKCON0 register.)
-	 // GATE1 (Timer 1 Gate Control) = DISABLED (Timer 1 enabled when TR1 = 1
-	 //     irrespective of INT1 logic level.)
-	 */
-	TMOD = TMOD_T0M__MODE0 | TMOD_T1M__MODE2 | TMOD_CT0__TIMER
-			| TMOD_GATE0__DISABLED | TMOD_CT1__TIMER | TMOD_GATE1__DISABLED;
-	// [TMOD - Timer 0/1 Mode]$
-
-	// $[TCON - Timer 0/1 Control]
-	/*
-	 // TR1 (Timer 1 Run Control) = RUN (Start Timer 1 running.)
-	 */
-	TCON |= TCON_TR1__RUN;
-	// [TCON - Timer 0/1 Control]$
-
-}
-
-extern void UART_0_enter_DefaultMode_from_RESET(void) {
-	// $[SCON0 - UART0 Serial Port Control]
-	/*
-	 // REN (Receive Enable) = RECEIVE_ENABLED (UART0 reception enabled.)
-	 */
-	SCON0 |= SCON0_REN__RECEIVE_ENABLED;
-	// [SCON0 - UART0 Serial Port Control]$
-
-}
-
-extern void USBLIB_0_enter_DefaultMode_from_RESET(void) {
-	// $[USBD Init]
-	USBD_Init (&initstruct);
-	// [USBD Init]$
-
-}
-
+//================================================================================
+// VREG_0_enter_DefaultMode_from_RESET
+//================================================================================
 extern void VREG_0_enter_DefaultMode_from_RESET(void) {
 	// $[REG0CN - Voltage Regulator 0 Control]
 	// [REG0CN - Voltage Regulator 0 Control]$
@@ -177,168 +80,9 @@ extern void VREG_0_enter_DefaultMode_from_RESET(void) {
 
 }
 
-extern void CIP51_0_enter_DefaultMode_from_RESET(void) {
-	// $[PFE0CN - Prefetch Engine Control]
-	/*
-	 // PFEN (Prefetch Enable) = ENABLED (Enable the prefetch engine (SYSCLK >
-	 //     25 MHz).)
-	 // FLRT (Flash Read Timing) = SYSCLK_BELOW_50_MHZ (SYSCLK < 50 MHz.)
-	 */
-	SFRPAGE = 0x10;
-	PFE0CN = PFE0CN_PFEN__ENABLED | PFE0CN_FLRT__SYSCLK_BELOW_50_MHZ;
-	// [PFE0CN - Prefetch Engine Control]$
-
-}
-
-extern void CLOCK_0_enter_DefaultMode_from_RESET(void) {
-	// $[HFOSC1 Setup]
-	// Ensure SYSCLK is > 24 MHz before switching to HFOSC1
-	SFRPAGE = 0x00;
-	CLKSEL = CLKSEL_CLKSL__HFOSC0 | CLKSEL_CLKDIV__SYSCLK_DIV_1;
-	CLKSEL = CLKSEL_CLKSL__HFOSC0 | CLKSEL_CLKDIV__SYSCLK_DIV_1;
-	while (CLKSEL & CLKSEL_DIVRDY__BMASK == CLKSEL_DIVRDY__NOT_READY)
-		;
-	// [HFOSC1 Setup]$
-
-	// $[CLKSEL - Clock Select]
-	/*
-	 // CLKSL (Clock Source Select) = HFOSC1 (Clock derived from the Internal
-	 //     High Frequency Oscillator 1.)
-	 // CLKDIV (Clock Source Divider) = SYSCLK_DIV_1 (SYSCLK is equal to
-	 //     selected clock source divided by 1.)
-	 // CLKSL (Clock Source Select) = HFOSC1 (Clock derived from the Internal
-	 //     High Frequency Oscillator 1.)
-	 // CLKDIV (Clock Source Divider) = SYSCLK_DIV_1 (SYSCLK is equal to
-	 //     selected clock source divided by 1.)
-	 */
-	CLKSEL = CLKSEL_CLKSL__HFOSC1 | CLKSEL_CLKDIV__SYSCLK_DIV_1;
-	CLKSEL = CLKSEL_CLKSL__HFOSC1 | CLKSEL_CLKDIV__SYSCLK_DIV_1;
-	while (CLKSEL & CLKSEL_DIVRDY__BMASK == CLKSEL_DIVRDY__NOT_READY)
-		;
-	// [CLKSEL - Clock Select]$
-
-}
-
-extern void INTERRUPT_0_enter_DefaultMode_from_RESET(void) {
-	// $[EIE1 - Extended Interrupt Enable 1]
-	/*
-	 // EADC0 (ADC0 Conversion Complete Interrupt Enable) = DISABLED (Disable
-	 //     ADC0 Conversion Complete interrupt.)
-	 // EWADC0 (ADC0 Window Comparison Interrupt Enable) = DISABLED (Disable
-	 //     ADC0 Window Comparison interrupt.)
-	 // ECP0 (Comparator0 (CP0) Interrupt Enable) = DISABLED (Disable CP0
-	 //     interrupts.)
-	 // ECP1 (Comparator1 (CP1) Interrupt Enable) = DISABLED (Disable CP1
-	 //     interrupts.)
-	 // EMAT (Port Match Interrupts Enable) = ENABLED (Enable interrupt
-	 //     requests generated by a Port Match.)
-	 // EPCA0 (Programmable Counter Array (PCA0) Interrupt Enable) = DISABLED
-	 //     (Disable all PCA0 interrupts.)
-	 // ESMB0 (SMBus (SMB0) Interrupt Enable) = DISABLED (Disable all SMB0
-	 //     interrupts.)
-	 // ET3 (Timer 3 Interrupt Enable) = DISABLED (Disable Timer 3
-	 //     interrupts.)
-	 */
-	EIE1 = EIE1_EADC0__DISABLED | EIE1_EWADC0__DISABLED | EIE1_ECP0__DISABLED
-			| EIE1_ECP1__DISABLED | EIE1_EMAT__ENABLED | EIE1_EPCA0__DISABLED
-			| EIE1_ESMB0__DISABLED | EIE1_ET3__DISABLED;
-	// [EIE1 - Extended Interrupt Enable 1]$
-
-	// $[EIE2 - Extended Interrupt Enable 2]
-	// [EIE2 - Extended Interrupt Enable 2]$
-
-	// $[EIP1H - Extended Interrupt Priority 1 High]
-	// [EIP1H - Extended Interrupt Priority 1 High]$
-
-	// $[EIP1 - Extended Interrupt Priority 1 Low]
-	// [EIP1 - Extended Interrupt Priority 1 Low]$
-
-	// $[EIP2 - Extended Interrupt Priority 2]
-	// [EIP2 - Extended Interrupt Priority 2]$
-
-	// $[EIP2H - Extended Interrupt Priority 2 High]
-	// [EIP2H - Extended Interrupt Priority 2 High]$
-
-	// $[IE - Interrupt Enable]
-	/*
-	 // EA (All Interrupts Enable) = ENABLED (Enable each interrupt according
-	 //     to its individual mask setting.)
-	 // EX0 (External Interrupt 0 Enable) = DISABLED (Disable external
-	 //     interrupt 0.)
-	 // EX1 (External Interrupt 1 Enable) = DISABLED (Disable external
-	 //     interrupt 1.)
-	 // ESPI0 (SPI0 Interrupt Enable) = DISABLED (Disable all SPI0
-	 //     interrupts.)
-	 // ET0 (Timer 0 Interrupt Enable) = DISABLED (Disable all Timer 0
-	 //     interrupt.)
-	 // ET1 (Timer 1 Interrupt Enable) = DISABLED (Disable all Timer 1
-	 //     interrupt.)
-	 // ET2 (Timer 2 Interrupt Enable) = DISABLED (Disable Timer 2 interrupt.)
-	 // ES0 (UART0 Interrupt Enable) = DISABLED (Disable UART0 interrupt.)
-	 */
-	IE = IE_EA__ENABLED | IE_EX0__DISABLED | IE_EX1__DISABLED
-			| IE_ESPI0__DISABLED | IE_ET0__DISABLED | IE_ET1__DISABLED
-			| IE_ET2__DISABLED | IE_ES0__DISABLED;
-	// [IE - Interrupt Enable]$
-
-	// $[IP - Interrupt Priority]
-	// [IP - Interrupt Priority]$
-
-	// $[IPH - Interrupt Priority High]
-	// [IPH - Interrupt Priority High]$
-
-}
-
-extern void PBCFG_0_enter_DefaultMode_from_RESET(void) {
-	// $[XBR2 - Port I/O Crossbar 2]
-	/*
-	 // WEAKPUD (Port I/O Weak Pullup Disable) = PULL_UPS_ENABLED (Weak
-	 //     Pullups enabled (except for Ports whose I/O are configured for analog
-	 //     mode).)
-	 // XBARE (Crossbar Enable) = ENABLED (Crossbar enabled.)
-	 // URT1E (UART1 I/O Enable) = DISABLED (UART1 I/O unavailable at Port
-	 //     pin.)
-	 // URT1RTSE (UART1 RTS Output Enable) = DISABLED (UART1 RTS1 unavailable
-	 //     at Port pin.)
-	 // URT1CTSE (UART1 CTS Input Enable) = DISABLED (UART1 CTS1 unavailable
-	 //     at Port pin.)
-	 */
-	XBR2 = XBR2_WEAKPUD__PULL_UPS_ENABLED | XBR2_XBARE__ENABLED
-			| XBR2_URT1E__DISABLED | XBR2_URT1RTSE__DISABLED
-			| XBR2_URT1CTSE__DISABLED;
-	// [XBR2 - Port I/O Crossbar 2]$
-
-	// $[PRTDRV - Port Drive Strength]
-	// [PRTDRV - Port Drive Strength]$
-
-	// $[XBR0 - Port I/O Crossbar 0]
-	/*
-	 // URT0E (UART0 I/O Enable) = ENABLED (UART0 TX0, RX0 routed to Port pins
-	 //     P0.4 and P0.5.)
-	 // SPI0E (SPI I/O Enable) = DISABLED (SPI I/O unavailable at Port pins.)
-	 // SMB0E (SMB0 I/O Enable) = DISABLED (SMBus 0 I/O unavailable at Port
-	 //     pins.)
-	 // CP0E (Comparator0 Output Enable) = DISABLED (CP0 unavailable at Port
-	 //     pin.)
-	 // CP0AE (Comparator0 Asynchronous Output Enable) = DISABLED
-	 //     (Asynchronous CP0 unavailable at Port pin.)
-	 // CP1E (Comparator1 Output Enable) = DISABLED (CP1 unavailable at Port
-	 //     pin.)
-	 // CP1AE (Comparator1 Asynchronous Output Enable) = DISABLED
-	 //     (Asynchronous CP1 unavailable at Port pin.)
-	 // SYSCKE (SYSCLK Output Enable) = DISABLED (SYSCLK unavailable at Port
-	 //     pin.)
-	 */
-	XBR0 = XBR0_URT0E__ENABLED | XBR0_SPI0E__DISABLED | XBR0_SMB0E__DISABLED
-			| XBR0_CP0E__DISABLED | XBR0_CP0AE__DISABLED | XBR0_CP1E__DISABLED
-			| XBR0_CP1AE__DISABLED | XBR0_SYSCKE__DISABLED;
-	// [XBR0 - Port I/O Crossbar 0]$
-
-	// $[XBR1 - Port I/O Crossbar 1]
-	// [XBR1 - Port I/O Crossbar 1]$
-
-}
-
+//================================================================================
+// PORTS_0_enter_DefaultMode_from_RESET
+//================================================================================
 extern void PORTS_0_enter_DefaultMode_from_RESET(void) {
 	// $[P0 - Port 0 Pin Latch]
 	/*
@@ -483,6 +227,295 @@ extern void PORTS_0_enter_DefaultMode_from_RESET(void) {
 	P0MAT = P0MAT_B0__HIGH | P0MAT_B1__HIGH | P0MAT_B2__HIGH | P0MAT_B3__HIGH
 			| P0MAT_B4__HIGH | P0MAT_B5__HIGH | P0MAT_B6__HIGH | P0MAT_B7__HIGH;
 	// [P0MAT - Port 0 Match]$
+
+}
+
+//================================================================================
+// PBCFG_0_enter_DefaultMode_from_RESET
+//================================================================================
+extern void PBCFG_0_enter_DefaultMode_from_RESET(void) {
+	// $[XBR2 - Port I/O Crossbar 2]
+	/*
+	 // WEAKPUD (Port I/O Weak Pullup Disable) = PULL_UPS_ENABLED (Weak
+	 //     Pullups enabled (except for Ports whose I/O are configured for analog
+	 //     mode).)
+	 // XBARE (Crossbar Enable) = ENABLED (Crossbar enabled.)
+	 // URT1E (UART1 I/O Enable) = DISABLED (UART1 I/O unavailable at Port
+	 //     pin.)
+	 // URT1RTSE (UART1 RTS Output Enable) = DISABLED (UART1 RTS1 unavailable
+	 //     at Port pin.)
+	 // URT1CTSE (UART1 CTS Input Enable) = DISABLED (UART1 CTS1 unavailable
+	 //     at Port pin.)
+	 */
+	XBR2 = XBR2_WEAKPUD__PULL_UPS_ENABLED | XBR2_XBARE__ENABLED
+			| XBR2_URT1E__DISABLED | XBR2_URT1RTSE__DISABLED
+			| XBR2_URT1CTSE__DISABLED;
+	// [XBR2 - Port I/O Crossbar 2]$
+
+	// $[PRTDRV - Port Drive Strength]
+	// [PRTDRV - Port Drive Strength]$
+
+	// $[XBR0 - Port I/O Crossbar 0]
+	/*
+	 // URT0E (UART0 I/O Enable) = ENABLED (UART0 TX0, RX0 routed to Port pins
+	 //     P0.4 and P0.5.)
+	 // SPI0E (SPI I/O Enable) = DISABLED (SPI I/O unavailable at Port pins.)
+	 // SMB0E (SMB0 I/O Enable) = DISABLED (SMBus 0 I/O unavailable at Port
+	 //     pins.)
+	 // CP0E (Comparator0 Output Enable) = DISABLED (CP0 unavailable at Port
+	 //     pin.)
+	 // CP0AE (Comparator0 Asynchronous Output Enable) = DISABLED
+	 //     (Asynchronous CP0 unavailable at Port pin.)
+	 // CP1E (Comparator1 Output Enable) = DISABLED (CP1 unavailable at Port
+	 //     pin.)
+	 // CP1AE (Comparator1 Asynchronous Output Enable) = DISABLED
+	 //     (Asynchronous CP1 unavailable at Port pin.)
+	 // SYSCKE (SYSCLK Output Enable) = DISABLED (SYSCLK unavailable at Port
+	 //     pin.)
+	 */
+	XBR0 = XBR0_URT0E__ENABLED | XBR0_SPI0E__DISABLED | XBR0_SMB0E__DISABLED
+			| XBR0_CP0E__DISABLED | XBR0_CP0AE__DISABLED | XBR0_CP1E__DISABLED
+			| XBR0_CP1AE__DISABLED | XBR0_SYSCKE__DISABLED;
+	// [XBR0 - Port I/O Crossbar 0]$
+
+	// $[XBR1 - Port I/O Crossbar 1]
+	// [XBR1 - Port I/O Crossbar 1]$
+
+}
+
+//================================================================================
+// CIP51_0_enter_DefaultMode_from_RESET
+//================================================================================
+extern void CIP51_0_enter_DefaultMode_from_RESET(void) {
+	// $[PFE0CN - Prefetch Engine Control]
+	/*
+	 // PFEN (Prefetch Enable) = ENABLED (Enable the prefetch engine (SYSCLK >
+	 //     25 MHz).)
+	 // FLRT (Flash Read Timing) = SYSCLK_BELOW_50_MHZ (SYSCLK < 50 MHz.)
+	 */
+	SFRPAGE = 0x10;
+	PFE0CN = PFE0CN_PFEN__ENABLED | PFE0CN_FLRT__SYSCLK_BELOW_50_MHZ;
+	// [PFE0CN - Prefetch Engine Control]$
+
+}
+
+//================================================================================
+// CLOCK_0_enter_DefaultMode_from_RESET
+//================================================================================
+extern void CLOCK_0_enter_DefaultMode_from_RESET(void) {
+	// $[HFOSC1 Setup]
+	// Ensure SYSCLK is > 24 MHz before switching to HFOSC1
+	SFRPAGE = 0x00;
+	CLKSEL = CLKSEL_CLKSL__HFOSC0 | CLKSEL_CLKDIV__SYSCLK_DIV_1;
+	CLKSEL = CLKSEL_CLKSL__HFOSC0 | CLKSEL_CLKDIV__SYSCLK_DIV_1;
+	while (CLKSEL & CLKSEL_DIVRDY__BMASK == CLKSEL_DIVRDY__NOT_READY)
+		;
+	// [HFOSC1 Setup]$
+
+	// $[CLKSEL - Clock Select]
+	/*
+	 // CLKSL (Clock Source Select) = HFOSC1 (Clock derived from the Internal
+	 //     High Frequency Oscillator 1.)
+	 // CLKDIV (Clock Source Divider) = SYSCLK_DIV_1 (SYSCLK is equal to
+	 //     selected clock source divided by 1.)
+	 // CLKSL (Clock Source Select) = HFOSC1 (Clock derived from the Internal
+	 //     High Frequency Oscillator 1.)
+	 // CLKDIV (Clock Source Divider) = SYSCLK_DIV_1 (SYSCLK is equal to
+	 //     selected clock source divided by 1.)
+	 */
+	CLKSEL = CLKSEL_CLKSL__HFOSC1 | CLKSEL_CLKDIV__SYSCLK_DIV_1;
+	CLKSEL = CLKSEL_CLKSL__HFOSC1 | CLKSEL_CLKDIV__SYSCLK_DIV_1;
+	while (CLKSEL & CLKSEL_DIVRDY__BMASK == CLKSEL_DIVRDY__NOT_READY)
+		;
+	// [CLKSEL - Clock Select]$
+
+}
+
+//================================================================================
+// TIMER01_0_enter_DefaultMode_from_RESET
+//================================================================================
+extern void TIMER01_0_enter_DefaultMode_from_RESET(void) {
+	// $[Timer Initialization]
+	//Save Timer Configuration
+	uint8_t TCON_save;
+	TCON_save = TCON;
+	//Stop Timers
+	TCON &= ~TCON_TR0__BMASK & ~TCON_TR1__BMASK;
+
+	// [Timer Initialization]$
+
+	// $[TH0 - Timer 0 High Byte]
+	// [TH0 - Timer 0 High Byte]$
+
+	// $[TL0 - Timer 0 Low Byte]
+	// [TL0 - Timer 0 Low Byte]$
+
+	// $[TH1 - Timer 1 High Byte]
+	/*
+	 // TH1 (Timer 1 High Byte) = 0x30
+	 */
+	TH1 = (0x30 << TH1_TH1__SHIFT);
+	// [TH1 - Timer 1 High Byte]$
+
+	// $[TL1 - Timer 1 Low Byte]
+	// [TL1 - Timer 1 Low Byte]$
+
+	// $[Timer Restoration]
+	//Restore Timer Configuration
+	TCON |= (TCON_save & TCON_TR0__BMASK) | (TCON_save & TCON_TR1__BMASK);
+
+	// [Timer Restoration]$
+
+}
+
+//================================================================================
+// TIMER_SETUP_0_enter_DefaultMode_from_RESET
+//================================================================================
+extern void TIMER_SETUP_0_enter_DefaultMode_from_RESET(void) {
+	// $[CKCON0 - Clock Control 0]
+	/*
+	 // SCA (Timer 0/1 Prescale) = SYSCLK_DIV_12 (System clock divided by 12.)
+	 // T0M (Timer 0 Clock Select) = PRESCALE (Counter/Timer 0 uses the clock
+	 //     defined by the prescale field, SCA.)
+	 // T2MH (Timer 2 High Byte Clock Select) = EXTERNAL_CLOCK (Timer 2 high
+	 //     byte uses the clock defined by T2XCLK in TMR2CN0.)
+	 // T2ML (Timer 2 Low Byte Clock Select) = EXTERNAL_CLOCK (Timer 2 low
+	 //     byte uses the clock defined by T2XCLK in TMR2CN0.)
+	 // T3MH (Timer 3 High Byte Clock Select) = EXTERNAL_CLOCK (Timer 3 high
+	 //     byte uses the clock defined by T3XCLK in TMR3CN0.)
+	 // T3ML (Timer 3 Low Byte Clock Select) = EXTERNAL_CLOCK (Timer 3 low
+	 //     byte uses the clock defined by T3XCLK in TMR3CN0.)
+	 // T1M (Timer 1 Clock Select) = SYSCLK (Timer 1 uses the system clock.)
+	 */
+	CKCON0 = CKCON0_SCA__SYSCLK_DIV_12 | CKCON0_T0M__PRESCALE
+			| CKCON0_T2MH__EXTERNAL_CLOCK | CKCON0_T2ML__EXTERNAL_CLOCK
+			| CKCON0_T3MH__EXTERNAL_CLOCK | CKCON0_T3ML__EXTERNAL_CLOCK
+			| CKCON0_T1M__SYSCLK;
+	// [CKCON0 - Clock Control 0]$
+
+	// $[CKCON1 - Clock Control 1]
+	// [CKCON1 - Clock Control 1]$
+
+	// $[TMOD - Timer 0/1 Mode]
+	/*
+	 // T0M (Timer 0 Mode Select) = MODE0 (Mode 0, 13-bit Counter/Timer)
+	 // T1M (Timer 1 Mode Select) = MODE2 (Mode 2, 8-bit Counter/Timer with
+	 //     Auto-Reload)
+	 // CT0 (Counter/Timer 0 Select) = TIMER (Timer Mode. Timer 0 increments
+	 //     on the clock defined by T0M in the CKCON0 register.)
+	 // GATE0 (Timer 0 Gate Control) = DISABLED (Timer 0 enabled when TR0 = 1
+	 //     irrespective of INT0 logic level.)
+	 // CT1 (Counter/Timer 1 Select) = TIMER (Timer Mode. Timer 1 increments
+	 //     on the clock defined by T1M in the CKCON0 register.)
+	 // GATE1 (Timer 1 Gate Control) = DISABLED (Timer 1 enabled when TR1 = 1
+	 //     irrespective of INT1 logic level.)
+	 */
+	TMOD = TMOD_T0M__MODE0 | TMOD_T1M__MODE2 | TMOD_CT0__TIMER
+			| TMOD_GATE0__DISABLED | TMOD_CT1__TIMER | TMOD_GATE1__DISABLED;
+	// [TMOD - Timer 0/1 Mode]$
+
+	// $[TCON - Timer 0/1 Control]
+	/*
+	 // TR1 (Timer 1 Run Control) = RUN (Start Timer 1 running.)
+	 */
+	TCON |= TCON_TR1__RUN;
+	// [TCON - Timer 0/1 Control]$
+
+}
+
+//================================================================================
+// UART_0_enter_DefaultMode_from_RESET
+//================================================================================
+extern void UART_0_enter_DefaultMode_from_RESET(void) {
+	// $[SCON0 - UART0 Serial Port Control]
+	/*
+	 // REN (Receive Enable) = RECEIVE_ENABLED (UART0 reception enabled.)
+	 */
+	SCON0 |= SCON0_REN__RECEIVE_ENABLED;
+	// [SCON0 - UART0 Serial Port Control]$
+
+}
+
+//================================================================================
+// INTERRUPT_0_enter_DefaultMode_from_RESET
+//================================================================================
+extern void INTERRUPT_0_enter_DefaultMode_from_RESET(void) {
+	// $[EIE1 - Extended Interrupt Enable 1]
+	/*
+	 // EADC0 (ADC0 Conversion Complete Interrupt Enable) = DISABLED (Disable
+	 //     ADC0 Conversion Complete interrupt.)
+	 // EWADC0 (ADC0 Window Comparison Interrupt Enable) = DISABLED (Disable
+	 //     ADC0 Window Comparison interrupt.)
+	 // ECP0 (Comparator0 (CP0) Interrupt Enable) = DISABLED (Disable CP0
+	 //     interrupts.)
+	 // ECP1 (Comparator1 (CP1) Interrupt Enable) = DISABLED (Disable CP1
+	 //     interrupts.)
+	 // EMAT (Port Match Interrupts Enable) = ENABLED (Enable interrupt
+	 //     requests generated by a Port Match.)
+	 // EPCA0 (Programmable Counter Array (PCA0) Interrupt Enable) = DISABLED
+	 //     (Disable all PCA0 interrupts.)
+	 // ESMB0 (SMBus (SMB0) Interrupt Enable) = DISABLED (Disable all SMB0
+	 //     interrupts.)
+	 // ET3 (Timer 3 Interrupt Enable) = DISABLED (Disable Timer 3
+	 //     interrupts.)
+	 */
+	EIE1 = EIE1_EADC0__DISABLED | EIE1_EWADC0__DISABLED | EIE1_ECP0__DISABLED
+			| EIE1_ECP1__DISABLED | EIE1_EMAT__ENABLED | EIE1_EPCA0__DISABLED
+			| EIE1_ESMB0__DISABLED | EIE1_ET3__DISABLED;
+	// [EIE1 - Extended Interrupt Enable 1]$
+
+	// $[EIE2 - Extended Interrupt Enable 2]
+	// [EIE2 - Extended Interrupt Enable 2]$
+
+	// $[EIP1H - Extended Interrupt Priority 1 High]
+	// [EIP1H - Extended Interrupt Priority 1 High]$
+
+	// $[EIP1 - Extended Interrupt Priority 1 Low]
+	// [EIP1 - Extended Interrupt Priority 1 Low]$
+
+	// $[EIP2 - Extended Interrupt Priority 2]
+	// [EIP2 - Extended Interrupt Priority 2]$
+
+	// $[EIP2H - Extended Interrupt Priority 2 High]
+	// [EIP2H - Extended Interrupt Priority 2 High]$
+
+	// $[IE - Interrupt Enable]
+	/*
+	 // EA (All Interrupts Enable) = ENABLED (Enable each interrupt according
+	 //     to its individual mask setting.)
+	 // EX0 (External Interrupt 0 Enable) = DISABLED (Disable external
+	 //     interrupt 0.)
+	 // EX1 (External Interrupt 1 Enable) = DISABLED (Disable external
+	 //     interrupt 1.)
+	 // ESPI0 (SPI0 Interrupt Enable) = DISABLED (Disable all SPI0
+	 //     interrupts.)
+	 // ET0 (Timer 0 Interrupt Enable) = DISABLED (Disable all Timer 0
+	 //     interrupt.)
+	 // ET1 (Timer 1 Interrupt Enable) = DISABLED (Disable all Timer 1
+	 //     interrupt.)
+	 // ET2 (Timer 2 Interrupt Enable) = DISABLED (Disable Timer 2 interrupt.)
+	 // ES0 (UART0 Interrupt Enable) = DISABLED (Disable UART0 interrupt.)
+	 */
+	IE = IE_EA__ENABLED | IE_EX0__DISABLED | IE_EX1__DISABLED
+			| IE_ESPI0__DISABLED | IE_ET0__DISABLED | IE_ET1__DISABLED
+			| IE_ET2__DISABLED | IE_ES0__DISABLED;
+	// [IE - Interrupt Enable]$
+
+	// $[IP - Interrupt Priority]
+	// [IP - Interrupt Priority]$
+
+	// $[IPH - Interrupt Priority High]
+	// [IPH - Interrupt Priority High]$
+
+}
+
+//================================================================================
+// USBLIB_0_enter_DefaultMode_from_RESET
+//================================================================================
+extern void USBLIB_0_enter_DefaultMode_from_RESET(void) {
+	// $[USBD Init]
+	USBD_Init (&initstruct);
+	// [USBD Init]$
 
 }
 

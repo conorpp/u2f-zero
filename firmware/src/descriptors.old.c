@@ -13,6 +13,7 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
+#if 0
 #include <si_toolchain.h>
 #include <endian.h>
 #include <stdlib.h>
@@ -51,6 +52,7 @@ SI_SEGMENT_VARIABLE(ReportDescriptor0[34],
 	0xc0,// END_COLLECTION
 
 };
+
 SI_SEGMENT_VARIABLE(deviceDesc[],
 		const USB_DeviceDescriptor_TypeDef,
 		SI_SEG_CODE) =
@@ -67,7 +69,7 @@ SI_SEGMENT_VARIABLE(deviceDesc[],
 	htole16(0x0100),// bcdDevice
 	1,// iManufacturer
 	2,// iProduct
-	3,// iSerialNumber
+	0,// iSerialNumber
 	1,// bNumConfigurations
 };
 
@@ -96,7 +98,7 @@ SI_SEGMENT_VARIABLE(configDesc[],
 	3,// bInterfaceClass: HID (Human Interface Device)
 	0,// bInterfaceSubClass
 	0,// bInterfaceProtocol
-	4,// iInterface
+	0,// iInterface
 
 	//HID Descriptor
 	USB_HID_DESCSIZE,// bLength
@@ -166,5 +168,6 @@ SI_SEGMENT_VARIABLE(initstruct,
 
 #ifdef __cplusplus
 }
+#endif
 #endif
 

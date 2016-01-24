@@ -357,7 +357,6 @@ void handleUsbOut1Int(void)
         myUsbDevice.ep1out.state = D_EP_IDLE;
         xferComplete = true;
       }
-
       status = USB_STATUS_OK;
       USB_EpnClearOutPacketReady();
     }
@@ -367,7 +366,6 @@ void handleUsbOut1Int(void)
       {
         myUsbDevice.ep1out.misc.bits.callback = false;
       }
-
       USBD_XferCompleteCb(EP1OUT, status, count, myUsbDevice.ep1out.remaining);
     }
   }

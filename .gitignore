@@ -37,3 +37,6 @@
 _saved*
 _autosave*
 gerbers/*
+
+# simplicity studio
+firmware/Keil*

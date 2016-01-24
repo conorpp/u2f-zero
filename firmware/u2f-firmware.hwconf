@@ -37,14 +37,17 @@
     <property object="UART_0" propertyId="uart.serialportcontrol.timer1overflowfrequency" value="230.769 kHz"/>
     <property object="USBLIB_0" propertyId="ABPeripheral.included" value="true"/>
     <property object="USBLIB_0" propertyId="configuration.configurationparameters.configurationstring" value=""/>
+    <property object="USBLIB_0" propertyId="configuration.configurationparameters.devicepower" value="Bus-Powered"/>
     <property object="USBLIB_0" propertyId="device.deviceproperties.bmaxpacketsize" value="64"/>
     <property object="USBLIB_0" propertyId="device.deviceproperties.productstring" value="U2F Zero"/>
     <property object="USBLIB_0" propertyId="endpoints.endpoint1in.endpoint1in" value="Enabled"/>
     <property object="USBLIB_0" propertyId="endpoints.endpoint1in.maxpacketsizebytes" value="64"/>
-    <property object="USBLIB_0" propertyId="endpoints.endpoint1in.pollingintervalms" value="24"/>
+    <property object="USBLIB_0" propertyId="endpoints.endpoint1in.pollingintervalms" value="5"/>
     <property object="USBLIB_0" propertyId="endpoints.endpoint1in.transfertype" value="Interrupt"/>
-    <property object="USBLIB_0" propertyId="endpoints.endpoint1in.usedbypreset" value="0"/>
+    <property object="USBLIB_0" propertyId="endpoints.endpoint1out.endpoint1out" value="Enabled"/>
     <property object="USBLIB_0" propertyId="endpoints.endpoint1out.maxpacketsizebytes" value="64"/>
+    <property object="USBLIB_0" propertyId="endpoints.endpoint1out.pollingintervalms" value="5"/>
+    <property object="USBLIB_0" propertyId="endpoints.endpoint1out.transfertype" value="Interrupt"/>
     <property object="USBLIB_0" propertyId="endpoints.endpoint2in.maxpacketsizebytes" value="64"/>
     <property object="USBLIB_0" propertyId="endpoints.endpoint2out.maxpacketsizebytes" value="64"/>
     <property object="USBLIB_0" propertyId="endpoints.endpoint3in.maxpacketsizebytes" value="64"/>
@@ -54,8 +57,6 @@
     <property object="USBLIB_0" propertyId="interfaces.interface0.hidreporttemplate" value="Keyboard"/>
     <property object="USBLIB_0" propertyId="interfaces.interface0.interfaceclass" value="HID (Human Interface Device)"/>
     <property object="USBLIB_0" propertyId="interfaces.interface0.interfacestring" value="HID Keyboard"/>
-    <property object="USBLIB_0" propertyId="interfaces.interface0.preset" value="HID Keyboard"/>
-    <property object="USBLIB_0" propertyId="interfaces.interface0.protocol" value="1"/>
     <property object="USBLIB_0" propertyId="library.callbackfunctions.handlercallback" value="Enabled"/>
     <property object="USBLIB_0" propertyId="library.callbackfunctions.resetcallback" value="Enabled"/>
     <property object="USBLIB_0" propertyId="library.callbackfunctions.selfpoweredcallback" value="Enabled"/>

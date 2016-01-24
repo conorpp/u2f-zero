@@ -57,6 +57,10 @@
 uint8_t keySeqNo = 0;        // Current position in report table.
 bool keyPushed = 0;          // Current pushbutton status.
 
+bool readpacket = 1;
+
+extern SI_SEGMENT_VARIABLE(thebuf1[64], uint8_t, SI_SEG_XDATA);
+
 void Delay(int16_t ms) {
 	int16_t x;
 	int16_t y;
@@ -66,7 +70,9 @@ void Delay(int16_t ms) {
 		}
 	}
 }
-
+SI_SEGMENT_VARIABLE(mybuf[64],
+		uint8_t,
+		SI_SEG_CODE);
 int16_t main(void) {
 	int i = 0;
 
@@ -74,8 +80,6 @@ int16_t main(void) {
 
 	SCON0_TI = 1;                       // This STDIO library requires TI to
 										// be set for prints to occur
-	printf("wat \r\n");
-
 	IE_EA = 1;
 
 	printf("welcome \r\n");
@@ -85,6 +89,12 @@ int16_t main(void) {
 
 		printf("%d\r\n", i);
 		Delay(1000);
+
+		if (readpacket)
+		{
+			USBD_Read(EP1OUT, thebuf1, sizeof(thebuf1), true);
+			readpacket = 0;
+		}
 
 	}
 }

@@ -44,7 +44,7 @@ extern "C" {
 #define USB_PRODUCT_ID                     htole16(0xfe01)
 // [Product ID]$
 
-extern SI_SEGMENT_VARIABLE(ReportDescriptor0[69], const uint8_t, SI_SEG_CODE);
+extern SI_SEGMENT_VARIABLE(ReportDescriptor0[34], const uint8_t, SI_SEG_CODE);
 
 extern SI_SEGMENT_VARIABLE(deviceDesc[], const USB_DeviceDescriptor_TypeDef, SI_SEG_CODE);
 extern SI_SEGMENT_VARIABLE(configDesc[], const uint8_t, SI_SEG_CODE);

@@ -1,7 +1,7 @@
 (export (version D)
   (design
     (source C:/Users/Conor/Desktop/u2f-zero/hardware/u2f-zero.sch)
-    (date "1/23/2016 3:46:20 PM")
+    (date "1/23/2016 4:50:02 PM")
     (tool "Eeschema 4.0.1-stable")
     (sheet (number 1) (name /) (tstamps /)
       (title_block
@@ -198,16 +198,16 @@
       (pins
         (pin (num 1) (name p) (type input)))))
   (libraries
+    (library (logical u2f-zero-rescue)
+      (uri C:\Users\Conor\Desktop\u2f-zero\hardware\u2f-zero-rescue.lib))
+    (library (logical device)
+      (uri "C:\\Program Files\\KiCad\\share\\kicad\\library\\device.lib"))
     (library (logical siliconlabs)
       (uri C:\Users\Conor\Desktop\u2f-zero\hardware\library\siliconlabs.lib))
     (library (logical discrete)
       (uri C:\Users\Conor\Desktop\u2f-zero\hardware\library\discrete.lib))
     (library (logical debug)
-      (uri C:\Users\Conor\Desktop\u2f-zero\hardware\library\debug.lib))
-    (library (logical u2f-zero-rescue)
-      (uri C:\Users\Conor\Desktop\u2f-zero\hardware\u2f-zero-rescue.lib))
-    (library (logical device)
-      (uri "C:\\Program Files\\KiCad\\share\\kicad\\library\\device.lib")))
+      (uri C:\Users\Conor\Desktop\u2f-zero\hardware\library\debug.lib)))
   (nets
     (net (code 1) (name /+5V)
       (node (ref R1) (pin 1))

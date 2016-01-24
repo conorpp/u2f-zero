@@ -1,0 +1,31 @@
+EESchema-LIBRARY Version 2.3
+#encoding utf-8
+#
+# debug-header
+#
+DEF debug-header DBG 0 40 Y Y 1 F N
+F0 "DBG" -350 -250 60 H V C CNN
+F1 "debug-header" 450 -250 60 H V C CNN
+F2 "" 0 0 60 H V C CNN
+F3 "" 0 0 60 H V C CNN
+DRAW
+X C2D 1 -200 -150 200 D 50 50 1 1 I
+X C2CK 2 -100 -150 200 D 50 50 1 1 I
+X RX 3 0 -150 200 D 50 50 1 1 I
+X TX 4 100 -150 200 D 50 50 1 1 I
+ENDDRAW
+ENDDEF
+#
+# debug-pin
+#
+DEF ~debug-pin p 0 40 Y Y 1 F N
+F0 "p" -400 -250 60 H V C CNN
+F1 "debug-pin" 100 -250 60 H I C CNN
+F2 "" 0 0 60 H V C CNN
+F3 "" 0 0 60 H V C CNN
+DRAW
+X p 1 -200 -150 200 D 50 50 1 1 I
+ENDDRAW
+ENDDEF
+#
+#End Library

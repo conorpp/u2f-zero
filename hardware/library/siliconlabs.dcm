@@ -1,0 +1,8 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP EFM8UB1
+D USB 8 bit Microcontroller
+K USB
+$ENDCMP
+#
+#End Doc Library

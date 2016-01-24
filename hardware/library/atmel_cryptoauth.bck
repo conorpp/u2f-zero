@@ -1,0 +1,8 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP ATECC508A
+D ECDSA, ECDH, I2C, secure storage
+K EC, ECDSA, ECDH, secure
+$ENDCMP
+#
+#End Doc Library

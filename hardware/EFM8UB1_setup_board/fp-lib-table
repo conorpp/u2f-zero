@@ -1,0 +1,3 @@
+(fp_lib_table
+  (lib (name footprints)(type KiCad)(uri /home/wintermute/apps/u2f-zero/footprints.pretty)(options "")(descr ""))
+)

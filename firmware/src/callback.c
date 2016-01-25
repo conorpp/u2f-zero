@@ -20,23 +20,11 @@
 #include "bsp.h"
 #include "descriptors.h"
 
-//-----------------------------------------------------------------------------
-// Constants
-//-----------------------------------------------------------------------------
-#define HID_KEYBOARD_IFC                  0
-//-----------------------------------------------------------------------------
-// Variables
-//-----------------------------------------------------------------------------
-// uint8_t thebuf1[32];
-SI_SEGMENT_VARIABLE(thebuf1[64], uint8_t, SI_SEG_XDATA);
+#define HID_INTERFACE_INDEX 0
+extern SI_SEGMENT_VARIABLE(appdata, struct APP_DATA, SI_SEG_XDATA);
+
 uint8_t tmpBuffer;
-extern bool readpacket;
-//SI_SEGMENT_VARIABLE(thebuf1[32],
-//		uint8_t,
-//		SI_SEG_CODE);
-//-----------------------------------------------------------------------------
-// Functions
-//-----------------------------------------------------------------------------
+
 
 void USBD_EnterHandler(void) {
 
@@ -65,16 +53,10 @@ bool USBD_IsSelfPoweredCb(void) {
 }
 
 
-
-
 USB_Status_TypeDef USBD_SetupCmdCb(
 		SI_VARIABLE_SEGMENT_POINTER(setup, USB_Setup_TypeDef, MEM_MODEL_SEG)) {
+
 	USB_Status_TypeDef retVal = USB_STATUS_REQ_UNHANDLED;
-	int i;
-
-
-
-
 
 
 	if ((setup->bmRequestType.Type == USB_SETUP_TYPE_STANDARD)
@@ -114,7 +96,7 @@ USB_Status_TypeDef USBD_SetupCmdCb(
 	}
 	else if ((setup->bmRequestType.Type == USB_SETUP_TYPE_CLASS)
 	           && (setup->bmRequestType.Recipient == USB_SETUP_RECIPIENT_INTERFACE)
-	           && (setup->wIndex == HID_KEYBOARD_IFC))
+	           && (setup->wIndex == HID_INTERFACE_INDEX))
 	  {
 	    // Implement the necessary HID class specific commands.
 	    switch (setup->bRequest)
@@ -125,8 +107,6 @@ USB_Status_TypeDef USBD_SetupCmdCb(
 
 	      case USB_HID_GET_REPORT:
 	    	  printf("input report\r\n");
-	    	  if ( USBD_Read(EP1OUT, thebuf1, sizeof(thebuf1), true) != USB_STATUS_OK)
-	    		  printf("ERROR not ready\n");
 
 	        break;
 
@@ -168,12 +148,6 @@ USB_Status_TypeDef USBD_SetupCmdCb(
 	return retVal;
 }
 
-//SI_SEGMENT_VARIABLE(testtx[],
-//		uint8_t,
-//		SI_SEG_CODE) =
-// "\x00\xff\xff\xff\xff\x86\x00\x08\x08\x07\x06\x05\x04\x03\x02\x01\x00\x00\x00\x00\x00\x00\x00"
-//		"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
-//		"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
 
 uint16_t USBD_XferCompleteCb(uint8_t epAddr, USB_Status_TypeDef status,
 		uint16_t xferred, uint16_t remaining) {
@@ -187,14 +161,13 @@ uint16_t USBD_XferCompleteCb(uint8_t epAddr, USB_Status_TypeDef status,
 	{
 		printf("USBD_XferCompleteCb read 0x%x/0x%x \r\n", xferred, remaining);
 
-		for (i=0; i < sizeof(thebuf1); i++)
+		for (i=0; i < sizeof(appdata.hidmsgbuf); i++)
 		{
-			uint16_t l = (uint8_t)thebuf1[i];
+			uint16_t l = (uint8_t)appdata.hidmsgbuf[i];
 			printf("%x",l);
-
 		}
 		printf("\n");
-		readpacket = 1;
+		appdata.EP1_state = EP_FREE;
 
 	}
 	return 0;

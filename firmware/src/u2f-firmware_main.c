@@ -1,49 +1,3 @@
-//-----------------------------------------------------------------------------
-// main.c
-//-----------------------------------------------------------------------------
-// Copyright 2014 Silicon Laboratories, Inc.
-// http://developer.silabs.com/legal/version/v11/Silicon_Labs_Software_License_Agreement.txt
-//
-// Program Description:
-//
-// This program enumerates as a USB keyboard. Each time a button is pressed
-// a character is sent to the host. A series of presses will spell out
-// "HID Keyboard ". The status of the Caps Lock and Num Lock on the host will
-// be indicated by the color of the LED.
-//
-// Resources:
-// SYSCLK - 48 MHz HFOSC1 / 1
-// USB0   - Full speed
-// P0.2 - push button
-// P0.3 - push button
-// P2.3 - Display enable
-//
-//-----------------------------------------------------------------------------
-// How To Test: EFM8UB1 STK
-//-----------------------------------------------------------------------------
-// 1) Place the switch in "AEM" mode.
-// 2) Connect the EFM8UB1 STK board to a PC using a mini USB cable.
-// 3) Compile and download code to the EFM8UB1 STK board.
-//    In Simplicity Studio IDE, select Run -> Debug from the menu bar,
-//    click the Debug button in the quick menu, or press F11.
-// 4) Run the code.
-//    In Simplicity Studio IDE, select Run -> Resume from the menu bar,
-//    click the Resume button in the quick menu, or press F8.
-// 5) The HID keyboard demo should start.
-// 6) Connect a micro USB cable from the PC to the STK.
-// 7) The device should enumerate on the PC as a HID keyboard.
-// 8) Press either push-button (PB0 or PB1) to send one character in the
-//    string "HID Keyboard ".
-// 9) Pressing Caps Lock or Num Lock on the host keyboard will change the color
-//    of the LED.
-//
-// Target:         EFM8UB1
-// Tool chain:     Generic
-//
-// Release 0.1 (JM)
-//    - Initial Revision
-//    - 26 JAN 2015
-//
 #include <SI_EFM8UB1_Register_Enums.h>
 #include <stdio.h>
 
@@ -59,46 +13,74 @@ bool keyPushed = 0;          // Current pushbutton status.
 
 bool readpacket = 1;
 
-extern SI_SEGMENT_VARIABLE(thebuf1[64], uint8_t, SI_SEG_XDATA);
+SI_SEGMENT_VARIABLE(appdata, struct APP_DATA, SI_SEG_XDATA);
 
-void Delay(int16_t ms) {
-	int16_t x;
-	int16_t y;
-	for (y = 0; y < ms; y++) {
-		for (x = 0; x < 1000; x) {
-			x++;
-		}
+static void init(struct APP_DATA* ap)
+{
+	memset(ap,0, sizeof(struct APP_DATA));
+	ap->EP1_state = EP_FREE;
+}
+
+void write_s_tx(char* d)
+{
+	uint16_t i;
+	while(*d)
+	{
+		// UART0 output queue
+		SBUF0 = *d++;
+		// 115200 baud , byte time ~ 7*10^-5 s * (48 MHz) ~ 3333 cycles
+		for (i=0; i<200; i++);
 	}
 }
-SI_SEGMENT_VARIABLE(mybuf[64],
-		uint8_t,
-		SI_SEG_CODE);
+
+void listen_for_pkt(struct APP_DATA* ap)
+{
+	if (USBD_Read(EP1OUT, ap->hidmsgbuf, sizeof(ap->hidmsgbuf), true) == USB_STATUS_OK)
+	{
+		ap->EP1_state = EP_BUSY;
+	}
+}
+
+
 int16_t main(void) {
-	int i = 0;
+
+	uint16_t i = 0;
+	uint16_t last_ms = get_ms();
+	uint16_t ms_since;
+
+	init(&appdata);
 
 	enter_DefaultMode_from_RESET();
 
-	SCON0_TI = 1;                       // This STDIO library requires TI to
-										// be set for prints to occur
+	// STDIO library requires TI to print
+	SCON0_TI = 1;
+
+	// Enable interrupts
 	IE_EA = 1;
 
-	printf("welcome \r\n");
+	printf("Welcome\n");
 
 	while (1) {
-		++i;
+		ms_since = get_ms() - last_ms;
 
-		printf("%d\r\n", i);
-		Delay(1000);
-
-		if (readpacket)
+		if (ms_since > 499)
 		{
-			USBD_Read(EP1OUT, thebuf1, sizeof(thebuf1), true);
-			readpacket = 0;
+			printf("%d\r\n", ++i);
+			last_ms = get_ms();
+		}
+
+
+		if ( USBD_GetUsbState() == USBD_STATE_CONFIGURED)
+		{
+			if (!USBD_EpIsBusy(EP1OUT))
+			{
+				listen_for_pkt(&appdata);
+				write_s_tx("read added\n");
+			}
+
 		}
 
 	}
 }
 
-SI_INTERRUPT(PMATCH_IrqHandler, PMATCH_IRQn) {
-	keyPushed = 1;
-}
+

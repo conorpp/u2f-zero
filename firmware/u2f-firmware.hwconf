@@ -64,16 +64,12 @@
     <property object="USBLIB_0" propertyId="interfaces.interface0.hidreporttemplate" value="Keyboard"/>
     <property object="USBLIB_0" propertyId="interfaces.interface0.interfaceclass" value="HID (Human Interface Device)"/>
     <property object="USBLIB_0" propertyId="interfaces.interface0.interfacestring" value="HID Keyboard"/>
-    <property object="USBLIB_0" propertyId="library.callbackfunctions.handlercallback" value="Enabled"/>
     <property object="USBLIB_0" propertyId="library.callbackfunctions.resetcallback" value="Enabled"/>
     <property object="USBLIB_0" propertyId="library.callbackfunctions.selfpoweredcallback" value="Enabled"/>
     <property object="USBLIB_0" propertyId="library.callbackfunctions.setupcommandcallback" value="Enabled"/>
-    <property object="USBLIB_0" propertyId="library.callbackfunctions.startofframecallback" value="Enabled"/>
     <property object="USBLIB_0" propertyId="library.callbackfunctions.statechangecallback" value="Enabled"/>
     <property object="USBLIB_0" propertyId="library.libraryconfiguration.clockrecovery" value="Enabled"/>
-    <property object="USBLIB_0" propertyId="library.powersavingmode.enteronsuspend" value="Enabled"/>
-    <property object="USBLIB_0" propertyId="library.powersavingmode.enteronvbusoff" value="Enabled"/>
-    <property object="USBLIB_0" propertyId="library.powersavingmode.powersavemode" value="( USB_PWRSAVE_MODE_ONSUSPEND \&#xA;                                               | USB_PWRSAVE_MODE_ONVBUSOFF )"/>
+    <property object="USBLIB_0" propertyId="library.powersavingmode.powersavemode" value="( USB_PWRSAVE_MODE_OFF )"/>
     <property object="VREG_0" propertyId="ABPeripheral.included" value="true"/>
     <property object="VREG_0" propertyId="vreg.5vto33vldoregulatorldo1.regulatorbias" value="Disabled (Lowest power consumption)"/>
     <property object="WDT_0" propertyId="ABPeripheral.included" value="true"/>

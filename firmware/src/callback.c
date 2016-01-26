@@ -17,6 +17,7 @@
 #include <efm8_usb.h>
 #include <stdio.h>
 #include "idle.h"
+#include "app.h"
 #include "bsp.h"
 #include "descriptors.h"
 
@@ -26,29 +27,18 @@ extern SI_SEGMENT_VARIABLE(appdata, struct APP_DATA, SI_SEG_XDATA);
 uint8_t tmpBuffer;
 
 
-void USBD_EnterHandler(void) {
-
-}
-
-void USBD_ExitHandler(void) {
-
-}
-
 void USBD_ResetCb(void) {
-	printf("USBD_ResetCb\r\n");
+	print_u2f("USBD_ResetCb\r\n");
 }
 
-void USBD_SofCb(uint16_t sofNr) {
-
-}
 
 void USBD_DeviceStateChangeCb(USBD_State_TypeDef oldState,
 		USBD_State_TypeDef newState) {
-	printf("USBD_DeviceStateChangeCb\r\n");
+	print_u2f("USBD_DeviceStateChangeCb\r\n");
 }
 
 bool USBD_IsSelfPoweredCb(void) {
-	printf("USBD_IsSelfPoweredCb\r\n");
+	print_u2f("USBD_IsSelfPoweredCb\r\n");
 	return false;
 }
 
@@ -102,11 +92,11 @@ USB_Status_TypeDef USBD_SetupCmdCb(
 	    switch (setup->bRequest)
 	    {
 	      case USB_HID_SET_REPORT:
-	    	  printf("output report\r\n");
+	    	  print_u2f("output report\r\n");
 	        break;
 
 	      case USB_HID_GET_REPORT:
-	    	  printf("input report\r\n");
+	    	  print_u2f("input report\r\n");
 
 	        break;
 
@@ -115,11 +105,11 @@ USB_Status_TypeDef USBD_SetupCmdCb(
 	            && (setup->wLength == 0)
 	            && (setup->bmRequestType.Direction != USB_SETUP_DIR_IN))
 	        {
-	        	printf("set idle\r\n");
+	        	print_u2f("set idle\r\n");
 	          idleTimerSet(setup->wValue >> 8);
 	          retVal = USB_STATUS_OK;
 	        }
-	        else printf("unhandled USB_HID_SET_IDLE\r\n");
+	        else print_u2f("unhandled USB_HID_SET_IDLE\r\n");
 	        break;
 
 	      case USB_HID_GET_IDLE:
@@ -127,22 +117,21 @@ USB_Status_TypeDef USBD_SetupCmdCb(
 	            && (setup->wLength == 1)
 	            && (setup->bmRequestType.Direction == USB_SETUP_DIR_IN))
 	        {
-	        	printf("get idle\r\n");
+	        	print_u2f("get idle\r\n");
 	          tmpBuffer = idleGetRate();
 	          USBD_Write(EP0, &tmpBuffer, 1, false);
 	          retVal = USB_STATUS_OK;
 	        }
-	        else printf("unhandled USB_HID_GET_IDLE\r\n");
+	        else print_u2f("unhandled USB_HID_GET_IDLE\r\n");
 	        break;
 	      default:
-	    	  printf("unhandled setup->bRequest\r\n");
+	    	  print_u2f("unhandled setup->bRequest\r\n");
 	    }
 	  }
 	  else
 	  {
 		  if (setup->bmRequestType.Recipient == USB_SETUP_RECIPIENT_ENDPOINT)
 			  printf("endpoint called!\n");
-		  // printf("NOT HANDLED\r\n");
 	  }
 
 	return retVal;
@@ -154,9 +143,6 @@ uint16_t USBD_XferCompleteCb(uint8_t epAddr, USB_Status_TypeDef status,
 
 	int i = 0;
 
-
-
-
 	if (epAddr == EP1OUT)
 	{
 		printf("USBD_XferCompleteCb read 0x%x/0x%x \r\n", xferred, remaining);
@@ -167,7 +153,6 @@ uint16_t USBD_XferCompleteCb(uint8_t epAddr, USB_Status_TypeDef status,
 			printf("%x",l);
 		}
 		printf("\n");
-		appdata.EP1_state = EP_FREE;
 
 	}
 	return 0;

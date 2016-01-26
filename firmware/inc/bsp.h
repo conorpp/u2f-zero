@@ -11,36 +11,27 @@
 #include <SI_EFM8UB1_Register_Enums.h>
 #include <efm8_usb.h>
 
-typedef enum
-{
-	EP_BUSY = 0,
-	EP_FREE,
-}
-ENDPOINT_STATE;
-
-
-struct APP_DATA
-{
-	ENDPOINT_STATE EP1_state;
-	uint8_t hidmsgbuf[64];
-
-	// ms
-	uint16_t usb_read_timeout;
-};
-
-
-SI_SBIT(LED_R, SFR_P0, 6);
-SI_SBIT(LED_G, SFR_P0, 5);
-SI_SBIT(LED_B, SFR_P0, 4);
-
-void Delay(int16_t ms);
-
 extern uint16_t _MS_;
+extern SI_SEGMENT_VARIABLE(myUsbDevice, USBD_Device_TypeDef, MEM_MODEL_SEG);
 
 #define get_ms() _MS_
 
-extern SI_SEGMENT_VARIABLE(myUsbDevice, USBD_Device_TypeDef, MEM_MODEL_SEG);
-
 #define GetEp(epAddr)  (&myUsbDevice.ep0 + epAddr)
+
+#define _EFMSDK16
+#ifdef _EFMSDK16
+SI_SBIT(LED_R, SFR_P1, 6);
+SI_SBIT(LED_B, SFR_P1, 5);
+SI_SBIT(LED_G, SFR_P1, 4);
+#endif
+
+void print_u2f(const char* fmt, ...);
+
+
+void Delay(int16_t ms);
+
+void write_s_tx(char* d);
+
+
 
 #endif /* BSP_H_ */

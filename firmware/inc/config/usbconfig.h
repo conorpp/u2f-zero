@@ -89,11 +89,11 @@
 // Enable or disable callback functions
 // -----------------------------------------------------------------------------
 // $[Callback Functions]
-#define SLAB_USB_HANDLER_CB                    1
+#define SLAB_USB_HANDLER_CB                    0
 #define SLAB_USB_IS_SELF_POWERED_CB            1
 #define SLAB_USB_RESET_CB                      1
 #define SLAB_USB_SETUP_CMD_CB                  1
-#define SLAB_USB_SOF_CB                        1
+#define SLAB_USB_SOF_CB                        0
 #define SLAB_USB_STATE_CHANGE_CB               1
 // [Callback Functions]$
 
@@ -130,8 +130,7 @@
 // 
 // -----------------------------------------------------------------------------
 // $[Power Save Mode]
-#define SLAB_USB_PWRSAVE_MODE                  ( USB_PWRSAVE_MODE_ONSUSPEND \
-                                               | USB_PWRSAVE_MODE_ONVBUSOFF )
+#define SLAB_USB_PWRSAVE_MODE                  ( USB_PWRSAVE_MODE_OFF )
 // [Power Save Mode]$
 
 // -----------------------------------------------------------------------------

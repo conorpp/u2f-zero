@@ -3,10 +3,12 @@
 
 #include "efm8_usb.h"
 #include "usb_0.h"
+#include "InitDevice.h"
 #include "descriptors.h"
 #include "idle.h"
 #include "bsp.h"
-#include "InitDevice.h"
+#include "app.h"
+
 
 uint8_t keySeqNo = 0;        // Current position in report table.
 bool keyPushed = 0;          // Current pushbutton status.
@@ -18,27 +20,15 @@ SI_SEGMENT_VARIABLE(appdata, struct APP_DATA, SI_SEG_XDATA);
 static void init(struct APP_DATA* ap)
 {
 	memset(ap,0, sizeof(struct APP_DATA));
-	ap->EP1_state = EP_FREE;
+
+	debug_fifo_init();
 }
 
-void write_s_tx(char* d)
-{
-	uint16_t i;
-	while(*d)
-	{
-		// UART0 output queue
-		SBUF0 = *d++;
-		// 115200 baud , byte time ~ 7*10^-5 s * (48 MHz) ~ 3333 cycles
-		for (i=0; i<200; i++);
-	}
-}
+
 
 void listen_for_pkt(struct APP_DATA* ap)
 {
-	if (USBD_Read(EP1OUT, ap->hidmsgbuf, sizeof(ap->hidmsgbuf), true) == USB_STATUS_OK)
-	{
-		ap->EP1_state = EP_BUSY;
-	}
+	USBD_Read(EP1OUT, ap->hidmsgbuf, sizeof(ap->hidmsgbuf), true);
 }
 
 
@@ -47,6 +37,7 @@ int16_t main(void) {
 	uint16_t i = 0;
 	uint16_t last_ms = get_ms();
 	uint16_t ms_since;
+	struct debug_msg dbg;
 
 	init(&appdata);
 
@@ -58,15 +49,16 @@ int16_t main(void) {
 	// Enable interrupts
 	IE_EA = 1;
 
-	printf("Welcome\n");
+	printf("Welcome\r\n");
 
 	while (1) {
 		ms_since = get_ms() - last_ms;
 
 		if (ms_since > 499)
 		{
-			printf("%d\r\n", ++i);
+			printf("%u ms\r\n", get_ms());
 			last_ms = get_ms();
+			LED_G = !LED_G;
 		}
 
 
@@ -75,9 +67,16 @@ int16_t main(void) {
 			if (!USBD_EpIsBusy(EP1OUT))
 			{
 				listen_for_pkt(&appdata);
-				write_s_tx("read added\n");
+				printf("read added\r\n");
 			}
 
+		}
+
+		while(debug_fifo_get(&dbg)==0)
+		{
+			va_start(dbg.arglist,dbg.fmt);
+			vprintf(dbg.fmt,dbg.arglist);
+			va_end(dbg.arglist);
 		}
 
 	}

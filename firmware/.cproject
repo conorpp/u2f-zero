@@ -44,6 +44,7 @@
 									<listOptionValue builtIn="false" value="&quot;${StudioSdkPath}/Lib/efm8_usb/inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${StudioSdkPath}/Device/EFM8UB1/peripheral_driver/inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${StudioSdkPath}/Lib/efm8_assert&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/tinyprintf&quot;"/>
 								</option>
 								<inputType id="com.silabs.ide.si8051.keil.compiler.inputType.2130506914" superClass="com.silabs.ide.si8051.keil.compiler.inputType"/>
 							</tool>
@@ -102,7 +103,8 @@
 						<toolChain id="com.silabs.ide.si8051.keil.toolchain.exe.default.1411268136" name="Keil 8051" superClass="com.silabs.ide.si8051.keil.toolchain.exe.default">
 							<option id="com.silabs.ide.si8051.keil.toolchain.category.general.debug.2136365445" name="Generate debug information" superClass="com.silabs.ide.si8051.keil.toolchain.category.general.debug"/>
 							<option id="com.silabs.ide.si8051.keil.toolchain.category.general.extended_linker.1343861604" name="Use Extended Linker (LX51) instead of BL51" superClass="com.silabs.ide.si8051.keil.toolchain.category.general.extended_linker" value="true" valueType="boolean"/>
-							<option id="com.silabs.ide.si8051.keil.toolchain.category.general.extended_assembler.1572057241" name="Use Extended Assembler (AX51) instead of A51" superClass="com.silabs.ide.si8051.keil.toolchain.category.general.extended_assembler" value="true" valueType="boolean"/>
+							<option id="com.silabs.ide.si8051.keil.toolchain.category.general.extended_assembler.1572057241" name="Use Extended Assembler (AX51) instead of A51" superClass="com.silabs.ide.si8051.keil.toolchain.category.general.extended_assembler" value="false" valueType="boolean"/>
+							<option id="com.silabs.ide.si8051.keil.toolchain.category.general.memory_model.250818744" name="Memory model" superClass="com.silabs.ide.si8051.keil.toolchain.category.general.memory_model" value="com.silabs.ide.si8051.keil.toolchain.category.general.memory_model.large" valueType="enumerated"/>
 							<targetPlatform binaryParser="com.silabs.ide.si8051.debug.omf.OMF;com.silabs.ide.si8051.debug.omf.OMF2;com.silabs.ide.debug.core.BIN;com.silabs.ide.debug.core.HEX;com.silabs.ide.debug.core.S37" id="com.silabs.ide.si8051.keil.targetplatform.406719948" isAbstract="false" superClass="com.silabs.ide.si8051.keil.targetplatform"/>
 							<builder buildPath="${workspace_loc:/u2f-firmware}/Keil 8051 v9.53 - Release" id="com.silabs.ide.si8051.keil.builder.1235887623" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Keil Builder" parallelBuildOn="false" superClass="com.silabs.ide.si8051.keil.builder"/>
 							<tool id="com.silabs.ide.si8051.keil.toolchain.compiler.1998078110" name="Keil 8051 Compiler" superClass="com.silabs.ide.si8051.keil.toolchain.compiler">
@@ -119,10 +121,12 @@
 									<listOptionValue builtIn="false" value="&quot;${StudioSdkPath}/Lib/efm8_usb/inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${StudioSdkPath}/Device/EFM8UB1/peripheral_driver/inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${StudioSdkPath}/Lib/efm8_assert&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/tinyprintf&quot;"/>
 								</option>
+								<option id="com.silabs.ide.si8051.keil.compiler.category.general.code.389376290" name="Code size" superClass="com.silabs.ide.si8051.keil.compiler.category.general.code" value="com.silabs.ide.si8051.keil.compiler.category.general.code.large" valueType="enumerated"/>
 								<inputType id="com.silabs.ide.si8051.keil.compiler.inputType.261436307" superClass="com.silabs.ide.si8051.keil.compiler.inputType"/>
 							</tool>
-							<tool command="AX51" id="com.silabs.ide.si8051.keil.toolchain.assembler.1919193369" name="Keil 8051 Assembler" superClass="com.silabs.ide.si8051.keil.toolchain.assembler">
+							<tool command="A51" id="com.silabs.ide.si8051.keil.toolchain.assembler.1919193369" name="Keil 8051 Assembler" superClass="com.silabs.ide.si8051.keil.toolchain.assembler">
 								<option id="com.silabs.ide.si8051.keil.assembler.category.symbols.def.554743847" name="Defined symbols (SET(...))" superClass="com.silabs.ide.si8051.keil.assembler.category.symbols.def" valueType="stringList">
 									<listOptionValue builtIn="false" value=""/>
 								</option>
@@ -135,6 +139,7 @@
 									<listOptionValue builtIn="false" value="&quot;${StudioSdkPath}/Lib/efm8_usb/inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${StudioSdkPath}/Device/EFM8UB1/peripheral_driver/inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${StudioSdkPath}/Lib/efm8_assert&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/tinyprintf&quot;"/>
 								</option>
 								<inputType id="com.silabs.ide.si8051.keil.assembler.inputType.1636083418" superClass="com.silabs.ide.si8051.keil.assembler.inputType"/>
 							</tool>
@@ -167,5 +172,12 @@
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.silabs.ide.si8051.keil.KeilScannerInfoCollector"/>
 		</scannerConfigBuildInfo>
 	</storageModule>
-	<storageModule moduleId="refreshScope"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Keil 8051 v9.53 - Release">
+			<resource resourceType="PROJECT" workspacePath="/u2f-firmware"/>
+		</configuration>
+		<configuration configurationName="Keil 8051 v9.53 - Debug">
+			<resource resourceType="PROJECT" workspacePath="/u2f-firmware"/>
+		</configuration>
+	</storageModule>
 </cproject>

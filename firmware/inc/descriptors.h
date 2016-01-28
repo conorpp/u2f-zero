@@ -25,24 +25,15 @@
 extern "C" {
 #endif
 
-// -------------------- USB Identification ------------------------------------
-//
-// **********
-// NOTE: YOU MUST PROVIDE YOUR OWN USB VID/PID (below)
-// **********
-//
-// Following are the definition of the USB VID and PID.  These are, by default,
-// values that are assigned to Silicon Labs. These values are provided merely
-// as an example. You may not use the Silicon Labs VID/PID values in your 
-// product.  You must provide your own assigned VID and PID values.
-//-----------------------------------------------------------------------------
-// $[Vendor ID]
+
 #define USB_VENDOR_ID                      htole16(0x10c4)
 // [Vendor ID]$
 
 // $[Product ID]
 #define USB_PRODUCT_ID                     htole16(0xfe01)
 // [Product ID]$
+
+#define HID_PACKET_SIZE 64
 
 extern SI_SEGMENT_VARIABLE(ReportDescriptor0[34], const uint8_t, SI_SEG_CODE);
 

@@ -1,5 +1,5 @@
 #include <SI_EFM8UB1_Register_Enums.h>
-#include <stdio.h>
+#include <stdarg.h>
 
 #include "efm8_usb.h"
 #include "usb_0.h"
@@ -8,6 +8,7 @@
 #include "idle.h"
 #include "bsp.h"
 #include "app.h"
+#include "u2f_hid.h"
 
 
 uint8_t keySeqNo = 0;        // Current position in report table.
@@ -15,16 +16,17 @@ bool keyPushed = 0;          // Current pushbutton status.
 
 bool readpacket = 1;
 
-SI_SEGMENT_VARIABLE(appdata, struct APP_DATA, SI_SEG_XDATA);
+data struct APP_DATA appdata;
+
+
 
 static void init(struct APP_DATA* ap)
 {
 	memset(ap,0, sizeof(struct APP_DATA));
 
 	debug_fifo_init();
+	u2f_hid_init();
 }
-
-
 
 void listen_for_pkt(struct APP_DATA* ap)
 {
@@ -34,10 +36,13 @@ void listen_for_pkt(struct APP_DATA* ap)
 
 int16_t main(void) {
 
-	uint16_t i = 0;
-	uint16_t last_ms = get_ms();
-	uint16_t ms_since;
-	struct debug_msg dbg;
+	data uint8_t i = 0;
+	data uint16_t last_ms = get_ms();
+	data uint16_t ms_since;
+
+#ifdef U2F_PRINT
+	xdata struct debug_msg dbg;
+#endif
 
 	init(&appdata);
 
@@ -49,14 +54,14 @@ int16_t main(void) {
 	// Enable interrupts
 	IE_EA = 1;
 
-	printf("Welcome\r\n");
+	u2f_print("U2F ZERO\r\n");
 
 	while (1) {
 		ms_since = get_ms() - last_ms;
 
 		if (ms_since > 499)
 		{
-			printf("%u ms\r\n", get_ms());
+			u2f_print("ms %u\r\n", get_ms());
 			last_ms = get_ms();
 			LED_G = !LED_G;
 		}
@@ -67,17 +72,17 @@ int16_t main(void) {
 			if (!USBD_EpIsBusy(EP1OUT))
 			{
 				listen_for_pkt(&appdata);
-				printf("read added\r\n");
+				u2f_write_s("read added\r\n");
 			}
 
 		}
 
-		while(debug_fifo_get(&dbg)==0)
+#ifdef U2F_PRINT
+		while(debug_fifo_get(&dbg) == 0)
 		{
-			va_start(dbg.arglist,dbg.fmt);
-			vprintf(dbg.fmt,dbg.arglist);
-			va_end(dbg.arglist);
+			u2f_write_s(dbg.buf);
 		}
+#endif
 
 	}
 }

@@ -1,7 +1,81 @@
-#ifndef _U2F_HID_H_
-#define _U2F_HID_H_
+/*
+ * u2f_hid.h
+ *
+ *  Created on: Jan 26, 2016
+ *      Author: pp
+ */
+
+#ifndef U2F_HID_H_
+#define U2F_HID_H_
+
+#include <stdint.h>
+#include "descriptors.h"
+
+#define TYPE_MASK               0x80	// Frame type mask
+#define TYPE_INIT               0x80	// Initial frame identifier
+#define TYPE_CONT               0x00	// Continuation frame identifier
+
+#define U2FHID_PING         (TYPE_INIT | 0x01)	// Echo data through local processor only
+#define U2FHID_MSG          (TYPE_INIT | 0x03)	// Send U2F message frame
+#define U2FHID_LOCK         (TYPE_INIT | 0x04)	// Send lock channel command
+#define U2FHID_INIT         (TYPE_INIT | 0x06)	// Channel initialization
+#define U2FHID_WINK         (TYPE_INIT | 0x08)	// Send device identification wink
+#define U2FHID_ERROR        (TYPE_INIT | 0x3f)	// Error response
+
+#define U2FHID_VENDOR_FIRST (TYPE_INIT | 0x40)	// First vendor defined command
+#define U2FHID_VENDOR_LAST  (TYPE_INIT | 0x7f)	// Last vendor defined command
+
+#define ERR_NONE                0x00    // No error
+#define ERR_INVALID_CMD         0x01    // Invalid command
+#define ERR_INVALID_PAR         0x02    // Invalid parameter
+#define ERR_INVALID_LEN         0x03    // Invalid message length
+#define ERR_INVALID_SEQ         0x04    // Invalid message sequencing
+#define ERR_MSG_TIMEOUT         0x05    // Message has timed out
+#define ERR_CHANNEL_BUSY        0x06    // Channel busy
+#define ERR_LOCK_REQUIRED       0x0a    // Command requires channel lock
+#define ERR_SYNC_FAIL           0x0b    // SYNC command failed
+#define ERR_OTHER               0x7f    // Other unspecified error
+
+#define U2FHID_BROADCAST 0xffffffff
+
+struct u2f_hid_msg
+{
+	uint32_t cid;
+	union{
+		struct{
+			uint8_t cmd;
+			uint8_t bcnth;		// length high
+			uint8_t bcntl;		// length low
+			uint8_t payload[HID_PACKET_SIZE - 7];
+		} init;
+		struct{
+			uint8_t seq;
+			uint8_t d[HID_PACKET_SIZE - 5];
+		} cont;
+	} pkt;
+};
+
+struct u2f_hid_nonce
+{
+	uint8_t nonce[8];
+};
+
+struct u2f_hid_init_response
+{
+	struct u2f_hid_nonce nonce;
+	uint32_t cid;
+	uint8_t version_id;
+	uint8_t version_major;
+	uint8_t version_minor;
+	uint8_t version_build;
+	uint8_t cflags;
+};
+
+void u2f_hid_init();
+
+int hid_u2f_request(struct u2f_hid_msg* req, struct u2f_hid_msg* res);
+
+#define U2FHID_IS_INIT(cmd)			((cmd) & 0x80)
 
 
-
-
-#endif
+#endif /* U2F_HID_H_ */

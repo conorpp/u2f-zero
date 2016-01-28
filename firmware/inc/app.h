@@ -10,7 +10,10 @@
 #include <stdarg.h>
 
 #include "fifo.h"
-#include "bsp.h"
+
+// debug options
+#define U2F_PRINT
+
 
 typedef enum
 {
@@ -23,15 +26,11 @@ ENDPOINT_STATE;
 struct APP_DATA
 {
 	uint8_t hidmsgbuf[64];
-
-	// ms
-	uint16_t usb_read_timeout;
 };
 
 struct debug_msg
 {
-	const char* fmt;
-	va_list arglist;
+	char buf[40];
 };
 
 #endif /* APP_H_ */

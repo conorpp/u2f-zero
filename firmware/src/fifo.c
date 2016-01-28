@@ -6,6 +6,7 @@
  */
 #include <stdio.h>
 #include "fifo.h"
+#include "app.h"
 
 
 #define FIFO_CREATE(NAME, TYPE, SIZE) \
@@ -51,4 +52,8 @@ int NAME##_fifo_get(TYPE* _data)\
 	return 0;\
 }
 
-FIFO_CREATE(debug,struct debug_msg, 10)
+#ifdef U2F_PRINT
+FIFO_CREATE(debug,struct debug_msg, 3)
+#endif
+
+

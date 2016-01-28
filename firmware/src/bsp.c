@@ -7,11 +7,12 @@
 #include "app.h"
 #include "bsp.h"
 #include "fifo.h"
+#include "tinyprintf.h"
 
 
-void Delay(uint16_t ms) {
-	int16_t x;
-	int16_t y;
+void u2f_delay(uint16_t ms) {
+	volatile int16_t x;
+	volatile int16_t y;
 	for (y = 0; y < ms; y++) {
 		for (x = 0; x < 1000; x) {
 			x++;
@@ -19,29 +20,41 @@ void Delay(uint16_t ms) {
 	}
 }
 
-void write_s_tx(char* d)
+#ifdef U2F_PRINT
+void u2f_print(char* fmt, ...)
 {
-	uint16_t i;
+
+	struct debug_msg dbg;
+	va_list args;
+
+	va_start(args,fmt);
+	if(vsprintf(dbg.buf, fmt, args) > sizeof(struct debug_msg))
+	{
+		u2f_write_s("vsprintf stack corrupt!\r\n");
+	}
+	va_end(args);
+	debug_fifo_append(&dbg);
+}
+#endif
+
+
+void putf(void* _notused, char c)
+{
+	xdata int i;
+	SBUF0 = c;
+	for (i=0; i<400; i++);
+}
+
+void u2f_write_s(char* d)
+{
+	data uint16_t i;
 	while(*d)
 	{
 		// UART0 output queue
-		SBUF0 = *d++;
-		// 115200 baud , byte time ~ 7*10^-5 s * (48 MHz) ~ 3333 cycles
-		for (i=0; i<200; i++);
+		putf(NULL,*d++);
+
 	}
 }
 
 
 
-void print_u2f(const char* fmt, ...)
-{
-	va_list args;
-	struct debug_msg dbg;
-
-	va_start(args,fmt);
-	dbg.arglist = args;
-	dbg.fmt = fmt;
-	debug_fifo_append(&dbg);
-	va_end(argptr);
-	printf("u2f append\r\n");
-}

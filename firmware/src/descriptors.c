@@ -38,13 +38,13 @@ SI_SEGMENT_VARIABLE(ReportDescriptor0[34],
         0x15, 0x00,                   //   LOGICAL_MINIMUM (0)
         0x26, 0xff, 0x00,             //   LOGICAL_MAXIMUM (255)
         0x75, 0x08,                   //   REPORT_SIZE (8)
-        0x95, 0x40,                   //   REPORT_COUNT (64)
+        0x95, HID_PACKET_SIZE,                   //   REPORT_COUNT (64)
         0x81, 0x02,                   //   INPUT (Data,Var,Abs)
         0x09, 0x21,                   //   USAGE(Output Report Data)
         0x15, 0x00,                   //   LOGICAL_MINIMUM (0)
         0x26, 0xff, 0x00,             //   LOGICAL_MAXIMUM (255)
         0x75, 0x08,                   //   REPORT_SIZE (8)
-        0x95, 0x40,                   //   REPORT_COUNT (64)
+        0x95, HID_PACKET_SIZE,                   //   REPORT_COUNT (64)
         0x91, 0x02,                   //   OUTPUT (Data,Var,Abs)
 
 
@@ -114,7 +114,7 @@ SI_SEGMENT_VARIABLE(configDesc[],
 	USB_ENDPOINT_DESCRIPTOR,// bDescriptorType
 	0x81,// bEndpointAddress
 	USB_EPTYPE_INTR,// bAttrib
-	0x40,// wMaxPacketSize (LSB)
+	HID_PACKET_SIZE,// wMaxPacketSize (LSB)
 	0x00,// wMaxPacketSize (MSB)
 	5,// bInterval
 
@@ -123,7 +123,7 @@ SI_SEGMENT_VARIABLE(configDesc[],
 	USB_ENDPOINT_DESCRIPTOR,// bDescriptorType
 	0x01,// bEndpointAddress
 	USB_EPTYPE_INTR,// bAttrib
-	0x40,// wMaxPacketSize (LSB)
+	HID_PACKET_SIZE,// wMaxPacketSize (LSB)
 	0x00,// wMaxPacketSize (MSB)
 	5,// bInterval
 };

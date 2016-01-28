@@ -10,8 +10,12 @@
 
 #include <SI_EFM8UB1_Register_Enums.h>
 #include <efm8_usb.h>
+#include <stdint.h>
+#include "descriptors.h"
+#include "app.h"
 
-extern uint16_t _MS_;
+
+extern data uint16_t _MS_;
 extern SI_SEGMENT_VARIABLE(myUsbDevice, USBD_Device_TypeDef, MEM_MODEL_SEG);
 
 #define get_ms() _MS_
@@ -25,13 +29,24 @@ SI_SBIT(LED_B, SFR_P1, 5);
 SI_SBIT(LED_G, SFR_P1, 4);
 #endif
 
-void print_u2f(const char* fmt, ...);
 
+void u2f_delay(int16_t ms);
 
-void Delay(int16_t ms);
+void u2f_write_s(char* d);
+void u2f_write_n(char* buf, uint32_t val, int base);
 
-void write_s_tx(char* d);
+void qu2f_write_s(char* d);
+void qu2f_write_n(char* buf, uint32_t val, int base);
 
+extern SI_SEGMENT_VARIABLE(appdata, struct APP_DATA, SI_SEG_DATA);
+
+#ifdef U2F_PRINT
+void u2f_print(char* fmt, ...);
+#else
+#define u2f_print(x)
+#endif
+
+int hid_u2f_request(struct u2f_hid_msg* req, struct u2f_hid_msg* res);
 
 
 #endif /* BSP_H_ */

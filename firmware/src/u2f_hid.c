@@ -41,11 +41,6 @@ uint8_t buffer[BUFFER_SIZE];
 } hid_layer;
 
 
-
-
-static void hid_u2f_parse(struct u2f_hid_msg* req, struct u2f_hid_msg* res,
-		uint8_t cmd, uint8_t* payload);
-
 void u2f_hid_init()
 {
 	memset(CIDS, 0, sizeof(CIDS));
@@ -53,7 +48,8 @@ void u2f_hid_init()
 	CID_NUM = 0;
 }
 
-uint32_t get_new_cid()
+
+static uint32_t get_new_cid()
 {
 	static uint32_t base = 0xcafebabe;
 	int i;
@@ -75,13 +71,13 @@ uint32_t get_new_cid()
 	return CIDS[i];
 }
 
-//todo
-void remove_cid()
+//TODO
+static void remove_cid()
 {
 
 }
 
-int check_cid(uint32_t cid)
+static int check_cid(uint32_t cid)
 {
 	int i;
 	if (cid == U2FHID_BROADCAST)
@@ -148,6 +144,52 @@ static int buffer_request(struct hid_layer_param* hid, struct u2f_hid_msg* req)
 	u2f_print("buffer full\r\n");
 	return -1;
 }
+
+static void hid_u2f_parse(struct u2f_hid_msg* req, struct u2f_hid_msg* res,
+		uint8_t cmd, uint8_t* payload)
+{
+	struct u2f_hid_init_response* init_res =
+			(struct u2f_hid_init_response*) res->pkt.init.payload;
+
+	uint16_t len = 0;
+
+	switch(cmd)
+	{
+		case U2FHID_INIT:
+			u2f_print("got init packet %lx\r\n",req->cid);
+			memmove(init_res->nonce.nonce, payload, 8);
+			init_res->cid = get_new_cid();
+			if (init_res->cid == 0)
+			{
+				goto fail;
+			}
+			init_res->version_id = 1;
+			init_res->version_major = 1;
+			init_res->version_minor = 0;
+			init_res->version_build = 0;
+			init_res->cflags = 0;
+			len = 17;
+
+			break;
+		case U2FHID_MSG:
+
+			u2f_request((struct u2f_message*)payload,
+					(struct u2f_message*)res->pkt.init.payload);
+
+			break;
+		default:
+			u2f_print("invalid cmd: %bx\r\n", cmd);
+			break;
+	}
+
+	U2FHID_SET_LEN(res, len);
+	return;
+
+	fail:
+		u2f_print("U2F HID FAIL\r\n");
+	return;
+}
+
 
 int hid_u2f_request(struct u2f_hid_msg* req, struct u2f_hid_msg* res)
 {
@@ -223,49 +265,5 @@ int hid_u2f_request(struct u2f_hid_msg* req, struct u2f_hid_msg* res)
 
 
 	return U2FHID_REPLY;
-}
-static void hid_u2f_parse(struct u2f_hid_msg* req, struct u2f_hid_msg* res,
-		uint8_t cmd, uint8_t* payload)
-{
-	struct u2f_hid_init_response* init_res =
-			(struct u2f_hid_init_response*) res->pkt.init.payload;
-
-	uint16_t len = 0;
-
-	switch(cmd)
-	{
-		case U2FHID_INIT:
-			u2f_print("got init packet %lx\r\n",req->cid);
-			memmove(init_res->nonce.nonce, payload, 8);
-			init_res->cid = get_new_cid();
-			if (init_res->cid == 0)
-			{
-				goto fail;
-			}
-			init_res->version_id = 1;
-			init_res->version_major = 1;
-			init_res->version_minor = 0;
-			init_res->version_build = 0;
-			init_res->cflags = 0;
-			len = 17;
-
-			break;
-		case U2FHID_MSG:
-
-			u2f_request((struct u2f_message*)payload,
-					(struct u2f_message*)res->pkt.init.payload);
-
-			break;
-		default:
-			u2f_print("invalid cmd: %bx\r\n", cmd);
-			break;
-	}
-
-	U2FHID_SET_LEN(res, len);
-	return;
-
-	fail:
-		u2f_print("U2F HID FAIL\r\n");
-	return;
 }
 

@@ -86,6 +86,7 @@ typedef enum
 	U2FHID_FAIL,
 } U2FHID_STATUS;
 
+
 void u2f_hid_init();
 
 int hid_u2f_request(struct u2f_hid_msg* req, struct u2f_hid_msg* res);

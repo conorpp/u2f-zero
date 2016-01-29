@@ -53,7 +53,7 @@ int NAME##_fifo_get(TYPE* _data)\
 }
 
 #ifdef U2F_PRINT
-FIFO_CREATE(debug,struct debug_msg, 3)
+FIFO_CREATE(debug,struct debug_msg, 5)
 #endif
 
 

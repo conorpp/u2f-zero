@@ -8,7 +8,12 @@
 #ifndef _U2F_H_
 #define _U2F_H_
 
+struct u2f_message
+{
+	int wat;
+};
 
-int u2f_request(int request, int response);
+
+int u2f_request(struct u2f_message* req, struct u2f_message* res);
 
 #endif /* U2F_H_ */

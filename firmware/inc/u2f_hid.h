@@ -38,6 +38,14 @@
 
 #define U2FHID_BROADCAST 0xffffffff
 
+#define U2FHID_INIT_PAYLOAD_SIZE  (HID_PACKET_SIZE-7)
+#define U2FHID_CONT_PAYLOAD_SIZE  (HID_PACKET_SIZE-5)
+
+#define U2FHID_LEN(req) (*(uint16_t*)&req->pkt.init.bcnth)
+#define U2FHID_SET_LEN(req,len) (*(uint16_t*)&req->pkt.init.bcnth = (uint16_t)len)
+
+
+
 struct u2f_hid_msg
 {
 	uint32_t cid;
@@ -46,11 +54,11 @@ struct u2f_hid_msg
 			uint8_t cmd;
 			uint8_t bcnth;		// length high
 			uint8_t bcntl;		// length low
-			uint8_t payload[HID_PACKET_SIZE - 7];
+			uint8_t payload[U2FHID_INIT_PAYLOAD_SIZE];
 		} init;
 		struct{
 			uint8_t seq;
-			uint8_t d[HID_PACKET_SIZE - 5];
+			uint8_t payload[U2FHID_CONT_PAYLOAD_SIZE];
 		} cont;
 	} pkt;
 };
@@ -70,6 +78,13 @@ struct u2f_hid_init_response
 	uint8_t version_build;
 	uint8_t cflags;
 };
+
+typedef enum
+{
+	U2FHID_REPLY=0,
+	U2FHID_WAIT,
+	U2FHID_FAIL,
+} U2FHID_STATUS;
 
 void u2f_hid_init();
 

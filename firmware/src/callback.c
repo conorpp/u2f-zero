@@ -171,7 +171,7 @@ uint16_t USBD_XferCompleteCb(uint8_t epAddr, USB_Status_TypeDef status,
 		i = hid_u2f_request((struct u2f_hid_msg*)appdata.hidmsgbuf,
 						&res);
 
-		if (i == 0)
+		if (i == U2FHID_REPLY)
 		{
 			USBD_Write(EP1IN, resbuf, 64, false);
 		}

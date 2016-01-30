@@ -8,8 +8,11 @@
 #ifndef _U2F_H_
 #define _U2F_H_
 
+#include <stdint.h>
+
 struct u2f_message
 {
+	uint8_t hihuht[8];
 	int wat;
 };
 

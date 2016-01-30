@@ -149,7 +149,7 @@ uint16_t USBD_XferCompleteCb(uint8_t epAddr, USB_Status_TypeDef status,
 		uint16_t xferred, uint16_t remaining) {
 
 	int i = 0;
-	char buf[4];
+	char buf[6];
 	// struct u2f_hid_msg res;
 	SI_SEGMENT_VARIABLE(res, struct u2f_hid_msg, SI_SEG_XDATA);
 	uint8_t* resbuf = (uint8_t*)&res;
@@ -166,7 +166,7 @@ uint16_t USBD_XferCompleteCb(uint8_t epAddr, USB_Status_TypeDef status,
 			u2f_write_s(buf);
 			//u2f_print("%x",l);
 		}
-		u2f_write_s("\n");
+		u2f_write_s("\r\n");
 
 		i = hid_u2f_request((struct u2f_hid_msg*)appdata.hidmsgbuf,
 						&res);

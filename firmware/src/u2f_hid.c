@@ -157,6 +157,14 @@ static void hid_u2f_parse(struct u2f_hid_msg* req, struct u2f_hid_msg* res,
 	{
 		case U2FHID_INIT:
 			u2f_print("got init packet %lx\r\n",req->cid);
+			appdata.state = APP_WINK;
+			if (U2FHID_LEN(req) != 8)
+			{
+				stamp_error(res, ERR_INVALID_LEN);
+				u2f_print("invalid len init\r\n");
+				goto fail;
+			}
+
 			memmove(init_res->nonce.nonce, payload, 8);
 			init_res->cid = get_new_cid();
 			if (init_res->cid == 0)
@@ -173,13 +181,46 @@ static void hid_u2f_parse(struct u2f_hid_msg* req, struct u2f_hid_msg* res,
 			break;
 		case U2FHID_MSG:
 
+			if (U2FHID_LEN(req) < 4)
+			{
+				stamp_error(res, ERR_INVALID_LEN);
+				u2f_print("invalid len msg\r\n");
+				goto fail;
+			}
+
 			u2f_request((struct u2f_message*)payload,
 					(struct u2f_message*)res->pkt.init.payload);
 
 			break;
+		case U2FHID_PING:
+			u2f_print("U2F PING\r\n");
+			if (U2FHID_LEN(req) > U2FHID_INIT_PAYLOAD_SIZE)
+			{
+				stamp_error(res, ERR_INVALID_LEN);
+				u2f_print("invalid len ping\r\n");
+				goto fail;
+			}
+
+			len = U2FHID_LEN(req);
+			memmove(res->pkt.init.payload, req->pkt.init.payload, len);
+			break;
+
+		case U2FHID_WINK:
+			u2f_print("U2F WINK\r\n");
+			if (U2FHID_LEN(req) != 0)
+			{
+				stamp_error(res, ERR_INVALID_LEN);
+				u2f_print("invalid len wink but who cares\r\n");
+			}
+
+			appdata.state = APP_WINK;
+
+			break;
+
 		default:
 			u2f_print("invalid cmd: %bx\r\n", cmd);
-			break;
+			stamp_error(res, ERR_INVALID_CMD);
+			goto fail;
 	}
 
 	U2FHID_SET_LEN(res, len);

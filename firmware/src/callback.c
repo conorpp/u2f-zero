@@ -138,46 +138,36 @@ USB_Status_TypeDef USBD_SetupCmdCb(
 	return retVal;
 }
 
-/*
- *
-int8_t USBD_Write(uint8_t epAddr,
-                  uint8_t *dat,
-                  uint16_t byteCount,
-                  bool callback)
- * */
+
 uint16_t USBD_XferCompleteCb(uint8_t epAddr, USB_Status_TypeDef status,
 		uint16_t xferred, uint16_t remaining) {
 
 	int i = 0;
 	char buf[6];
-	// struct u2f_hid_msg res;
-	SI_SEGMENT_VARIABLE(res, struct u2f_hid_msg, SI_SEG_XDATA);
+	struct u2f_hid_msg res;
 	uint8_t* resbuf = (uint8_t*)&res;
 
 	if (epAddr == EP1OUT)
 	{
-		// u2f_print("USBD_XferCompleteCb read 0x%x/0x%x\r\n", xferred, remaining);
 
-
+#ifdef U2F_PRINT
 		for (i=0; i < sizeof(appdata.hidmsgbuf); i++)
 		{
 			uint16_t l = (uint8_t)appdata.hidmsgbuf[i];
 			sprintf(buf,"%x",l);
 			u2f_write_s(buf);
-			//u2f_print("%x",l);
 		}
 		u2f_write_s("\r\n");
+#endif
 
-		i = hid_u2f_request((struct u2f_hid_msg*)appdata.hidmsgbuf,
-						&res);
-
-		if (i == U2FHID_REPLY)
-		{
-			USBD_Write(EP1IN, resbuf, 64, false);
-		}
-
-		// memset(resbuf,0,64);
-
+		do {
+			i = hid_u2f_request((struct u2f_hid_msg*)appdata.hidmsgbuf,
+							&res);
+			if (i == U2FHID_REPLY || i == U2FHID_INCOMPLETE)
+			{
+				USBD_Write(EP1IN, resbuf, 64, false);
+			}
+		} while (i == U2FHID_INCOMPLETE);
 
 	}
 	return 0;

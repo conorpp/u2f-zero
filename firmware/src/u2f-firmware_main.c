@@ -37,7 +37,7 @@ void listen_for_pkt(struct APP_DATA* ap)
 	USBD_Read(EP1OUT, ap->hidmsgbuf, sizeof(ap->hidmsgbuf), true);
 }
 
-#define ms_since(ms,num) ((get_ms() - (ms)) >= num ? (1|(ms=get_ms())):0)
+#define ms_since(ms,num) (((uint16_t)get_ms() - (ms)) >= num ? (1|(ms=(uint16_t)get_ms())):0)
 
 int16_t main(void) {
 
@@ -67,7 +67,7 @@ int16_t main(void) {
 
 		if (ms_since(ms_heart,500))
 		{
-			u2f_print("ms %u\r\n", get_ms());
+			u2f_print("ms %lu\r\n", get_ms());
 			LED_G = !LED_G;
 		}
 
@@ -77,7 +77,7 @@ int16_t main(void) {
 			if (!USBD_EpIsBusy(EP1OUT))
 			{
 				listen_for_pkt(&appdata);
-				u2f_write_s("read added\r\n");
+				u2f_print("read added\r\n");
 			}
 
 		}

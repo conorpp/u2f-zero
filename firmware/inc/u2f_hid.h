@@ -44,7 +44,8 @@
 #define U2FHID_LEN(req) (*(uint16_t*)&req->pkt.init.bcnth)
 #define U2FHID_SET_LEN(req,len) (*(uint16_t*)&req->pkt.init.bcnth = (uint16_t)len)
 
-
+#define U2FHID_TIMEOUT_MS 1500
+#define U2FHID_TIMEOUT(hid) ((hid)->last_buffered > U2FHID_TIMEOUT_MS)
 
 struct u2f_hid_msg
 {
@@ -83,6 +84,7 @@ typedef enum
 {
 	U2FHID_REPLY=0,
 	U2FHID_WAIT,
+	U2FHID_INCOMPLETE,
 	U2FHID_FAIL,
 } U2FHID_STATUS;
 

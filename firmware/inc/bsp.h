@@ -15,7 +15,7 @@
 #include "app.h"
 
 
-extern data uint16_t _MS_;
+extern data uint32_t _MS_;
 extern SI_SEGMENT_VARIABLE(myUsbDevice, USBD_Device_TypeDef, MEM_MODEL_SEG);
 
 #define get_ms() _MS_

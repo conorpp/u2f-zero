@@ -25,8 +25,8 @@ Firmware generally works as follows:
 
 * Main loop adds a request for USB to read a 64 byte packet
 * `USBD_XferCompleteCb` gets called with packet when it comes
-* USB HID layer gets called
-* USB HID layer will call U2F layer when appropriate
+* U2F HID layer gets called
+* U2F HID layer will call U2F layer when appropriate
 
 [U2F HID layer spec](https://fidoalliance.org/specs/fido-u2f-v1.0-nfc-bt-amendment-20150514/fido-u2f-hid-protocol.html)
 

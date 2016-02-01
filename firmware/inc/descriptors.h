@@ -25,12 +25,12 @@
 extern "C" {
 #endif
 
-
 #define USB_VENDOR_ID                      htole16(0x10c4)
 // [Vendor ID]$
 
+#define USB_PRODUCT_ID                     htole16(0x8ACF)
 // $[Product ID]
-#define USB_PRODUCT_ID                     htole16(0xfe01)
+#define USB_PRODUCT_ID                     htole16(0x8acf)
 // [Product ID]$
 
 #define HID_PACKET_SIZE 64
@@ -46,3 +46,7 @@ extern SI_SEGMENT_VARIABLE(initstruct, const USBD_Init_TypeDef, SI_SEG_CODE);
 #endif
 
 #endif // __SILICON_LABS_DESCRIPTORS_H
+// $[Vendor ID]
+#define USB_VENDOR_ID                      htole16(0x10c4)
+// [Vendor ID]$
+

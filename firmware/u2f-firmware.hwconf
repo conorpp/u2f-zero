@@ -46,6 +46,7 @@
     <property object="USBLIB_0" propertyId="configuration.configurationparameters.configurationstring" value=""/>
     <property object="USBLIB_0" propertyId="configuration.configurationparameters.devicepower" value="Bus-Powered"/>
     <property object="USBLIB_0" propertyId="device.deviceproperties.bmaxpacketsize" value="64"/>
+    <property object="USBLIB_0" propertyId="device.deviceproperties.productidpid" value="35535"/>
     <property object="USBLIB_0" propertyId="device.deviceproperties.productstring" value="U2F Zero"/>
     <property object="USBLIB_0" propertyId="endpoints.endpoint1in.endpoint1in" value="Enabled"/>
     <property object="USBLIB_0" propertyId="endpoints.endpoint1in.maxpacketsizebytes" value="64"/>

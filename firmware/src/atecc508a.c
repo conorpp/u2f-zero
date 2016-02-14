@@ -18,7 +18,7 @@ void atecc_send(uint8_t cmd, uint8_t p1, uint16_t p2,
 {
 	static uint8_t params[6];
 	params[0] = 0x3;
-	params[1] = 7;
+	params[1] = 7+len;
 	params[2] = cmd;
 	params[3] = p1;
 	params[4] = ((uint8_t*)&p2)[1];

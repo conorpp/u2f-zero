@@ -40,7 +40,7 @@ static struct hid_layer_param
 	#define BUFFER_SIZE 600
 	uint8_t buffer[BUFFER_SIZE];
 #else
-	#define BUFFER_SIZE 64
+	#define BUFFER_SIZE 24
 	uint8_t buffer[BUFFER_SIZE];
 #endif
 

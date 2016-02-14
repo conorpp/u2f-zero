@@ -71,15 +71,43 @@ static void dump_hex(uint8_t* hex, uint8_t len)
 
 void test_ecc508a()
 {
-	uint8_t buf[10];
+	uint8_t buf[40];
 	uint8_t len;
-	do{
-		atecc_send(ATECC_CMD_COUNTER,
-				ATECC_COUNTER_READ,
-				ATECC_COUNTER1,NULL,0);
-	}while((len = atecc_recv(buf,10)) < 0);
+//	do{
+//		atecc_send(ATECC_CMD_COUNTER,
+//				ATECC_COUNTER_READ,
+//				ATECC_COUNTER1,NULL,0);
+//	}while((len = atecc_recv(buf,sizeof(buf))) < 0);
 
+//	do{
+//		atecc_send(ATECC_CMD_RNG,
+//				ATECC_RNG_P1,
+//				ATECC_RNG_P2,NULL,0);
+//	}while((len = atecc_recv(buf,sizeof(buf))) < 0);
+	char pw[] = "2pckJ4IkT3PwdGMwuCygPpxD6+lObNGORiLGPQxM4ef4YoNvx9/k0xskZl84rCd3TllCvitepe+B";
+	do{
+		atecc_send(ATECC_CMD_SHA,
+				ATECC_SHA_START,
+				0,NULL,0);
+	}while((len = atecc_recv(buf,sizeof(buf))) < 0);
 	dump_hex(buf,len);
+
+	do{
+		atecc_send(ATECC_CMD_SHA,
+				ATECC_SHA_UPDATE,
+				64,pw,64);
+	}while((len = atecc_recv(buf,sizeof(buf))) < 0);
+	dump_hex(buf,len);
+
+	do{
+		atecc_send(ATECC_CMD_SHA,
+				ATECC_SHA_END,
+				sizeof(pw)-65,pw+64,sizeof(pw)-65);
+	}while((len = atecc_recv(buf,sizeof(buf))) < 0);
+	dump_hex(buf,len);
+
+	// sha256 sum should be bcddd71b48f8a31d1374ad51c2e4138a871cb7f1eb3f2bdab49bc9bc60afc3a5
+
 }
 
 #define ms_since(ms,num) (((uint16_t)get_ms() - (ms)) >= num ? (1|(ms=(uint16_t)get_ms())):0)
@@ -111,6 +139,8 @@ int16_t main(void) {
 
 		if (!test)
 		{
+			test_ecc508a();
+			test_ecc508a();
 			test_ecc508a();
 			test = 1;
 		}

@@ -3,6 +3,7 @@
 
 #include "efm8_usb.h"
 #include "usb_0.h"
+#include "atecc508a.h"
 #include "InitDevice.h"
 #include "descriptors.h"
 #include "idle.h"
@@ -83,33 +84,19 @@ static void flush_messages()
 }
 
 
-
-void wakeup_i2c_slave()
-{
-	uint32_t i;
-	for (i=0; i<15000; i++)
-	{
-		SMB0DAT = 0;
-
-	}
-}
-
-
-
 static uint16_t crc16(uint8_t* buf, uint16_t len)
 {
-#define CRC16 0xa001
 	uint16_t crc = 0;
 	while (len--) {
 		crc ^= *buf++;
-		crc = crc & 1 ? (crc >> 1) ^ CRC16 : crc >> 1;
-		crc = crc & 1 ? (crc >> 1) ^ CRC16 : crc >> 1;
-		crc = crc & 1 ? (crc >> 1) ^ CRC16 : crc >> 1;
-		crc = crc & 1 ? (crc >> 1) ^ CRC16 : crc >> 1;
-		crc = crc & 1 ? (crc >> 1) ^ CRC16 : crc >> 1;
-		crc = crc & 1 ? (crc >> 1) ^ CRC16 : crc >> 1;
-		crc = crc & 1 ? (crc >> 1) ^ CRC16 : crc >> 1;
-		crc = crc & 1 ? (crc >> 1) ^ CRC16 : crc >> 1;
+		crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
+		crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
+		crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
+		crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
+		crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
+		crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
+		crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
+		crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
 	}
 
 	// efficient bit reversal
@@ -165,7 +152,7 @@ void SMB_Write (uint8_t addr, uint8_t* buf, uint8_t len)
 
 }
 
-void send_508_command(uint8_t cmd, uint8_t p1, uint16_t p2,
+void atecc_send(uint8_t cmd, uint8_t p1, uint16_t p2,
 					uint8_t * buf, uint8_t len)
 {
 	static uint8_t params[8];
@@ -180,107 +167,57 @@ void send_508_command(uint8_t cmd, uint8_t p1, uint16_t p2,
 	params[6] = ((uint8_t*)&crc)[1];
 	params[7] = ((uint8_t*)&crc)[0];
 
-	SMB_Write( 0xc0, params, sizeof(params) );
+	SMB_Write( ATECC508A_ADDR, params, sizeof(params) );
 }
 
-void test_i2c2()
+uint8_t atecc_recv(uint8_t * buf, uint8_t buflen)
+{
+	uint8_t pkt_len;
+	uint16_t crc_recv, crc_compute;
+	SMB_Read( 0xc0,buf,10);
+	pkt_len = buf[0];
+	if (pkt_len <= buflen && pkt_len >= 4)
+	{
+		crc_compute = crc16(buf,pkt_len-2);
+		crc_recv = htole16(*((uint16_t*)(buf+pkt_len-2)));
+		if (crc_recv != crc_compute)
+			goto fail;
+	}
+	else
+	{
+		goto fail;
+	}
+	return 0;
+	fail:
+		u2f_print("crc failed %x != %x\r\n",crc_compute,crc_recv );
+	return 1;
+}
+
+static void dump_hex(uint8_t* hex, uint8_t len)
 {
 	uint8_t i;
-	uint8_t buf[10];
-
 	flush_messages();
-
-	memset(buf,0,sizeof(buf));
-
-	send_508_command(0x24,0,1,NULL,0);
-	SMB_Read( 0xc0,buf,10);
-
-	flush_messages();
-	for (i=0 ; i < 10 ; i++)
+	for (i=0 ; i < len ; i++)
 	{
-		u2f_print(" %02bx",buf[i]);
+		u2f_print(" %02bx",hex[i]);
 		flush_messages();
 	}
 	u2f_print("\r\n");
 	flush_messages();
-
 }
 
-/*
-void test_i2c()
+void test_ecc508a()
 {
-	int i;
-	uint8_t rbuf[4];
-	uint8_t params[] = {5,0x30,0,0,0};
-	uint8_t numbytes = 4;
-	uint16_t crc;
-	// write
+	uint8_t buf[10];
+	do{
+		atecc_send(ATECC_CMD_COUNTER,
+				ATECC_COUNTER_READ,
+				ATECC_COUNTER1,NULL,0);
+	}while(atecc_recv(buf,10) != 0);
 
-	u2f_print("1 packet\r\n");
-	flush_messages();
-
-	SMB0CN0_STA = 1;
-	SMB0CN0_STA = 0;  // clear start
-	//while (!SMB0CN0_STA){}
-
-	u2f_print("2 packet\r\n");
-	flush_messages();
-
-	SMB0DAT = ECC508_ADDR | I2C_WRITE;
-
-	while(!SMB0CN0_ACK){}
-
-	u2f_print("3 packet\r\n");
-	flush_messages();
-
-	SMB0DAT = 0x3;
-	while(!SMB0CN0_ACK){}
-
-	u2f_print("wat packet\r\n");
-	flush_messages();
-	// repeat data/acks for each byte
-
-	for (i=0; i<sizeof(params); i++)
-	{
-		SMB0DAT = params[i];
-		while(!SMB0CN0_ACK){}
-	}
-
-	crc = crc16(params, 5);
-
-	SMB0DAT = (uint8_t)crc;
-	while(!SMB0CN0_ACK){}
-	SMB0DAT = crc >> 8;
-	while(!SMB0CN0_ACK){}
-
-
-	SMB0CN0_STO = 1;
-	while (!SMB0CN0_STO){}
-
-	u2f_print("wrote packet\r\n");
-	flush_messages();
-
-	// read
-	SMB0CN0_STA = 1;
-	while (!SMB0CN0_STA){}
-	SMB0DAT = ECC508_ADDR | I2C_READ;
-	while(!SMB0CN0_ACK){}
-	SMB0DAT = 0x3;
-	while(!SMB0CN0_ACK){}
-
-	for (i=0; i < numbytes + 2; i++)
-	{
-		while(RX_EMPTY){}
-		rbuf[i] = SMB0DAT;
-		SMB0CN0_ACK = 1;
-	}
-	while (!SMB0CN0_STO){}
-
-	 u2f_print("got packet\r\n");
-	 flush_messages();
-	 //u2f_print("");
+	dump_hex(buf,sizeof(buf));
 }
-*/
+
 
 int16_t main(void) {
 
@@ -307,14 +244,13 @@ int16_t main(void) {
 	   SMB0CN0_STA = 0;
 
 	u2f_print("U2F ZERO\r\n");
-	wakeup_i2c_slave();
 	NUM_ERRORS = 0;
 
 	while (1) {
 
 		if (!test)
 		{
-			test_i2c2();
+			test_ecc508a();
 			test = 1;
 		}
 

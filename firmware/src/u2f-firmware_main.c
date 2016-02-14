@@ -94,21 +94,30 @@ void wakeup_i2c_slave()
 	}
 }
 
+
+
 static uint16_t crc16(uint8_t* buf, uint16_t len)
 {
-
+#define CRC16 0xa001
 	uint16_t crc = 0;
 	while (len--) {
 		crc ^= *buf++;
-		crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
-		crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
-		crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
-		crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
-		crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
-		crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
-		crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
-		crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
+		crc = crc & 1 ? (crc >> 1) ^ CRC16 : crc >> 1;
+		crc = crc & 1 ? (crc >> 1) ^ CRC16 : crc >> 1;
+		crc = crc & 1 ? (crc >> 1) ^ CRC16 : crc >> 1;
+		crc = crc & 1 ? (crc >> 1) ^ CRC16 : crc >> 1;
+		crc = crc & 1 ? (crc >> 1) ^ CRC16 : crc >> 1;
+		crc = crc & 1 ? (crc >> 1) ^ CRC16 : crc >> 1;
+		crc = crc & 1 ? (crc >> 1) ^ CRC16 : crc >> 1;
+		crc = crc & 1 ? (crc >> 1) ^ CRC16 : crc >> 1;
 	}
+
+	// efficient bit reversal
+	crc = (((crc & 0xaaaa) >> 1) | ((crc & 0x5555) << 1));
+	crc = (((crc & 0xcccc) >> 2) | ((crc & 0x3333) << 2));
+	crc = (((crc & 0xf0f0) >> 4) | ((crc & 0x0f0f) << 4));
+	crc = (((crc & 0xff00) >> 8) | ((crc & 0x00ff) << 8));
+
 	return crc;
 }
 volatile bit SMB_RW;
@@ -156,30 +165,34 @@ void SMB_Write (uint8_t addr, uint8_t* buf, uint8_t len)
 
 }
 
+void send_508_command(uint8_t cmd, uint8_t p1, uint16_t p2,
+					uint8_t * buf, uint8_t len)
+{
+	static uint8_t params[8];
+	uint16_t crc;
+	params[0] = 0x3;
+	params[1] = 7;
+	params[2] = cmd;
+	params[3] = p1;
+	params[4] = ((uint8_t*)&p2)[1];
+	params[5] = ((uint8_t*)&p2)[0];
+	crc = crc16(params+1,5);
+	params[6] = ((uint8_t*)&crc)[1];
+	params[7] = ((uint8_t*)&crc)[0];
+
+	SMB_Write( 0xc0, params, sizeof(params) );
+}
+
 void test_i2c2()
 {
-
-	uint8_t j,i;
-	static uint8_t params[] = {0x3,7,0x24,0,1,0,0x0,0x0};
-	static uint8_t zero[] = {0,0,0,0,0,0,0};
+	uint8_t i;
 	uint8_t buf[10];
 
-
-	uint16_t crc = crc16(params,7);
-	u2f_print("crc %x\r\n", crc16("\x04\x11",2));
 	flush_messages();
-
-	SMB_Write( 0xc0, zero, 7 );
-	SMB_Write( 0xc0, zero, 7 );
-	SMB_Write( 0xc0, zero, 7 );
-
 
 	memset(buf,0,sizeof(buf));
 
-	params[5] = (uint8_t)crc;
-	params[6] = crc >> 8;
-	SMB_Write( 0xc0, params, 8 );
-
+	send_508_command(0x24,0,1,NULL,0);
 	SMB_Read( 0xc0,buf,10);
 
 	flush_messages();
@@ -292,8 +305,9 @@ int16_t main(void) {
 	   SMB0CF  |=  0x80;                   // Re-enable SMBus
 	   TMR3CN0 &= ~0x80;                   // Clear Timer3 interrupt-pending flag
 	   SMB0CN0_STA = 0;
-	wakeup_i2c_slave();
+
 	u2f_print("U2F ZERO\r\n");
+	wakeup_i2c_slave();
 	NUM_ERRORS = 0;
 
 	while (1) {

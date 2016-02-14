@@ -2,6 +2,8 @@
 #include <SI_EFM8UB1_Register_Enums.h>
 #include <stdint.h>
 #include "app.h"
+#include "i2c.h"
+
 #include "bsp.h"
 
 uint32_t data _MS_ = 0;
@@ -74,13 +76,7 @@ extern volatile bit SMB_RW;            // Software flag to indicate the
 
 extern uint16_t NUM_ERRORS;            // Counter for the number of errors.
 
-uint8_t* SMB_WRITE_BUF;
-uint8_t SMB_WRITE_BUF_LEN;
-uint8_t SMB_WRITE_BUF_OFFSET;
-uint8_t SMB_READ_LEN;
-uint8_t SMB_READ_OFFSET;
-uint8_t* SMB_READ_BUF;
-
+struct smb_interrupt_interface SMB;
 
 
 SI_INTERRUPT (SMBUS0_ISR, SMBUS0_IRQn)
@@ -113,9 +109,9 @@ SI_INTERRUPT (SMBUS0_ISR, SMBUS0_IRQn)
             	//u2f_print("THERE WAS AN ACK %d %bx\r\n", ++inter, stat);
             	if (SMB_RW == 0)
             	{
-					if (SMB_WRITE_BUF_OFFSET < SMB_WRITE_BUF_LEN)
+					if (SMB.SMB_WRITE_BUF_OFFSET < SMB.SMB_WRITE_BUF_LEN)
 					{
-						SMB0DAT = SMB_WRITE_BUF[SMB_WRITE_BUF_OFFSET++];
+						SMB0DAT = SMB.SMB_WRITE_BUF[SMB.SMB_WRITE_BUF_OFFSET++];
 
 					}
 					else                    // If previous byte was not a slave
@@ -144,9 +140,9 @@ SI_INTERRUPT (SMBUS0_ISR, SMBUS0_IRQn)
          // Master Receiver: byte received
          case SMB_MRDB:
         	 //u2f_print("RECV\r\n");
-        	 if (SMB_READ_OFFSET < SMB_READ_LEN)
+        	 if (SMB.SMB_READ_OFFSET < SMB.SMB_READ_LEN)
         	 {
-        		 SMB_READ_BUF[SMB_READ_OFFSET++] = SMB0DAT;
+        		 SMB.SMB_READ_BUF[SMB.SMB_READ_OFFSET++] = SMB0DAT;
         		 SMB0CN0_ACK = 1;                   // Send ACK to indicate last byte
         	 }
         	 else

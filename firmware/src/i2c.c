@@ -5,6 +5,7 @@
  *      Author: Conor
  */
 #include <SI_EFM8UB1_Register_Enums.h>
+#include <string.h>
 #include <stdint.h>
 
 #include "i2c.h"
@@ -34,10 +35,10 @@ void smb_read (uint8_t addr, uint8_t* dest, uint8_t count)
 
    SMB_RW = 1;                         // Mark this transfer as a READ
 
-   SMB_READ_OFFSET = 0;
+   SMB.SMB_READ_OFFSET = 0;
    TARGET = addr;
-   SMB_READ_LEN = count;
-   SMB_READ_BUF = dest;
+   SMB.SMB_READ_LEN = count;
+   SMB.SMB_READ_BUF = dest;
    SMB0CN0_STA = 1;                    // Start transfer
 
 
@@ -50,19 +51,15 @@ void smb_write (uint8_t addr, uint8_t* buf, uint8_t len)
    while(SMB_BUSY);                    // Wait for SMBus to be free.
    SMB_BUSY = 1;                       // Claim SMBus (set to busy)
    SMB_RW = 0;                         // Mark this transfer as a WRITE
-   SMB_WRITE_BUF_LEN = len;
-   SMB_WRITE_BUF = buf;
-   SMB_WRITE_BUF_OFFSET = 0;
+   SMB.SMB_WRITE_BUF_LEN = len;
+   SMB.SMB_WRITE_BUF = buf;
+   SMB.SMB_WRITE_BUF_OFFSET = 0;
    TARGET = addr;
    SMB0CN0_STA = 1;                    // Start transfer
 }
 
 void smb_init()
 {
-	SMB_WRITE_BUF = NULL;
-	SMB_READ_BUF = NULL;
-	SMB_READ_OFFSET = 0;
-	SMB_WRITE_BUF_LEN = 0;
-	SMB_WRITE_BUF_OFFSET = 0;
-	SMB_READ_LEN = 0;
+	memset(&SMB,0,sizeof(SMB));
+	SMB_FLAGS = 0;
 }

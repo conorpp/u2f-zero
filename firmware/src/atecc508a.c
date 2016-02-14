@@ -27,7 +27,6 @@ void atecc_send(uint8_t cmd, uint8_t p1, uint16_t p2,
 	smb_init_crc();
 	smb_set_ext_write(buf, len);
 	smb_write( ATECC508A_ADDR, params, sizeof(params));
-
 }
 
 #define PKT_CRC(buf, pkt_len) (htole16(*((uint16_t*)(buf+pkt_len-2))))
@@ -36,7 +35,7 @@ uint8_t atecc_recv(uint8_t * buf, uint8_t buflen)
 {
 	uint8_t pkt_len;
 	smb_init_crc();
-	pkt_len = smb_read( 0xc0,buf,10);
+	pkt_len = smb_read( 0xc0,buf,buflen);
 
 	if (SMB_FLAGS & SMB_READ_TRUNC)
 	{

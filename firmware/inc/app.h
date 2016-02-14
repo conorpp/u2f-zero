@@ -9,7 +9,10 @@
 #include <SI_EFM8UB1_Register_Enums.h>
 #include <stdarg.h>
 
-#include "fifo.h"
+SI_SBIT (SDA, SFR_P1, 2);              // SMBus on P1.2
+SI_SBIT(SCL, SFR_P1, 3);               // and P1.3
+
+SI_SBIT (LED1, SFR_P1, 4);             // LED green
 
 // debug options
 #define U2F_PRINT

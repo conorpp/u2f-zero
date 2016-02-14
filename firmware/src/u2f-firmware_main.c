@@ -17,7 +17,12 @@ bool keyPushed = 0;          // Current pushbutton status.
 bool readpacket = 1;
 
 data struct APP_DATA appdata;
-
+extern uint8_t* SMB_WRITE_BUF;
+extern uint8_t SMB_WRITE_BUF_LEN;
+extern uint8_t SMB_WRITE_BUF_OFFSET;
+extern uint8_t SMB_READ_LEN;
+extern uint8_t SMB_READ_OFFSET;
+extern uint8_t* SMB_READ_BUF;
 
 #ifdef U2F_PRINT
 FIFO_CREATE(debug,struct debug_msg, 5)
@@ -30,6 +35,14 @@ static void init(struct APP_DATA* ap)
 	ap->state = APP_NOTHING;
 	debug_fifo_init();
 	u2f_hid_init();
+
+	SMB_WRITE_BUF = NULL;
+	SMB_READ_BUF = NULL;
+	SMB_READ_OFFSET = 0;
+	SMB_WRITE_BUF_LEN = 0;
+	SMB_WRITE_BUF_OFFSET = 0;
+	SMB_READ_LEN = 0;
+
 }
 
 void listen_for_pkt(struct APP_DATA* ap)
@@ -39,6 +52,223 @@ void listen_for_pkt(struct APP_DATA* ap)
 
 #define ms_since(ms,num) (((uint16_t)get_ms() - (ms)) >= num ? (1|(ms=(uint16_t)get_ms())):0)
 
+void reset_i2c()
+{
+    SMB0CF &= ~0x80;                 // Reset communication
+    SMB0CF |= 0x80;
+    SMB0CN0_STA = 0;
+    SMB0CN0_STO = 0;
+    SMB0CN0_ACK = 0;
+}
+
+// SMB0DAT - read write data from i2c
+// SMB0CN0_ACK = 0|1, 0 to nack, 1 to ack
+// SMB0CN0_STO = 1, send stop
+// SMB0CN0_STA = 1, send start
+
+#define TX_BUSY (!(SMB0FCN1 & 0x40))
+#define RX_EMPTY ((SMB0FCN1 & 0x04))
+
+
+#ifdef U2F_PRINT
+	static xdata struct debug_msg dbg;
+#endif
+
+static void flush_messages()
+{
+	while(debug_fifo_get(&dbg) == 0)
+	{
+		u2f_write_s(dbg.buf);
+	}
+}
+
+
+
+void wakeup_i2c_slave()
+{
+	uint32_t i;
+	for (i=0; i<15000; i++)
+	{
+		SMB0DAT = 0;
+
+	}
+}
+
+static uint16_t crc16(uint8_t* buf, uint16_t len)
+{
+
+	uint16_t crc = 0;
+	while (len--) {
+		crc ^= *buf++;
+		crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
+		crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
+		crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
+		crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
+		crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
+		crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
+		crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
+		crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
+	}
+	return crc;
+}
+volatile bit SMB_RW;
+volatile bit SMB_BUSY;
+
+uint8_t SMB_DATA_IN;                   // Global holder for SMBus data
+                                       // All receive data is written here
+
+uint8_t SMB_DATA_OUT;                  // Global holder for SMBus data.
+                                       // All transmit data is read from here
+
+uint8_t TARGET;                        // Target SMBus slave address
+uint8_t NUM_ERRORS;                        // Target SMBus slave address
+
+
+void SMB_Read (uint8_t addr, uint8_t* dest, uint8_t count)
+{
+   while(SMB_BUSY != 0);               // Wait for transfer to complete
+
+   SMB_BUSY = 1;                       // Claim SMBus (set to busy)
+
+   SMB_RW = 1;                         // Mark this transfer as a READ
+
+   SMB_READ_OFFSET = 0;
+   TARGET = addr;
+   SMB_READ_LEN = count;
+   SMB_READ_BUF = dest;
+   SMB0CN0_STA = 1;                    // Start transfer
+
+
+   while(SMB_BUSY);                    // Wait for transfer to complete
+}
+
+
+void SMB_Write (uint8_t addr, uint8_t* buf, uint8_t len)
+{
+   while(SMB_BUSY);                    // Wait for SMBus to be free.
+   SMB_BUSY = 1;                       // Claim SMBus (set to busy)
+   SMB_RW = 0;                         // Mark this transfer as a WRITE
+   SMB_WRITE_BUF_LEN = len;
+   SMB_WRITE_BUF = buf;
+   SMB_WRITE_BUF_OFFSET = 0;
+   TARGET = addr;
+   SMB0CN0_STA = 1;                    // Start transfer
+
+}
+
+void test_i2c2()
+{
+
+	uint8_t j,i;
+	static uint8_t params[] = {0x3,7,0x24,0,1,0,0x0,0x0};
+	static uint8_t zero[] = {0,0,0,0,0,0,0};
+	uint8_t buf[10];
+
+
+	uint16_t crc = crc16(params,7);
+	u2f_print("crc %x\r\n", crc16("\x04\x11",2));
+	flush_messages();
+
+	SMB_Write( 0xc0, zero, 7 );
+	SMB_Write( 0xc0, zero, 7 );
+	SMB_Write( 0xc0, zero, 7 );
+
+
+	memset(buf,0,sizeof(buf));
+
+	params[5] = (uint8_t)crc;
+	params[6] = crc >> 8;
+	SMB_Write( 0xc0, params, 8 );
+
+	SMB_Read( 0xc0,buf,10);
+
+	flush_messages();
+	for (i=0 ; i < 10 ; i++)
+	{
+		u2f_print(" %02bx",buf[i]);
+		flush_messages();
+	}
+	u2f_print("\r\n");
+	flush_messages();
+
+}
+
+/*
+void test_i2c()
+{
+	int i;
+	uint8_t rbuf[4];
+	uint8_t params[] = {5,0x30,0,0,0};
+	uint8_t numbytes = 4;
+	uint16_t crc;
+	// write
+
+	u2f_print("1 packet\r\n");
+	flush_messages();
+
+	SMB0CN0_STA = 1;
+	SMB0CN0_STA = 0;  // clear start
+	//while (!SMB0CN0_STA){}
+
+	u2f_print("2 packet\r\n");
+	flush_messages();
+
+	SMB0DAT = ECC508_ADDR | I2C_WRITE;
+
+	while(!SMB0CN0_ACK){}
+
+	u2f_print("3 packet\r\n");
+	flush_messages();
+
+	SMB0DAT = 0x3;
+	while(!SMB0CN0_ACK){}
+
+	u2f_print("wat packet\r\n");
+	flush_messages();
+	// repeat data/acks for each byte
+
+	for (i=0; i<sizeof(params); i++)
+	{
+		SMB0DAT = params[i];
+		while(!SMB0CN0_ACK){}
+	}
+
+	crc = crc16(params, 5);
+
+	SMB0DAT = (uint8_t)crc;
+	while(!SMB0CN0_ACK){}
+	SMB0DAT = crc >> 8;
+	while(!SMB0CN0_ACK){}
+
+
+	SMB0CN0_STO = 1;
+	while (!SMB0CN0_STO){}
+
+	u2f_print("wrote packet\r\n");
+	flush_messages();
+
+	// read
+	SMB0CN0_STA = 1;
+	while (!SMB0CN0_STA){}
+	SMB0DAT = ECC508_ADDR | I2C_READ;
+	while(!SMB0CN0_ACK){}
+	SMB0DAT = 0x3;
+	while(!SMB0CN0_ACK){}
+
+	for (i=0; i < numbytes + 2; i++)
+	{
+		while(RX_EMPTY){}
+		rbuf[i] = SMB0DAT;
+		SMB0CN0_ACK = 1;
+	}
+	while (!SMB0CN0_STO){}
+
+	 u2f_print("got packet\r\n");
+	 flush_messages();
+	 //u2f_print("");
+}
+*/
+
 int16_t main(void) {
 
 	data uint8_t i = 0;
@@ -46,10 +276,8 @@ int16_t main(void) {
 	data uint16_t ms_heart;
 	data uint16_t ms_wink;
 	uint8_t winks = 0;
+	uint8_t test = 0;
 
-#ifdef U2F_PRINT
-	xdata struct debug_msg dbg;
-#endif
 
 	init(&appdata);
 
@@ -60,15 +288,27 @@ int16_t main(void) {
 
 	// Enable interrupts
 	IE_EA = 1;
-
+	   SMB0CF  &= ~0x80;                   // Disable SMBus
+	   SMB0CF  |=  0x80;                   // Re-enable SMBus
+	   TMR3CN0 &= ~0x80;                   // Clear Timer3 interrupt-pending flag
+	   SMB0CN0_STA = 0;
+	wakeup_i2c_slave();
 	u2f_print("U2F ZERO\r\n");
+	NUM_ERRORS = 0;
 
 	while (1) {
+
+		if (!test)
+		{
+			test_i2c2();
+			test = 1;
+		}
 
 		if (ms_since(ms_heart,500))
 		{
 			u2f_print("ms %lu\r\n", get_ms());
 			LED_G = !LED_G;
+
 		}
 
 
@@ -81,6 +321,8 @@ int16_t main(void) {
 			}
 
 		}
+
+
 
 		switch(appdata.state)
 		{
@@ -107,10 +349,7 @@ int16_t main(void) {
 		}
 
 #ifdef U2F_PRINT
-		while(debug_fifo_get(&dbg) == 0)
-		{
-			u2f_write_s(dbg.buf);
-		}
+		flush_messages();
 #endif
 
 	}

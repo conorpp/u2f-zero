@@ -27,15 +27,20 @@ extern SI_SEGMENT_VARIABLE(appdata, struct APP_DATA, SI_SEG_DATA);
 
 uint8_t tmpBuffer;
 
+//#define PRINT_EVENTS
 
 void USBD_ResetCb(void) {
+#ifdef PRINT_EVENTS
 	u2f_print("USBD_ResetCb\r\n");
+#endif
 }
 
 
 void USBD_DeviceStateChangeCb(USBD_State_TypeDef oldState,
 		USBD_State_TypeDef newState) {
+#ifdef PRINT_EVENTS
 	u2f_print("USBD_DeviceStateChangeCb\r\n");
+#endif
 }
 
 bool USBD_IsSelfPoweredCb(void) {
@@ -93,7 +98,9 @@ USB_Status_TypeDef USBD_SetupCmdCb(
 	    switch (setup->bRequest)
 	    {
 	      case USB_HID_SET_REPORT:
+#ifdef PRINT_EVENTS
 	    	  u2f_print("output report\r\n");
+#endif
 	        break;
 
 	      case USB_HID_GET_REPORT:
@@ -110,7 +117,9 @@ USB_Status_TypeDef USBD_SetupCmdCb(
 	          idleTimerSet(setup->wValue >> 8);
 	          retVal = USB_STATUS_OK;
 	        }
+#ifdef PRINT_EVENTS
 	        else u2f_print("unhandled USB_HID_SET_IDLE\r\n");
+#endif
 	        break;
 
 	      case USB_HID_GET_IDLE:
@@ -123,16 +132,19 @@ USB_Status_TypeDef USBD_SetupCmdCb(
 	          USBD_Write(EP0, &tmpBuffer, 1, false);
 	          retVal = USB_STATUS_OK;
 	        }
+#ifdef PRINT_EVENTS
 	        else u2f_print("unhandled USB_HID_GET_IDLE\r\n");
+#endif
 	        break;
+#ifdef PRINT_EVENTS
 	      default:
 	    	  u2f_print("unhandled setup->bRequest\r\n");
+#endif
 	    }
 	  }
 	  else
 	  {
-		  if (setup->bmRequestType.Recipient == USB_SETUP_RECIPIENT_ENDPOINT)
-			  u2f_print("endpoint called!\n");
+
 	  }
 
 	return retVal;
@@ -150,7 +162,7 @@ uint16_t USBD_XferCompleteCb(uint8_t epAddr, USB_Status_TypeDef status,
 	if (epAddr == EP1OUT)
 	{
 
-#ifdef U2F_PRINT
+#ifdef U2F_PRINT && PRINT_EVENTS
 		for (i=0; i < sizeof(appdata.hidmsgbuf); i++)
 		{
 			uint16_t l = (uint8_t)appdata.hidmsgbuf[i];

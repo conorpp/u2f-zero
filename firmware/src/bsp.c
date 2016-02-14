@@ -6,8 +6,6 @@
 #include <stdio.h>
 #include "app.h"
 #include "bsp.h"
-#include "fifo.h"
-#include "tinyprintf.h"
 
 
 void u2f_delay(uint16_t ms) {
@@ -28,7 +26,7 @@ void u2f_print(char* fmt, ...)
 	va_list args;
 
 	va_start(args,fmt);
-	if(vsprintf(dbg.buf, fmt, args) > sizeof(struct debug_msg))
+	if(vsprintf(dbg.buf, fmt, args) > sizeof(struct debug_msg)-1)
 	{
 		u2f_write_s("vsprintf stack corrupt!\r\n");
 	}

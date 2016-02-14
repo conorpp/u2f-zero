@@ -16,8 +16,6 @@
 #define ATECC_COUNTER_READ 0
 #define ATECC_COUNTER_INC 1
 
-uint16_t atecc_crc16(uint8_t* buf, uint16_t len);
-
 void atecc_send(uint8_t cmd, uint8_t p1, uint16_t p2,
 					uint8_t * buf, uint8_t len);
 

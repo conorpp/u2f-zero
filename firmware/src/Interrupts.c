@@ -1,4 +1,8 @@
-// USER INCLUDES
+/*
+ * i2c.c
+ *
+ *      Author: Conor
+ */
 #include <SI_EFM8UB1_Register_Enums.h>
 #include <stdint.h>
 #include "app.h"
@@ -14,110 +18,169 @@ SI_INTERRUPT (TIMER2_ISR, TIMER2_IRQn)
 	++_MS_;
 }
 
+#define SMB_STATUS_START			0xE0
+#define SMB_STATUS_MTX				0xC0
+#define SMB_STATUS_MRX				0x80
+#define SMB_STATE_MASK				0xF0
 
 
-// Status vector - top 4 bits only
-#define  SMB_MTSTA                0xE0 // (MT) start transmitted
-#define  SMB_MTDB                 0xC0 // (MT) data byte transmitted
-#define  SMB_MRDB                 0x80 // (MR) data byte received
-
+#define SMB_TX_STATE_MASK (SMB_WRITE_EXT|SMB_WRITE)
+#define SMB_TX_EXT (SMB_WRITE|SMB_WRITE_EXT)
+#define SMB_TX (SMB_WRITE)
 
 struct smb_interrupt_interface SMB;
+volatile uint8_t SMB_FLAGS;
+
+static void update_from_packet_length()
+{
+	if (SMB.read_buf[0] <= SMB.read_len)
+	{
+		SMB.read_len = SMB.read_buf[0];
+	}
+	else
+	{
+		// truncated read
+		SMB_FLAGS |= SMB_READ_TRUNC;
+	}
+}
+
+static void _feed_crc(uint8_t b)
+{
+	if (SMB_HAS_CRC())
+	{
+		SMB.crc = feed_crc(SMB.crc,b);
+	}
+}
+
+static void restart_bus()
+{
+	SMB0CF &= ~0x80;
+	SMB0CF |= 0x80;
+	SMB0CN0_STA = 0;
+	SMB0CN0_STO = 0;
+	SMB0CN0_ACK = 0;
+	SMB_BUSY_CLEAR();
+}
 
 
 SI_INTERRUPT (SMBUS0_ISR, SMBUS0_IRQn)
 {
-	uint8_t stat = SMB0CN0 & 0xF0;
-	bit FAIL = 0;
-	static bit ADDR_SEND = 0;
 
-	if (SMB0CN0_ARBLOST == 0)
+	if (SMB0CN0_ARBLOST != 0)
 	{
-	switch (stat)
+		goto fail;
+	}
+	switch (SMB0CN0 & SMB_STATE_MASK)
 	{
-	 case SMB_MTSTA:
-		SMB0DAT = SMB.addr;
-		SMB0DAT &= 0xFE;
+		case SMB_STATUS_START:
+			SMB0DAT = SMB.addr;
+			SMB0DAT &= 0xFE;
 
-		SMB0DAT |= SMB_FLAGS & SMB_READ;
-		SMB0CN0_STA = 0;
-		ADDR_SEND = 1;
-		break;
+			SMB0DAT |= SMB_FLAGS & SMB_READ;
+			SMB0CN0_STA = 0;
+			break;
 
-	 case SMB_MTDB:
-		if (SMB0CN0_ACK)
-		{
-			if (SMB_RW == 0)
+		case SMB_STATUS_MTX:
+			if (!SMB0CN0_ACK)
 			{
-				if (SMB.SMB_WRITE_BUF_OFFSET < SMB.write_buf_len)
+				// NACK
+				// turn the bus around
+				SMB0CN0_STO = 1;
+				SMB0CN0_STA = 1;
+			}
+			else if (!SMB_WRITING())
+			{
+				// do nothing and switch to receive mode
+			}
+			else if (SMB.write_offset < SMB.write_len)
+			{
+				// start writing first buffer
+				// dont crc first byte for atecc508a
+				if (SMB.write_offset) _feed_crc(SMB.write_buf[SMB.write_offset]);
+				SMB0DAT = SMB.write_buf[SMB.write_offset++];
+			}
+			else if(SMB_WRITING_EXT() && SMB.write_ext_offset < SMB.write_ext_len)
+			{
+				// start writing second optional buffer
+				_feed_crc(SMB.write_ext_buf[SMB.write_ext_offset]);
+				SMB0DAT = SMB.write_ext_buf[SMB.write_ext_offset++];
+			}
+			else if (SMB_HAS_CRC())
+			{
+				// write optional CRC
+				switch(SMB.crc_offset++)
 				{
-					SMB0DAT = SMB.write_buf[SMB.SMB_WRITE_BUF_OFFSET++];
-
-				}
-				else
-				{
-					SMB0CN0_STO = 1;
-					SMB_FLAGS &= 0xff ^ SMB_BSSY;
+					case 0:
+						SMB.crc = reverse_bits(SMB.crc);
+						SMB0DAT = (uint8_t)SMB.crc;
+						break;
+					case 1:
+						SMB0DAT = (uint8_t)(SMB.crc>>8);
+						SMB_CRC_CLEAR();
+						break;
 				}
 			}
 			else
 			{
-				// do nothing and switch to receive mode
+				// end transaction
+				SMB0CN0_STO = 1;
+				SMB_BUSY_CLEAR();
 			}
-		}
-		else
-		{
-			// NACK
-			// turn the bus around
-			SMB0CN0_STO = 1;
-			SMB0CN0_STA = 1;
-		}
-		break;
 
-	 case SMB_MRDB:
-		 if (SMB.SMB_READ_OFFSET < SMB.SMB_READ_LEN)
-		 {
-			 SMB.SMB_READ_BUF[SMB.SMB_READ_OFFSET++] = SMB0DAT;
-			 SMB0CN0_ACK = 1;
-		 }
-		 else
-		 {
-			 SMB_FLAGS &= 0xff ^ SMB_BSSY;
-			 SMB0CN0_ACK = 0;
-			 SMB0CN0_STO = 1;
-		 }
 
-		break;
+			break;
 
-	 default:
-		 u2f_print("i2c fail\r\n");
-		FAIL = 1;                  // Indicate failed transfer
-								   // and handle at end of ISR
-		break;
+		case SMB_STATUS_MRX:
+			// read in buffer
 
-	} // end switch
-	}
-	else
-	{
-		FAIL = 1;
-	}
+			if (SMB.read_offset < SMB.read_len)
+			{
+				SMB.read_buf[SMB.read_offset] = SMB0DAT;
 
-	if (FAIL)
-	{
-	   u2f_print("i2c fail\r\n");
-	  SMB0CF &= ~0x80;
-	  SMB0CF |= 0x80;
-	  SMB0CN0_STA = 0;
-	  SMB0CN0_STO = 0;
-	  SMB0CN0_ACK = 0;
-	  SMB_FLAGS &= 0xff ^ SMB_BSSY;
+				// update with length from packet
+				// warning this is device specific to atecc508a
+				if (SMB.read_offset == 0)
+				{
+					update_from_packet_length();
+				}
 
-	  FAIL = 0;
+				if ((SMB.read_offset < (SMB.read_len - 2)) && SMB_HAS_CRC())
+				{
+					SMB.crc = feed_crc(SMB.crc, SMB.read_buf[SMB.read_offset]);
+				}
+
+				SMB.read_offset++;
+				SMB0CN0_ACK = 1;
+			}
+			else
+			{
+				// end transaction
+				if (SMB_HAS_CRC())
+				{
+					SMB.crc = reverse_bits(SMB.crc);
+				}
+				SMB_BUSY_CLEAR();
+				SMB0CN0_ACK = 0;
+				SMB0CN0_STO = 1;
+			}
+
+			break;
+
+		default:
+			goto fail;
+			break;
 
 	}
+
 
 	// interrupt flag
 	SMB0CN0_SI = 0;
+	return;
+
+	fail:
+		restart_bus();
+
+		SMB0CN0_SI = 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -135,8 +198,7 @@ SI_INTERRUPT (SMBUS0_ISR, SMBUS0_IRQn)
 //-----------------------------------------------------------------------------
 SI_INTERRUPT (TIMER3_ISR, TIMER3_IRQn)
 {
-
-	SMB_FLAGS &= 0xff ^ SMB_BSSY;
+	restart_bus();
 }
 
 

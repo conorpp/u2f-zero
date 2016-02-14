@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="ASCII"?>
 <device:XMLDevice xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:device="http://www.silabs.com/sls/hc/document/device.ecore" name="EFM8UB10F16G-B-QFN28" partId="com.silabs.mcu.si8051.efm8ub1_g.efm8ub10f16g">
   <mode name="DefaultMode">
-    <property object="ADC_0" propertyId="ABPeripheral.included" value="true"/>
     <property object="ADC_0" propertyId="adc.configuration.sarclkactual" value="1.500 MHz"/>
     <property object="ADC_0" propertyId="adc.configuration.sarclocksource" value="48.000 MHz"/>
     <property object="ADC_0" propertyId="adc.configuration.sysclk" value="48.000 MHz"/>
@@ -15,6 +14,7 @@
     <property object="CLOCK_0" propertyId="ABPeripheral.included" value="true"/>
     <property object="CLOCK_0" propertyId="clock.clockselect.clocksourcedivider" value="SYSCLK / 1"/>
     <property object="CLOCK_0" propertyId="clock.clockselect.selectclocksource" value="Internal High Frequency Oscillator 1"/>
+    <property object="CRC_0" propertyId="crc.crccontrol.enablecrcinitialization" value="Initialize"/>
     <property object="CROSSBAR0" propertyId="xbar0.smbus0.clockdata" value="Enabled"/>
     <property object="CROSSBAR0" propertyId="xbar0.uart0.data" value="Enabled"/>
     <property object="DefaultMode" propertyId="mode.diagramLocation" value="100, 100"/>

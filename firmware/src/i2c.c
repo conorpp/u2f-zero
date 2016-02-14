@@ -10,40 +10,84 @@
 
 #include "i2c.h"
 
-volatile bit SMB_RW;
-volatile bit SMB_BUSY;
-volatile uint8_t SMB_FLAGS;
+#include "bsp.h"
+#include "app.h"
 
 
 
-void smb_read (uint8_t addr, uint8_t* dest, uint8_t count)
+
+
+uint8_t smb_read (uint8_t addr, uint8_t* dest, uint8_t count)
 {
-   while(SMB_FLAGS & SMB_BSSY);
+   while(SMB_IS_BUSY());
+   SMB_FLAGS = SMB_READ | SMB_BUSY| SMB.preflags;
+   SMB.preflags = 0;
 
-   SMB_RW = 1;
-   SMB_FLAGS = SMB_READ | SMB_BSSY;
-
-   SMB.SMB_READ_OFFSET = 0;
+   SMB.read_offset = 0;
    SMB.addr = addr;
-   SMB.SMB_READ_LEN = count;
-   SMB.SMB_READ_BUF = dest;
+   SMB.read_len = count;
+   SMB.read_buf = dest;
    SMB0CN0_STA = 1;
 
-
-   while(SMB_FLAGS & SMB_BSSY);
+   while(SMB_IS_BUSY());
+   return SMB.read_len;
 }
 
 
 void smb_write (uint8_t addr, uint8_t* buf, uint8_t len)
 {
-   while(SMB_FLAGS & SMB_BSSY);
-   SMB_RW = 0;
-   SMB_FLAGS = SMB_WRITE | SMB_BSSY;
-   SMB.write_buf_len = len;
+   while(SMB_IS_BUSY());
+
+   SMB_FLAGS = SMB_WRITE | SMB_BUSY | SMB.preflags;
+   SMB.preflags = 0;
+
+   SMB.write_len = len;
    SMB.write_buf = buf;
-   SMB.SMB_WRITE_BUF_OFFSET = 0;
+   SMB.write_offset = 0;
    SMB.addr = addr;
+
    SMB0CN0_STA = 1;
+}
+
+void smb_set_ext_write( uint8_t* extbuf, uint8_t extlen)
+{
+	while(SMB_IS_BUSY());
+	SMB.write_ext_len = extlen;
+	SMB.write_ext_buf = extbuf;
+	SMB.write_ext_offset = 0;
+	SMB.preflags |= SMB_WRITE_EXT;
+}
+
+void smb_init_crc()
+{
+	while(SMB_IS_BUSY());
+	SMB.crc = 0;
+	SMB.crc_offset = 0;
+	SMB.preflags |= SMB_COMPUTE_CRC;
+}
+
+uint16_t feed_crc(uint16_t crc, uint8_t b)
+{
+	crc ^= b;
+	crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
+	crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
+	crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
+	crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
+	crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
+	crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
+	crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
+	crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
+	return crc;
+}
+
+uint16_t reverse_bits(uint16_t crc)
+{
+	// efficient bit reversal for 16 bit int
+	crc = (((crc & 0xaaaa) >> 1) | ((crc & 0x5555) << 1));
+	crc = (((crc & 0xcccc) >> 2) | ((crc & 0x3333) << 2));
+	crc = (((crc & 0xf0f0) >> 4) | ((crc & 0x0f0f) << 4));
+	crc = (((crc & 0xff00) >> 8) | ((crc & 0x00ff) << 8));
+	return crc;
 }
 
 void smb_init()

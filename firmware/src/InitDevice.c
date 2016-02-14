@@ -30,7 +30,6 @@ extern void enter_DefaultMode_from_RESET(void) {
 	VREG_0_enter_DefaultMode_from_RESET();
 	PORTS_0_enter_DefaultMode_from_RESET();
 	PBCFG_0_enter_DefaultMode_from_RESET();
-	ADC_0_enter_DefaultMode_from_RESET();
 	CIP51_0_enter_DefaultMode_from_RESET();
 	CLOCK_0_enter_DefaultMode_from_RESET();
 	TIMER01_0_enter_DefaultMode_from_RESET();
@@ -647,38 +646,6 @@ extern void TIMER16_3_enter_DefaultMode_from_RESET(void) {
 }
 
 extern void ADC_0_enter_DefaultMode_from_RESET(void) {
-	// $[ADC0CN1 - ADC0 Control 1]
-	// [ADC0CN1 - ADC0 Control 1]$
-
-	// $[ADC0MX - ADC0 Multiplexer Selection]
-	// [ADC0MX - ADC0 Multiplexer Selection]$
-
-	// $[ADC0CF - ADC0 Configuration]
-	// [ADC0CF - ADC0 Configuration]$
-
-	// $[ADC0AC - ADC0 Accumulator Configuration]
-	// [ADC0AC - ADC0 Accumulator Configuration]$
-
-	// $[ADC0TK - ADC0 Burst Mode Track Time]
-	// [ADC0TK - ADC0 Burst Mode Track Time]$
-
-	// $[ADC0PWR - ADC0 Power Control]
-	// [ADC0PWR - ADC0 Power Control]$
-
-	// $[ADC0GTH - ADC0 Greater-Than High Byte]
-	// [ADC0GTH - ADC0 Greater-Than High Byte]$
-
-	// $[ADC0GTL - ADC0 Greater-Than Low Byte]
-	// [ADC0GTL - ADC0 Greater-Than Low Byte]$
-
-	// $[ADC0LTH - ADC0 Less-Than High Byte]
-	// [ADC0LTH - ADC0 Less-Than High Byte]$
-
-	// $[ADC0LTL - ADC0 Less-Than Low Byte]
-	// [ADC0LTL - ADC0 Less-Than Low Byte]$
-
-	// $[ADC0CN0 - ADC0 Control 0]
-	// [ADC0CN0 - ADC0 Control 0]$
 
 }
 

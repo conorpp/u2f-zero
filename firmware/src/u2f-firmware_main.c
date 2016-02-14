@@ -21,7 +21,7 @@ data struct APP_DATA appdata;
 
 	static xdata struct debug_msg dbg;
 
-	static void flush_messages()
+	void flush_messages()
 	{
 		while(debug_fifo_get(&dbg) == 0)
 		{
@@ -52,12 +52,10 @@ static void listen_for_pkt(struct APP_DATA* ap)
 	USBD_Read(EP1OUT, ap->hidmsgbuf, sizeof(ap->hidmsgbuf), true);
 }
 
-#define ms_since(ms,num) (((uint16_t)get_ms() - (ms)) >= num ? (1|(ms=(uint16_t)get_ms())):0)
 
 
 
-
-
+// not reentrant
 static void dump_hex(uint8_t* hex, uint8_t len)
 {
 	uint8_t i;
@@ -74,15 +72,17 @@ static void dump_hex(uint8_t* hex, uint8_t len)
 void test_ecc508a()
 {
 	uint8_t buf[10];
+	uint8_t len;
 	do{
 		atecc_send(ATECC_CMD_COUNTER,
 				ATECC_COUNTER_READ,
 				ATECC_COUNTER1,NULL,0);
-	}while(atecc_recv(buf,10) != 0);
+	}while((len = atecc_recv(buf,10)) < 0);
 
-	dump_hex(buf,sizeof(buf));
+	dump_hex(buf,len);
 }
 
+#define ms_since(ms,num) (((uint16_t)get_ms() - (ms)) >= num ? (1|(ms=(uint16_t)get_ms())):0)
 
 int16_t main(void) {
 

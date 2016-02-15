@@ -38,7 +38,10 @@ void u2f_write_n(char* buf, uint32_t val, int base);
 void qu2f_write_s(char* d);
 void qu2f_write_n(char* buf, uint32_t val, int base);
 
-extern SI_SEGMENT_VARIABLE(appdata, struct APP_DATA, SI_SEG_DATA);
+// not reentrant
+void dump_hex(uint8_t* hex, uint8_t len);
+
+
 
 #ifdef U2F_PRINT
 void u2f_print(char* fmt, ...);
@@ -46,7 +49,7 @@ void u2f_print(char* fmt, ...);
 #define u2f_print(x)
 #endif
 
-int hid_u2f_request(struct u2f_hid_msg* req, struct u2f_hid_msg* res);
+
 
 
 #endif /* BSP_H_ */

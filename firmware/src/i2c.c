@@ -15,8 +15,6 @@
 
 
 
-
-
 uint8_t smb_read (uint8_t addr, uint8_t* dest, uint8_t count)
 {
    while(SMB_IS_BUSY());

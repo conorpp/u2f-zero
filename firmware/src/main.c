@@ -11,6 +11,7 @@
 #include "app.h"
 #include "i2c.h"
 #include "u2f_hid.h"
+#include "tests.h"
 
 data struct APP_DATA appdata;
 
@@ -55,19 +56,7 @@ static void listen_for_pkt(struct APP_DATA* ap)
 
 
 
-// not reentrant
-static void dump_hex(uint8_t* hex, uint8_t len)
-{
-	uint8_t i;
-	flush_messages();
-	for (i=0 ; i < len ; i++)
-	{
-		u2f_print(" %02bx",hex[i]);
-		flush_messages();
-	}
-	u2f_print("\r\n");
-	flush_messages();
-}
+
 
 void test_ecc508a()
 {
@@ -84,29 +73,8 @@ void test_ecc508a()
 //				ATECC_RNG_P1,
 //				ATECC_RNG_P2,NULL,0);
 //	}while((len = atecc_recv(buf,sizeof(buf))) < 0);
-	char pw[] = "2pckJ4IkT3PwdGMwuCygPpxD6+lObNGORiLGPQxM4ef4YoNvx9/k0xskZl84rCd3TllCvitepe+B";
-	do{
-		atecc_send(ATECC_CMD_SHA,
-				ATECC_SHA_START,
-				0,NULL,0);
-	}while((len = atecc_recv(buf,sizeof(buf))) < 0);
-	dump_hex(buf,len);
 
-	do{
-		atecc_send(ATECC_CMD_SHA,
-				ATECC_SHA_UPDATE,
-				64,pw,64);
-	}while((len = atecc_recv(buf,sizeof(buf))) < 0);
-	dump_hex(buf,len);
 
-	do{
-		atecc_send(ATECC_CMD_SHA,
-				ATECC_SHA_END,
-				sizeof(pw)-65,pw+64,sizeof(pw)-65);
-	}while((len = atecc_recv(buf,sizeof(buf))) < 0);
-	dump_hex(buf,len);
-
-	// sha256 sum should be bcddd71b48f8a31d1374ad51c2e4138a871cb7f1eb3f2bdab49bc9bc60afc3a5
 
 }
 
@@ -139,9 +107,7 @@ int16_t main(void) {
 
 		if (!test)
 		{
-			test_ecc508a();
-			test_ecc508a();
-			test_ecc508a();
+			run_tests();
 			test = 1;
 		}
 

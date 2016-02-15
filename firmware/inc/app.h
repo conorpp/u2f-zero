@@ -32,10 +32,14 @@ struct APP_DATA
 	uint8_t state;
 };
 
+extern data struct APP_DATA appdata;
+
 struct debug_msg
 {
 	char buf[40];
 };
+
+
 
 #define FIFO_HEADER(NAME, TYPE)\
 void NAME##_fifo_init();\

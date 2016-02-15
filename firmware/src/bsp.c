@@ -54,5 +54,19 @@ void u2f_write_s(char* d)
 	}
 }
 
+// not reentrant
+void dump_hex(uint8_t* hex, uint8_t len)
+{
+	uint8_t i;
+	flush_messages();
+	for (i=0 ; i < len ; i++)
+	{
+		u2f_print(" %02bx",hex[i]);
+		flush_messages();
+	}
+	u2f_print("\r\n");
+	flush_messages();
+}
+
 
 

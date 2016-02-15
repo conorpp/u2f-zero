@@ -23,7 +23,6 @@
 #include "u2f_hid.h"
 
 #define HID_INTERFACE_INDEX 0
-extern SI_SEGMENT_VARIABLE(appdata, struct APP_DATA, SI_SEG_DATA);
 
 uint8_t tmpBuffer;
 

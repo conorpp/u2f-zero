@@ -74,8 +74,7 @@ uint16_t feed_crc(uint16_t crc, uint8_t b)
 	crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
 	crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
 	crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
-	crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
-	return crc;
+	return crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
 }
 
 uint16_t reverse_bits(uint16_t crc)
@@ -84,8 +83,7 @@ uint16_t reverse_bits(uint16_t crc)
 	crc = (((crc & 0xaaaa) >> 1) | ((crc & 0x5555) << 1));
 	crc = (((crc & 0xcccc) >> 2) | ((crc & 0x3333) << 2));
 	crc = (((crc & 0xf0f0) >> 4) | ((crc & 0x0f0f) << 4));
-	crc = (((crc & 0xff00) >> 8) | ((crc & 0x00ff) << 8));
-	return crc;
+	return (((crc & 0xff00) >> 8) | ((crc & 0x00ff) << 8));
 }
 
 void smb_init()

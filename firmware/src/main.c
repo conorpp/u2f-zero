@@ -13,6 +13,7 @@
 #include "u2f_hid.h"
 #include "tests.h"
 
+
 data struct APP_DATA appdata;
 
 
@@ -39,22 +40,15 @@ data struct APP_DATA appdata;
 static void init(struct APP_DATA* ap)
 {
 	memset(ap,0, sizeof(struct APP_DATA));
-
-	ap->state = APP_NOTHING;
 	debug_fifo_init();
 	u2f_hid_init();
-
 	smb_init();
-
 }
 
 static void listen_for_pkt(struct APP_DATA* ap)
 {
 	USBD_Read(EP1OUT, ap->hidmsgbuf, sizeof(ap->hidmsgbuf), true);
 }
-
-
-
 
 
 
@@ -86,8 +80,8 @@ int16_t main(void) {
 	data uint16_t last_ms = get_ms();
 	data uint16_t ms_heart;
 	data uint16_t ms_wink;
-	uint8_t winks = 0;
-	uint8_t test = 0;
+	data uint8_t winks = 0;
+	data uint8_t test = 0;
 
 
 	init(&appdata);
@@ -128,8 +122,6 @@ int16_t main(void) {
 			}
 
 		}
-
-
 
 		switch(appdata.state)
 		{

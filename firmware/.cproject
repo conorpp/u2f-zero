@@ -123,6 +123,7 @@
 									<listOptionValue builtIn="false" value="&quot;${StudioSdkPath}/Lib/efm8_usb/inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${StudioSdkPath}/Device/EFM8UB1/peripheral_driver/inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${StudioSdkPath}/Lib/efm8_assert&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/tests&quot;"/>
 								</option>
 								<option id="com.silabs.ide.si8051.keil.compiler.category.general.code.389376290" name="Code size" superClass="com.silabs.ide.si8051.keil.compiler.category.general.code" value="com.silabs.ide.si8051.keil.compiler.category.general.code.large" valueType="enumerated"/>
 								<inputType id="com.silabs.ide.si8051.keil.compiler.inputType.261436307" superClass="com.silabs.ide.si8051.keil.compiler.inputType"/>
@@ -134,6 +135,7 @@
 								<option id="com.silabs.ide.si8051.keil.assembler.category.includes.paths.158046198" name="Include paths (INCDIR(...))" superClass="com.silabs.ide.si8051.keil.assembler.category.includes.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc/config}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/tests&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/tinyprintf&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${StudioSdkPath}/Device/shared/si8051Base&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${StudioSdkPath}/Device/EFM8UB1&quot;"/>
@@ -141,7 +143,6 @@
 									<listOptionValue builtIn="false" value="&quot;${StudioSdkPath}/Lib/efm8_usb/inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${StudioSdkPath}/Device/EFM8UB1/peripheral_driver/inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${StudioSdkPath}/Lib/efm8_assert&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/tests&quot;"/>
 								</option>
 								<inputType id="com.silabs.ide.si8051.keil.assembler.inputType.1636083418" superClass="com.silabs.ide.si8051.keil.assembler.inputType"/>
 							</tool>

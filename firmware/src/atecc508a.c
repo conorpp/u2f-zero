@@ -16,7 +16,7 @@
 void atecc_send(uint8_t cmd, uint8_t p1, uint16_t p2,
 					uint8_t * buf, uint8_t len)
 {
-	static uint8_t params[6];
+	static data uint8_t params[6];
 	params[0] = 0x3;
 	params[1] = 7+len;
 	params[2] = cmd;
@@ -33,7 +33,7 @@ void atecc_send(uint8_t cmd, uint8_t p1, uint16_t p2,
 
 uint8_t atecc_recv(uint8_t * buf, uint8_t buflen)
 {
-	uint8_t pkt_len;
+	data uint8_t pkt_len;
 	smb_init_crc();
 	pkt_len = smb_read( 0xc0,buf,buflen);
 

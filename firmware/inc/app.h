@@ -16,7 +16,7 @@ SI_SBIT (LED1, SFR_P1, 4);             // LED green
 
 // debug options
 #define U2F_PRINT
-void flush_messages();
+
 
 typedef enum
 {

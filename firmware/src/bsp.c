@@ -19,6 +19,9 @@ void u2f_delay(uint16_t ms) {
 }
 
 #ifdef U2F_PRINT
+
+xdata struct debug_msg dbg;
+
 void u2f_print(char* fmt, ...)
 {
 
@@ -32,6 +35,27 @@ void u2f_print(char* fmt, ...)
 	}
 	va_end(args);
 	debug_fifo_append(&dbg);
+}
+// not reentrant
+void dump_hex(uint8_t* hex, uint8_t len)
+{
+	uint8_t i;
+	flush_messages();
+	for (i=0 ; i < len ; i++)
+	{
+		u2f_print(" %02bx",hex[i]);
+		flush_messages();
+	}
+	u2f_print("\r\n");
+	flush_messages();
+}
+
+void flush_messages()
+{
+	while(debug_fifo_get(&dbg) == 0)
+	{
+		u2f_write_s(dbg.buf);
+	}
 }
 #endif
 
@@ -54,19 +78,10 @@ void u2f_write_s(char* d)
 	}
 }
 
-// not reentrant
-void dump_hex(uint8_t* hex, uint8_t len)
-{
-	uint8_t i;
-	flush_messages();
-	for (i=0 ; i < len ; i++)
-	{
-		u2f_print(" %02bx",hex[i]);
-		flush_messages();
-	}
-	u2f_print("\r\n");
-	flush_messages();
-}
+
+
+
+
 
 
 

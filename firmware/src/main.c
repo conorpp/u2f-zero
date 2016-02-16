@@ -21,19 +21,7 @@ data struct APP_DATA appdata;
 
 	FIFO_CREATE(debug,struct debug_msg, 5)
 
-	static xdata struct debug_msg dbg;
 
-	void flush_messages()
-	{
-		while(debug_fifo_get(&dbg) == 0)
-		{
-			u2f_write_s(dbg.buf);
-		}
-	}
-
-#else
-
-	#define flush_messages(x)
 
 #endif
 
@@ -50,25 +38,8 @@ static void listen_for_pkt(struct APP_DATA* ap)
 	USBD_Read(EP1OUT, ap->hidmsgbuf, sizeof(ap->hidmsgbuf), true);
 }
 
-
-
-void test_ecc508a()
+int8_t test_ecc508a()
 {
-	uint8_t buf[40];
-	uint8_t len;
-//	do{
-//		atecc_send(ATECC_CMD_COUNTER,
-//				ATECC_COUNTER_READ,
-//				ATECC_COUNTER1,NULL,0);
-//	}while((len = atecc_recv(buf,sizeof(buf))) < 0);
-
-//	do{
-//		atecc_send(ATECC_CMD_RNG,
-//				ATECC_RNG_P1,
-//				ATECC_RNG_P2,NULL,0);
-//	}while((len = atecc_recv(buf,sizeof(buf))) < 0);
-
-
 
 }
 
@@ -102,12 +73,13 @@ int16_t main(void) {
 		if (!test)
 		{
 			run_tests();
+			test_ecc508a();
 			test = 1;
 		}
 
 		if (ms_since(ms_heart,500))
 		{
-			u2f_print("ms %lu\r\n", get_ms());
+			// u2f_print("ms %lu\r\n", get_ms());
 			LED_G = !LED_G;
 
 		}

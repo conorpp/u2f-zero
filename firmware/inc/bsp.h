@@ -38,15 +38,22 @@ void u2f_write_n(char* buf, uint32_t val, int base);
 void qu2f_write_s(char* d);
 void qu2f_write_n(char* buf, uint32_t val, int base);
 
-// not reentrant
-void dump_hex(uint8_t* hex, uint8_t len);
+
 
 
 
 #ifdef U2F_PRINT
-void u2f_print(char* fmt, ...);
+
+	void u2f_print(char* fmt, ...);
+
+	// not reentrant
+	void dump_hex(uint8_t* hex, uint8_t len);
+	void flush_messages();
+
 #else
-#define u2f_print(x)
+	#define u2f_print(x)
+	#define dump_hex(x)
+	#define flush_messages(x)
 #endif
 
 

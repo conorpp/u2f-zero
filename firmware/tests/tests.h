@@ -8,7 +8,10 @@
 #ifndef TESTS_H_
 #define TESTS_H_
 
-// #define ENABLE_TESTS
+//#define ENABLE_TESTS
+
+//#define TEST_SHA
+//#define TEST_EEPROM
 
 #ifdef ENABLE_TESTS
 

@@ -13,6 +13,7 @@ struct smb_interrupt_interface
 	uint8_t addr;
 	uint16_t crc;
 	uint8_t crc_offset;
+	uint8_t errors;
 
 	uint8_t* write_buf;
 	uint8_t write_len;
@@ -33,6 +34,8 @@ struct smb_interrupt_interface
 extern struct smb_interrupt_interface SMB;
 extern volatile uint8_t SMB_FLAGS;
 
+#define SMB_MAX_ERRORS 15
+#define SMB_ERRORS_EXCEEDED(inter) ((inter)->errors > SMB_MAX_ERRORS)
 
 #define SMB_WRITE			0x0
 #define SMB_READ			0x1

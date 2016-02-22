@@ -44,7 +44,10 @@ void dump_hex(uint8_t* hex, uint8_t len)
 	for (i=0 ; i < len ; i++)
 	{
 		u2f_print(" %02bx",hex[i]);
+		if ((i%4) == 3)
+			u2f_print("\r\n");
 		flush_messages();
+
 	}
 	u2f_print("\r\n");
 	flush_messages();

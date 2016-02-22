@@ -23,13 +23,22 @@ typedef enum
 	APP_NOTHING = 0,
 	APP_WINK,
 	_APP_WINK,
+	APP_ERROR,
 }
 APP_STATE;
+
+typedef enum
+{
+	ERROR_NOTHING = 0,
+	ERROR_I2C_ERRORS_EXCEEDED = -2,
+}
+APP_ERROR_CODE;
 
 struct APP_DATA
 {
 	uint8_t hidmsgbuf[64];
 	uint8_t state;
+	uint8_t error;
 };
 
 extern data struct APP_DATA appdata;
@@ -39,7 +48,7 @@ struct debug_msg
 	char buf[40];
 };
 
-
+void set_app_error(APP_ERROR_CODE ec);
 
 #define FIFO_HEADER(NAME, TYPE)\
 void NAME##_fifo_init();\

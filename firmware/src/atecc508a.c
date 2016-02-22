@@ -31,11 +31,11 @@ void atecc_send(uint8_t cmd, uint8_t p1, uint16_t p2,
 
 #define PKT_CRC(buf, pkt_len) (htole16(*((uint16_t*)(buf+pkt_len-2))))
 
-uint8_t atecc_recv(uint8_t * buf, uint8_t buflen, struct atecc_response* res)
+int8_t atecc_recv(uint8_t * buf, uint8_t buflen, struct atecc_response* res)
 {
 	data uint8_t pkt_len;
 	smb_init_crc();
-	pkt_len = smb_read( 0xc0,buf,buflen);
+	pkt_len = smb_read( ATECC508A_ADDR,buf,buflen);
 
 	if (SMB_FLAGS & SMB_READ_TRUNC)
 	{
@@ -52,6 +52,12 @@ uint8_t atecc_recv(uint8_t * buf, uint8_t buflen, struct atecc_response* res)
 		goto fail;
 	}
 
+	if (pkt_len == 4 && buf[1] != 0)
+	{
+		set_app_error(buf[1]);
+		return -1;
+	}
+
 	if (res != NULL)
 	{
 		res->len = pkt_len - 3;
@@ -60,17 +66,19 @@ uint8_t atecc_recv(uint8_t * buf, uint8_t buflen, struct atecc_response* res)
 	return pkt_len;
 
 	fail:
-	u2f_print("crc failed %x\r\n",SMB.crc );
+	// u2f_print("crc failed %x\r\n", SMB.crc);
 	return -1;
 }
 
-uint8_t atecc_send_recv(uint8_t cmd, uint8_t p1, uint16_t p2,
+int8_t atecc_send_recv(uint8_t cmd, uint8_t p1, uint16_t p2,
 							uint8_t* tx, uint8_t txlen, uint8_t * rx,
 							uint8_t rxlen, struct atecc_response* res)
 {
+	int errors = 0;
 	do{
 		atecc_send(cmd, p1, p2, tx, txlen);
-	}while(atecc_recv(rx,rxlen, res) < 0);
+	}while(atecc_recv(rx,rxlen, res) < 0 && ( errors++ < 10 || (appdata.error & 0x7f) == 0x7e ));
+	return errors < 12 ? 0 : 1;
 }
 
 int8_t atecc_write_eeprom(uint8_t base, uint8_t offset, uint8_t* srcbuf, uint8_t len)
@@ -95,5 +103,126 @@ int8_t atecc_write_eeprom(uint8_t base, uint8_t offset, uint8_t* srcbuf, uint8_t
 			ATECC_RW_CONFIG, base, dstbuf, 4,
 			buf, sizeof(buf), &res);
 
-	return res.buf[0] == 0 ? 0 : -1;
+	if (res.buf[0])
+	{
+		set_app_error(-res.buf[0]);
+		return -1;
+	}
+	return 0;
 }
+
+#ifdef SETUP_DEVICE
+
+static void dump_config(uint8_t* buf)
+{
+	uint8_t i,j;
+	uint16_t crc = 0;
+	struct atecc_response res;
+	for (i=0; i < 4; i++)
+	{
+		atecc_send_recv(ATECC_CMD_READ,
+				ATECC_RW_CONFIG | ATECC_RW_EXT, i << 3, NULL, 0,
+				buf, 36, &res);
+		for(j = 0; j < res.len; j++)
+		{
+			crc = feed_crc(crc,res.buf[j]);
+		}
+		dump_hex(res.buf,res.len);
+	}
+
+	u2f_print("config crc: %x\r\n", reverse_bits(crc));
+}
+
+static void atecc_setup_config(uint8_t* buf)
+{
+	struct atecc_response res;
+	int i;
+
+	struct atecc_slot_config sc;
+	struct atecc_key_config kc;
+	memset(&sc, 0, sizeof(struct atecc_slot_config));
+	memset(&kc, 0, sizeof(struct atecc_key_config));
+	sc.readkey = 3;
+	sc.secret = 1;
+	sc.writeconfig = 0xa;
+
+	// set up read/write permissions for keys
+	for (i = 0; i < 15; i++)
+	{
+		if ( atecc_write_eeprom(ATECC_EEPROM_SLOT(i), ATECC_EEPROM_SLOT_OFFSET(i), &sc, ATECC_EEPROM_SLOT_SIZE) != 0)
+		{
+			u2f_print("1 atecc_write_eeprom failed %bd\r\n",i);
+		}
+
+	}
+
+	memset(&sc, 0, sizeof(struct atecc_slot_config));
+	sc.writeconfig = 0x2;
+	if ( atecc_write_eeprom(ATECC_EEPROM_SLOT(15), ATECC_EEPROM_SLOT_OFFSET(15), &sc, ATECC_EEPROM_SLOT_SIZE) != 0)
+	{
+		u2f_print("2 atecc_write_eeprom failed %bd\r\n",i);
+	}
+
+	kc.private = 1;
+	kc.pubinfo = 1;
+	kc.keytype = 0x4;
+
+	// set up config for keys
+	for (i = 0; i < 16; i++)
+	{
+		if (i > 7)
+		{
+			kc.lockable = 1;
+		}
+		if (i==15)
+		{
+			kc.private = 0;
+			kc.pubinfo = 0;
+		}
+		if ( atecc_write_eeprom(ATECC_EEPROM_KEY(i), ATECC_EEPROM_KEY_OFFSET(i), &kc, ATECC_EEPROM_KEY_SIZE) != 0)
+		{
+			u2f_print("3 atecc_write_eeprom failed %bd\r\n" ,i);
+		}
+
+	}
+
+	// set otp to be read only
+	buf[0] = 0xAA;
+	if ( atecc_write_eeprom(ATECC_EEPROM_B2A(18), ATECC_EEPROM_B2O(18), buf, 1) != 0)
+	{
+		u2f_print("otp write failed\r\n");
+	}
+
+	dump_config(buf);
+}
+
+// write a message to the otp memory before locking
+static void atecc_write_otp()
+{
+	char msg[] = "conorpp's u2f token.\r\n\0\0\0\0";
+	char buf[7];
+	int i;
+	for (i=0; i<sizeof(msg); i+=4)
+	{
+		atecc_send_recv(ATECC_CMD_WRITE,
+				ATECC_RW_OTP, ATECC_EEPROM_B2A(i), msg+i, 4,
+				buf, sizeof(buf), NULL);
+	}
+}
+
+void atecc_setup_device(uint8_t * buf)
+{
+	setup_config(buf);
+
+	// lock config
+	if (atecc_send_recv(ATECC_CMD_LOCK,
+			ATECC_LOCK_CONFIG, 0xf2cd, NULL, 0,
+			buf, sizeof(buf), NULL))
+	{
+		u2f_print("ATECC_CMD_LOCK failed\r\n");
+		return;
+	}
+
+	write_otp();
+}
+#endif

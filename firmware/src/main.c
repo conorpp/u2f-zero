@@ -49,12 +49,20 @@ int8_t test_ecc508a()
 {
 	struct atecc_response res;
 	uint8_t buf[72];
-	atecc_send_recv(ATECC_CMD_RNG,
-			ATECC_RNG_P1, ATECC_RNG_P2, NULL, 0,
-				buf, sizeof(buf), &res);
-	flush_messages();
-	u2f_print("recv %bd bytes\r\n", res.len);
+	char digest[] = "4b3ed9de7155981804626b02432ad25e78003ce82ee61abe1b699b90bc195942";
+
+	atecc_send_recv(ATECC_CMD_NONCE,
+			ATECC_NONCE_TEMP_UPDATE, 0, digest, 32,
+			buf, sizeof(buf), &res);
 	dump_hex(res.buf, res.len);
+
+
+	atecc_send_recv(ATECC_CMD_SIGN,
+			ATECC_SIGN_EXTERNAL, 0, NULL, 0,
+				buf, sizeof(buf), &res);
+	dump_hex(res.buf, res.len);
+
+	return 0;
 }
 
 #define ms_since(ms,num) (((uint16_t)get_ms() - (ms)) >= num ? (1|(ms=(uint16_t)get_ms())):0)
@@ -80,11 +88,7 @@ int16_t main(void) {
 	// Enable interrupts
 	IE_EA = 1;
 
-
-
-
 	u2f_print("U2F ZERO\r\n");
-	// smb_write(0, zeros, sizeof(zeros));
 
 	while (1) {
 
@@ -133,6 +137,7 @@ int16_t main(void) {
 					winks = 0;
 					appdata.state = APP_NOTHING;
 				}
+				break;
 			case APP_ERROR:
 				u2f_print("error: %bx\r\n", appdata.error);
 				appdata.state = APP_NOTHING;

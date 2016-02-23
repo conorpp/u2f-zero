@@ -59,11 +59,22 @@
 	// P2 is CRC or 0
 
 #define ATECC_CMD_GENKEY 0x40
+	// P1
 	#define ATECC_GENKEY_PRIVATE 0x04
 	#define ATECC_GENKEY_PUBDIGEST 0x08
 	#define ATECC_GENKEY_PUBDIGEST2 0x10
+	// P2 is keyid
 
+#define ATECC_CMD_NONCE 0x16
+	// P1
+	#define ATECC_NONCE_RNG_UPDATE 0x0
+	#define ATECC_NONCE_TEMP_UPDATE 0x3
+	// P2 is 0
 
+#define ATECC_CMD_SIGN 0x41
+	// P1
+	#define ATECC_SIGN_INTERNAL 0x00
+	#define ATECC_SIGN_EXTERNAL 0x80
 	// P2 is keyid
 
 struct atecc_response

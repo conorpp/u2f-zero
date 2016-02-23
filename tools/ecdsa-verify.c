@@ -9,7 +9,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <assert.h>
-#include <optarg.h>
+#include <unistd.h>
 
 
 int verify(char * digest, char * pubxy, char * rs )
@@ -17,7 +17,7 @@ int verify(char * digest, char * pubxy, char * rs )
     EC_KEY * key = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
 
     ECDSA_SIG sig;
-    BIGNUM* bnx = NULL, *bny = NULL;
+    BIGNUM * bnx = NULL, * bny = NULL;
 
     char r[65], s[65], x[65], y[65];
 
@@ -28,7 +28,7 @@ int verify(char * digest, char * pubxy, char * rs )
     memset(&sig, 0, sizeof(ECDSA_SIG));
 
     r[64] = s[64] = x[64] = y[64] = 0;
-
+    
     if (!BN_hex2bn(&bnx, x))
     {   return -1;  }
     if (!BN_hex2bn(&bny, y))
@@ -61,34 +61,38 @@ int verify(char * digest, char * pubxy, char * rs )
 int main(int argc, char * argv[])
 {
     
-    char buf[64], c;
+    char buf[256], c;
     char digest[SHA256_DIGEST_LENGTH];
-    char * digest_s = NULL;
+    int take_digest = 1;
+
     SHA256_CTX sha256;
     int n, ret;
 
     char * pubkey, * sig;
 
-    if (argc != 3)
+    if (argc != 3 && argc != 4)
     {
-        fprintf(stderr, "usage: %s <public-key-hex> <signature-hex> [-d digest]\n",argv[0]);
+        fprintf(stderr, "usage: %s <public-key-hex> <signature-hex> [-d]\n"
+                        "   -d: don't take sha256sum of stdin input\n",argv[0]);
         return 1;
     }
 
-    while ( (c = getopt(argc, argv, "i:p:") ) != -1) 
-    {
-        switch (c) 
-        {
-            case 'd':
-                digest_s = optarg;
-                break;
-        }
-    }
+    ERR_load_crypto_strings();
 
     pubkey = argv[1];
     sig = argv[2];
 
-    if (digest_s == NULL)
+    while ( (c = getopt(argc, argv, "d") ) != -1) 
+    {
+        switch (c) 
+        {
+            case 'd':
+                take_digest = 0;
+                break;
+        }
+    }
+
+    if (take_digest)
     {
         SHA256_Init(&sha256);
 
@@ -101,11 +105,8 @@ int main(int argc, char * argv[])
     }
     else
     {
-        digest = digest_s;
+        read(STDIN_FILENO, digest, sizeof(digest));
     }
-
-    //BIGNUM* bnd = BN_bin2bn(digest, SHA256_DIGEST_LENGTH, NULL);
-    //char * digest = BN_bn2hex(bnd);
 
     ret = verify(digest, 
             pubkey,
@@ -124,8 +125,6 @@ int main(int argc, char * argv[])
             break;
     }
 
-    //BN_free(bnd);
-    //OPENSSL_free(digest);
-    
+    ERR_free_strings();
     return 0;
 }

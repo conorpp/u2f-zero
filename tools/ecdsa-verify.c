@@ -39,10 +39,6 @@ int verify(char * digest, char * pubxy, char * rs )
     if (!BN_hex2bn(&sig.s, s))
     {   return -1;  }
 
-    assert(key != NULL);
-    assert(bny != NULL);
-    assert(bnx != NULL);
-
     if (!EC_KEY_set_public_key_affine_coordinates(key,bnx,bny))
     {   return -1;  }
 

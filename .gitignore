@@ -40,3 +40,4 @@ gerbers/*
 
 # simplicity studio
 firmware/Keil*
+*.swp

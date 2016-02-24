@@ -9,13 +9,9 @@
 
 
 void u2f_delay(uint16_t ms) {
-	volatile int16_t x;
-	volatile int16_t y;
-	for (y = 0; y < ms; y++) {
-		for (x = 0; x < 1000; x) {
-			x++;
-		}
-	}
+	uint32_t ms_now = get_ms();
+	while((get_ms() - ms_now) < ms)
+	{}
 }
 
 #ifdef U2F_PRINT
@@ -43,9 +39,9 @@ void dump_hex(uint8_t* hex, uint8_t len)
 	flush_messages();
 	for (i=0 ; i < len ; i++)
 	{
-		u2f_print(" %02bx",hex[i]);
-		if ((i%4) == 3)
-			u2f_print("\r\n");
+		u2f_print("%02bx",hex[i]);
+		//if ((i%4) == 3)
+		//	u2f_print("\r\n");
 		flush_messages();
 
 	}

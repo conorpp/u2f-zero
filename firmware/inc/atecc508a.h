@@ -110,6 +110,10 @@ struct atecc_key_config
 	uint8_t x509id : 2;
 };
 
+void atecc_idle();
+void atecc_wake();
+void atecc_sleep();
+
 void atecc_send(uint8_t cmd, uint8_t p1, uint16_t p2,
 					uint8_t * buf, uint8_t len);
 

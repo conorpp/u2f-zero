@@ -49,17 +49,23 @@ int8_t test_ecc508a()
 {
 	struct atecc_response res;
 	uint8_t buf[72];
-	char digest[] = "4b3ed9de7155981804626b02432ad25e78003ce82ee61abe1b699b90bc195942";
+	char msg[] = "wow a signature!\n";
 
-	atecc_send_recv(ATECC_CMD_NONCE,
-			ATECC_NONCE_TEMP_UPDATE, 0, digest, 32,
+	atecc_send_recv(ATECC_CMD_SHA,
+			ATECC_SHA_START, 0, NULL, 0,
 			buf, sizeof(buf), &res);
+
+	atecc_send_recv(ATECC_CMD_SHA,
+			ATECC_SHA_END, sizeof(msg)-1, msg, sizeof(msg)-1,
+			buf, sizeof(buf), &res);
+
 	dump_hex(res.buf, res.len);
 
+	u2f_print("sig:\r\n");
 
 	atecc_send_recv(ATECC_CMD_SIGN,
 			ATECC_SIGN_EXTERNAL, 0, NULL, 0,
-				buf, sizeof(buf), &res);
+			buf, sizeof(buf), &res);
 	dump_hex(res.buf, res.len);
 
 	return 0;

@@ -29,6 +29,24 @@ void atecc_send(uint8_t cmd, uint8_t p1, uint16_t p2,
 	smb_write( ATECC508A_ADDR, params, sizeof(params));
 }
 
+void atecc_idle()
+{
+	static data uint8_t params = 0x2;
+	smb_write( ATECC508A_ADDR, &params, sizeof(params));
+}
+
+void atecc_sleep()
+{
+	static data uint8_t params = 0x1;
+	smb_write( ATECC508A_ADDR, &params, sizeof(params));
+}
+
+void atecc_wake()
+{
+	static uint8_t params[] = {0,0,0,0,0,0,0,0,0,0};
+	smb_write( ATECC508A_ADDR, params, sizeof(params));
+}
+
 #define PKT_CRC(buf, pkt_len) (htole16(*((uint16_t*)(buf+pkt_len-2))))
 
 int8_t atecc_recv(uint8_t * buf, uint8_t buflen, struct atecc_response* res)
@@ -45,7 +63,9 @@ int8_t atecc_recv(uint8_t * buf, uint8_t buflen, struct atecc_response* res)
 	if (pkt_len <= buflen && pkt_len >= 4)
 	{
 		if (PKT_CRC(buf,pkt_len) != SMB.crc)
+		{
 			goto fail;
+		}
 	}
 	else
 	{
@@ -66,7 +86,6 @@ int8_t atecc_recv(uint8_t * buf, uint8_t buflen, struct atecc_response* res)
 	return pkt_len;
 
 	fail:
-	// u2f_print("crc failed %x\r\n", SMB.crc);
 	return -1;
 }
 
@@ -77,7 +96,8 @@ int8_t atecc_send_recv(uint8_t cmd, uint8_t p1, uint16_t p2,
 	int errors = 0;
 	do{
 		atecc_send(cmd, p1, p2, tx, txlen);
-	}while(atecc_recv(rx,rxlen, res) < 0 && ( errors++ < 10 || (appdata.error & 0x7f) == 0x7e ));
+		if (errors++) u2f_delay(40);
+	}while(atecc_recv(rx,rxlen, res) < 0);
 	return errors < 12 ? 0 : 1;
 }
 

@@ -43,6 +43,7 @@ extern volatile uint8_t SMB_FLAGS;
 #define SMB_WRITE_EXT		0x4
 #define SMB_READ_TRUNC		0x10
 #define SMB_COMPUTE_CRC		0x20
+#define SMB_RECV_NACK		0x40
 
 #define SMB_READING() 				((SMB_FLAGS & SMB_READ))
 #define SMB_WRITING() 				(!(SMB_FLAGS & SMB_READ))
@@ -51,6 +52,7 @@ extern volatile uint8_t SMB_FLAGS;
 #define SMB_BUSY_CLEAR() 			(SMB_FLAGS &= ~SMB_BUSY)
 #define SMB_HAS_CRC() 				(SMB_FLAGS & SMB_COMPUTE_CRC)
 #define SMB_CRC_CLEAR() 			(SMB_FLAGS &= ~SMB_COMPUTE_CRC)
+#define SMB_WAS_NACKED() 			(SMB_FLAGS & SMB_RECV_NACK)
 
 void smb_init();
 

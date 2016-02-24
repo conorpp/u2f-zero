@@ -82,10 +82,10 @@ SI_INTERRUPT (SMBUS0_ISR, SMBUS0_IRQn)
 			if (!SMB0CN0_ACK)
 			{
 				// NACK
-				// turn the bus around
+				// end transaction
 				SMB0CN0_STO = 1;
-				SMB0CN0_STA = 1;
-				SMB.errors++;
+				SMB_FLAGS |= SMB_RECV_NACK;
+				SMB_BUSY_CLEAR();
 			}
 			else if (!SMB_WRITING())
 			{
@@ -180,8 +180,6 @@ SI_INTERRUPT (SMBUS0_ISR, SMBUS0_IRQn)
 
 	fail:
 		restart_bus();
-
-
 		SMB0CN0_SI = 0;
 }
 

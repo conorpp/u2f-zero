@@ -13,7 +13,7 @@
 
 
 
-void atecc_send(uint8_t cmd, uint8_t p1, uint16_t p2,
+int8_t atecc_send(uint8_t cmd, uint8_t p1, uint16_t p2,
 					uint8_t * buf, uint8_t len)
 {
 	static data uint8_t params[6];
@@ -27,6 +27,11 @@ void atecc_send(uint8_t cmd, uint8_t p1, uint16_t p2,
 	smb_init_crc();
 	smb_set_ext_write(buf, len);
 	smb_write( ATECC508A_ADDR, params, sizeof(params));
+	if (SMB_WAS_NACKED())
+	{
+		return -1;
+	}
+	return 0;
 }
 
 void atecc_idle()
@@ -54,10 +59,14 @@ int8_t atecc_recv(uint8_t * buf, uint8_t buflen, struct atecc_response* res)
 	data uint8_t pkt_len;
 	smb_init_crc();
 	pkt_len = smb_read( ATECC508A_ADDR,buf,buflen);
+	if (SMB_WAS_NACKED())
+	{
+		return -1;
+	}
 
 	if (SMB_FLAGS & SMB_READ_TRUNC)
 	{
-		u2f_print("error read truncated\r\n");
+		set_app_error(ERROR_READ_TRUNCATED);
 	}
 
 	if (pkt_len <= buflen && pkt_len >= 4)
@@ -89,16 +98,41 @@ int8_t atecc_recv(uint8_t * buf, uint8_t buflen, struct atecc_response* res)
 	return -1;
 }
 
+static void delay_cmd(uint8_t cmd)
+{
+	uint8_t d = 0;
+	switch(cmd)
+	{
+		case ATECC_CMD_SIGN:
+			d = 50;
+			break;
+		case ATECC_CMD_GENKEY:
+			d = 100;
+			break;
+		case ATECC_CMD_LOCK:
+			d = 32;
+			break;
+		default:
+			d = 26;
+			break;
+	}
+	u2f_delay(d);
+}
+
 int8_t atecc_send_recv(uint8_t cmd, uint8_t p1, uint16_t p2,
 							uint8_t* tx, uint8_t txlen, uint8_t * rx,
 							uint8_t rxlen, struct atecc_response* res)
 {
-	int errors = 0;
-	do{
-		atecc_send(cmd, p1, p2, tx, txlen);
-		if (errors++) u2f_delay(40);
-	}while(atecc_recv(rx,rxlen, res) < 0);
-	return errors < 12 ? 0 : 1;
+
+	while(atecc_send(cmd, p1, p2, tx, txlen) == -1)
+	{
+		u2f_delay(10);
+	}
+	while(atecc_recv(rx,rxlen, res) == -1)
+	{
+		delay_cmd(cmd);
+	}
+	return 0;
 }
 
 int8_t atecc_write_eeprom(uint8_t base, uint8_t offset, uint8_t* srcbuf, uint8_t len)

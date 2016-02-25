@@ -76,7 +76,6 @@ int8_t test_ecc508a()
 
 int16_t main(void) {
 
-	uint8_t zeros[] = {0,0,0,0};
 	data uint8_t i = 0;
 	data uint16_t last_ms = get_ms();
 	data uint16_t ms_heart;

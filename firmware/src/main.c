@@ -31,6 +31,7 @@ static void init(struct APP_DATA* ap)
 	debug_fifo_init();
 	u2f_hid_init();
 	smb_init();
+	atecc_idle();
 }
 
 static void listen_for_pkt(struct APP_DATA* ap)
@@ -83,10 +84,10 @@ int16_t main(void) {
 	data uint8_t winks = 0;
 	data uint8_t test = 0;
 
-
+	enter_DefaultMode_from_RESET();
 	init(&appdata);
 
-	enter_DefaultMode_from_RESET();
+
 
 	// STDIO library requires TI to print
 	SCON0_TI = 1;
@@ -95,6 +96,7 @@ int16_t main(void) {
 	IE_EA = 1;
 
 	u2f_print("U2F ZERO\r\n");
+
 
 	while (1) {
 

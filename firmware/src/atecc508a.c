@@ -48,7 +48,7 @@ void atecc_sleep()
 
 void atecc_wake()
 {
-	static uint8_t params[] = {0,0,0,0,0,0,0,0,0,0};
+	static uint8_t params[] = {0,0};
 	smb_write( ATECC508A_ADDR, params, sizeof(params));
 }
 
@@ -123,15 +123,45 @@ int8_t atecc_send_recv(uint8_t cmd, uint8_t p1, uint16_t p2,
 							uint8_t* tx, uint8_t txlen, uint8_t * rx,
 							uint8_t rxlen, struct atecc_response* res)
 {
+	uint8_t errors = 0;
+	atecc_wake();
+	resend:
 
 	while(atecc_send(cmd, p1, p2, tx, txlen) == -1)
 	{
 		u2f_delay(10);
+		errors++;
 	}
+
 	while(atecc_recv(rx,rxlen, res) == -1)
 	{
-		delay_cmd(cmd);
+		errors++;
+		if (errors > 5)
+		{
+			u2f_print("fail recv %bx\r\n", appdata.error);
+			flush_messages();
+		}
+		switch(appdata.error)
+		{
+			case ERROR_NOTHING:
+				delay_cmd(cmd);
+				break;
+			case ERROR_ATECC_EXECUTION:
+				delay_cmd(cmd);
+			case ERROR_ATECC_PARSE:
+			case ERROR_ATECC_FAULT:
+			case ERROR_ATECC_WAKE:
+			case ERROR_ATECC_WATCHDOG:
+				goto resend;
+				break;
+			default:
+				u2f_delay(10);
+				break;
+		}
+
 	}
+
+	atecc_idle();
 	return 0;
 }
 

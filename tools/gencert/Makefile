@@ -3,8 +3,10 @@ obj = $(src:.c=.o)
 
 LDFLAGS = -lcrypto
 
-verify: $(obj)
+name=gencert
+
+$(name): $(obj)
 	$(CC) -O3 -Wall -Werror -o $@ $^ $(LDFLAGS)
 
 clean:
-	rm -f $(obj) verify
+	rm -f $(obj) $(name)

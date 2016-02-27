@@ -40,4 +40,11 @@ gerbers/*
 
 # simplicity studio
 firmware/Keil*
+
+# vim
 *.swp
+
+# keys
+*.pem
+*.csr
+*.der

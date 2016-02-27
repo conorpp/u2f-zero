@@ -110,10 +110,7 @@ int main(int argc, char * argv[])
         return 2;
     }
 
-    if (!PEM_write_X509(
-            fcert,
-            gencert
-    ))
+    if (!i2d_X509_fp(fcert, gencert))
     { openssl_die(); }
 
 
@@ -146,5 +143,4 @@ int main(int argc, char * argv[])
 
     return 0;
 }
-
 

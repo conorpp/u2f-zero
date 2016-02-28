@@ -26,7 +26,7 @@
 
 uint8_t tmpBuffer;
 
-//#define PRINT_EVENTS
+// #define PRINT_EVENTS
 
 void USBD_ResetCb(void) {
 #ifdef PRINT_EVENTS
@@ -171,14 +171,23 @@ uint16_t USBD_XferCompleteCb(uint8_t epAddr, USB_Status_TypeDef status,
 		u2f_write_s("\r\n");
 #endif
 
-		do {
-			i = hid_u2f_request((struct u2f_hid_msg*)appdata.hidmsgbuf,
-							&res);
-			if (i == U2FHID_REPLY || i == U2FHID_INCOMPLETE)
-			{
-				USBD_Write(EP1IN, resbuf, 64, false);
-			}
-		} while (i == U2FHID_INCOMPLETE);
+		i = hid_u2f_request((struct u2f_hid_msg*)appdata.hidmsgbuf,
+						&res);
+		if (i == U2FHID_REPLY || i == U2FHID_INCOMPLETE)
+		{
+			USBD_Write(EP1IN, resbuf, 64, false);
+		}
+		else
+		{
+
+		}
+
+	}
+	else
+	{
+		u2f_print(
+
+				);
 
 	}
 	return 0;

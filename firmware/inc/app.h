@@ -16,7 +16,8 @@ SI_SBIT (LED1, SFR_P1, 4);             // LED green
 
 // debug options
 #define U2F_PRINT
-
+#define DBG_MESSAGE_SIZE 		30
+#define DBG_MSG_COUNT			4
 
 typedef enum
 {
@@ -45,6 +46,7 @@ APP_ERROR_CODE;
 struct APP_DATA
 {
 	uint8_t hidmsgbuf[64];
+	uint8_t tmp[10];
 	uint8_t state;
 	uint8_t error;
 };
@@ -53,7 +55,7 @@ extern data struct APP_DATA appdata;
 
 struct debug_msg
 {
-	char buf[40];
+	char buf[DBG_MESSAGE_SIZE];
 };
 
 void set_app_error(APP_ERROR_CODE ec);

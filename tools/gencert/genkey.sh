@@ -19,3 +19,5 @@ openssl req -new -key $keyname -out "$keyname".csr
 
 openssl x509 -req -in "$keyname".csr  -CA $cacert -CAkey $cakey -CAcreateserial -outform DER \
     -out $certname -set_serial 1 -clrext -days $((365 * 6))
+
+rm "$keyname".csr

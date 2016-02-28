@@ -12,6 +12,7 @@
 
 //#define TEST_SHA
 //#define TEST_EEPROM
+//#define TEST_KEY_SIGNING		// requires key and locked eeprom
 
 #ifdef ENABLE_TESTS
 

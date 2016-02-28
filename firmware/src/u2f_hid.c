@@ -40,7 +40,7 @@ static struct hid_layer_param
 	#define BUFFER_SIZE 600
 	uint8_t buffer[BUFFER_SIZE];
 #else
-	#define BUFFER_SIZE 24
+	#define BUFFER_SIZE 70
 	uint8_t buffer[BUFFER_SIZE];
 #endif
 
@@ -139,7 +139,7 @@ static int buffer_request(struct hid_layer_param* hid, struct u2f_hid_msg* req)
 		{
 			goto fail;
 		}
-		memmove(hid->buffer, req->pkt.cont.payload, hid->bytes_remain);
+		memmove(hid->buffer + hid->bytes_buffered, req->pkt.cont.payload, hid->bytes_remain);
 		hid->bytes_buffered += hid->bytes_remain;
 		hid->bytes_remain = 0;
 		hid->state = HID_READY;
@@ -150,7 +150,7 @@ static int buffer_request(struct hid_layer_param* hid, struct u2f_hid_msg* req)
 		{
 			goto fail;
 		}
-		memmove(hid->buffer, req->pkt.cont.payload, U2FHID_CONT_PAYLOAD_SIZE);
+		memmove(hid->buffer+ hid->bytes_buffered, req->pkt.cont.payload, U2FHID_CONT_PAYLOAD_SIZE);
 		hid->bytes_buffered += U2FHID_CONT_PAYLOAD_SIZE;
 		hid->bytes_remain -= U2FHID_CONT_PAYLOAD_SIZE;
 	}
@@ -207,8 +207,7 @@ static void hid_u2f_parse(struct u2f_hid_msg* req, struct u2f_hid_msg* res,
 				goto fail;
 			}
 
-			u2f_request((struct u2f_message*)payload,
-					(struct u2f_message*)res->pkt.init.payload);
+			u2f_request((struct u2f_request_apdu *)payload);
 
 			break;
 		case U2FHID_PING:
@@ -299,6 +298,7 @@ int hid_u2f_request(struct u2f_hid_msg* req, struct u2f_hid_msg* res)
 					u2f_print("cant buffer request\r\n");
 					return U2FHID_FAIL;
 				}
+				u2f_print("buffered from %lx\r\n", req->cid);
 				cmd = hid_layer.current_cmd;
 				payload = hid_layer.buffer;
 
@@ -306,6 +306,7 @@ int hid_u2f_request(struct u2f_hid_msg* req, struct u2f_hid_msg* res)
 			else if (U2FHID_TIMEOUT(&hid_layer))
 			{
 				// return timeout error for old channel and run again for new channel
+				u2f_print("timeout, switching\r\n");
 				hid_layer.state = HID_READY;
 				stamp_error(res, ERR_MSG_TIMEOUT);
 				res->cid = hid_layer.current_cid;
@@ -326,6 +327,7 @@ int hid_u2f_request(struct u2f_hid_msg* req, struct u2f_hid_msg* res)
 				if (U2FHID_LEN(req) > U2FHID_INIT_PAYLOAD_SIZE)
 				{
 					start_buffering(&hid_layer, req);
+					u2f_print("started buffering\r\n");
 				}
 			}
 			else

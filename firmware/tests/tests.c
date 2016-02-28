@@ -191,6 +191,37 @@ static int test_eeprom()
 #define test_eeprom(x)
 #endif
 
+#ifdef TEST_KEY_SIGNING
+int test_key_signing()
+{
+	struct atecc_response res;
+	uint8_t buf[72];
+	char msg[] = "wow a signature!\n";
+
+	atecc_send_recv(ATECC_CMD_SHA,
+			ATECC_SHA_START, 0, NULL, 0,
+			buf, sizeof(buf), &res);
+
+	atecc_send_recv(ATECC_CMD_SHA,
+			ATECC_SHA_END, sizeof(msg)-1, msg, sizeof(msg)-1,
+			buf, sizeof(buf), &res);
+
+	dump_hex(res.buf, res.len);
+
+	u2f_print("sig:\r\n");
+
+	atecc_send_recv(ATECC_CMD_SIGN,
+			ATECC_SIGN_EXTERNAL, 0, NULL, 0,
+			buf, sizeof(buf), &res);
+	dump_hex(res.buf, res.len);
+
+	// lazy/bad check but eh
+	return res.len > 8 ? 0 : -1;
+}
+#else
+#define test_key_signing(x)
+#endif
+
 void run_tests()
 {
 	int rc;
@@ -211,6 +242,15 @@ void run_tests()
 		PRINT("--- EEPROM TEST SUCCESS ---\r\n");
 	else
 		PRINT("--- EEPROM TEST FAILED %d ---\r\n",rc);
+#endif
+
+#ifdef TEST_KEY_SIGNING
+	PRINT("--- STARTING KEY SIGNING TEST ---\r\n");
+	rc = test_key_signing();
+	if (rc == 0)
+		PRINT("--- KEY SIGNING SUCCESS ---\r\n");
+	else
+		PRINT("--- KEY SIGNING FAILED %d ---\r\n",rc);
 #endif
 
 }

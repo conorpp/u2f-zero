@@ -19,9 +19,7 @@ data struct APP_DATA appdata;
 
 #ifdef U2F_PRINT
 
-	FIFO_CREATE(debug,struct debug_msg, 5)
-
-
+	FIFO_CREATE(debug,struct debug_msg,  DBG_MSG_COUNT)
 
 #endif
 
@@ -48,26 +46,6 @@ void set_app_error(APP_ERROR_CODE ec)
 
 int8_t test_ecc508a()
 {
-	struct atecc_response res;
-	uint8_t buf[72];
-	char msg[] = "wow a signature!\n";
-
-	atecc_send_recv(ATECC_CMD_SHA,
-			ATECC_SHA_START, 0, NULL, 0,
-			buf, sizeof(buf), &res);
-
-	atecc_send_recv(ATECC_CMD_SHA,
-			ATECC_SHA_END, sizeof(msg)-1, msg, sizeof(msg)-1,
-			buf, sizeof(buf), &res);
-
-	dump_hex(res.buf, res.len);
-
-	u2f_print("sig:\r\n");
-
-	atecc_send_recv(ATECC_CMD_SIGN,
-			ATECC_SIGN_EXTERNAL, 0, NULL, 0,
-			buf, sizeof(buf), &res);
-	dump_hex(res.buf, res.len);
 
 	return 0;
 }
@@ -81,7 +59,6 @@ int16_t main(void) {
 	data uint16_t ms_heart;
 	data uint16_t ms_wink;
 	data uint8_t winks = 0;
-	data uint8_t test = 0;
 
 	enter_DefaultMode_from_RESET();
 	init(&appdata);
@@ -96,21 +73,15 @@ int16_t main(void) {
 
 	u2f_print("U2F ZERO\r\n");
 
+	run_tests();
+	test_ecc508a();
 
 	while (1) {
-
-		if (!test)
-		{
-			run_tests();
-			test_ecc508a();
-			test = 1;
-		}
 
 		if (ms_since(ms_heart,500))
 		{
 			u2f_print("ms %lu\r\n", get_ms());
 			LED_G = !LED_G;
-
 		}
 
 

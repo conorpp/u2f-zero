@@ -5,24 +5,30 @@
  *      Author: pp
  */
 #include "app.h"
+#include "bsp.h"
 #include "u2f.h"
+#include "u2f_hid.h"
 #include "atecc508a.h"
 
+static struct u2f_hid_msg res;
+static uint8_t* resbuf = (uint8_t*)&res;
+static uint8_t resoffset = 0;
+static uint8_t resseq = 0;
 
 void u2f_response_writeback(uint8_t * buf, uint8_t len)
 {
-
+	u2f_hid_writeback(buf, len);
 }
-
 
 void u2f_response_flush()
 {
-
+	USBD_Write(EP1IN, resbuf, 64, false);
+	resseq = 0;
 }
 
 void u2f_response_start()
 {
-
+	resoffset = 0;
 }
 
 int8_t u2f_get_user_feedback()

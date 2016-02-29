@@ -71,7 +71,7 @@ struct u2f_hid_nonce
 
 struct u2f_hid_init_response
 {
-	struct u2f_hid_nonce nonce;
+	// struct u2f_hid_nonce nonce;
 	uint32_t cid;
 	uint8_t version_id;
 	uint8_t version_major;
@@ -91,7 +91,13 @@ typedef enum
 
 void u2f_hid_init();
 
-int hid_u2f_request(struct u2f_hid_msg* req, struct u2f_hid_msg* res);
+// u2f_hid_writeback handles the sequencing and per packet buffering
+// @payload the buffer to write
+// @len length of buffer
+// @@prereq is that hid_layer.current_cid, hid_layer.res_len each set to correct values
+void u2f_hid_writeback(uint8_t * payload, uint8_t len);
+
+void u2f_hid_request(struct u2f_hid_msg* req);
 
 #define U2FHID_IS_INIT(cmd)			((cmd) & 0x80)
 

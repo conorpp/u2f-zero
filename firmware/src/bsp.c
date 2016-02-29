@@ -2,6 +2,8 @@
  * bsp.c
  *
  */
+#include <SI_EFM8UB1_Register_Enums.h>
+#include <efm8_usb.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include "app.h"
@@ -75,6 +77,11 @@ void u2f_write_s(char* d)
 		putf(NULL,*d++);
 
 	}
+}
+
+void usb_write(uint8_t* buf, uint8_t len)
+{
+	USBD_Write(EP1IN, buf, len, false);
 }
 
 

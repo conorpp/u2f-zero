@@ -26,24 +26,30 @@
 
 uint8_t tmpBuffer;
 
-// #define PRINT_EVENTS
+#define PRINT_EVENTS
+
+#ifdef PRINT_EVENTS
+
+#define u2f_print_ev u2f_print
+#define u2f_write_s_ev u2f_write_s
+
+#else
+#define u2f_print_ev(x)
+#define u2f_write_s_ev(x)
+#endif
+
 
 void USBD_ResetCb(void) {
-#ifdef PRINT_EVENTS
-	u2f_print("USBD_ResetCb\r\n");
-#endif
+	u2f_print_ev("USBD_ResetCb\r\n");
 }
 
 
 void USBD_DeviceStateChangeCb(USBD_State_TypeDef oldState,
 		USBD_State_TypeDef newState) {
-#ifdef PRINT_EVENTS
-	u2f_print("USBD_DeviceStateChangeCb\r\n");
-#endif
+	u2f_print_ev("USBD_DeviceStateChangeCb\r\n");
 }
 
 bool USBD_IsSelfPoweredCb(void) {
-	//u2f_print("USBD_IsSelfPoweredCb\r\n");
 	return false;
 }
 
@@ -97,9 +103,7 @@ USB_Status_TypeDef USBD_SetupCmdCb(
 	    switch (setup->bRequest)
 	    {
 	      case USB_HID_SET_REPORT:
-#ifdef PRINT_EVENTS
-	    	  u2f_print("output report\r\n");
-#endif
+	    	  u2f_print_ev("output report\r\n");
 	        break;
 
 	      case USB_HID_GET_REPORT:
@@ -116,9 +120,7 @@ USB_Status_TypeDef USBD_SetupCmdCb(
 	          idleTimerSet(setup->wValue >> 8);
 	          retVal = USB_STATUS_OK;
 	        }
-#ifdef PRINT_EVENTS
-	        else u2f_print("unhandled USB_HID_SET_IDLE\r\n");
-#endif
+	        else u2f_print_ev("unhandled USB_HID_SET_IDLE\r\n");
 	        break;
 
 	      case USB_HID_GET_IDLE:
@@ -126,19 +128,15 @@ USB_Status_TypeDef USBD_SetupCmdCb(
 	            && (setup->wLength == 1)
 	            && (setup->bmRequestType.Direction == USB_SETUP_DIR_IN))
 	        {
-	        	u2f_print("get idle\r\n");
+	          u2f_print_ev("get idle\r\n");
 	          tmpBuffer = idleGetRate();
 	          USBD_Write(EP0, &tmpBuffer, 1, false);
 	          retVal = USB_STATUS_OK;
 	        }
-#ifdef PRINT_EVENTS
-	        else u2f_print("unhandled USB_HID_GET_IDLE\r\n");
-#endif
+	        else u2f_print_ev("unhandled USB_HID_GET_IDLE\r\n");
 	        break;
-#ifdef PRINT_EVENTS
 	      default:
-	    	  u2f_print("unhandled setup->bRequest\r\n");
-#endif
+	    	  u2f_print_ev("unhandled setup->bRequest\r\n");
 	    }
 	  }
 	  else
@@ -153,43 +151,24 @@ USB_Status_TypeDef USBD_SetupCmdCb(
 uint16_t USBD_XferCompleteCb(uint8_t epAddr, USB_Status_TypeDef status,
 		uint16_t xferred, uint16_t remaining) {
 
-	int i = 0;
-	char buf[6];
-	struct u2f_hid_msg res;
-	uint8_t* resbuf = (uint8_t*)&res;
+	char buf[4];
 
 	if (epAddr == EP1OUT)
 	{
-
-#ifdef U2F_PRINT && PRINT_EVENTS
+#ifdef U2F_PRINT
+		int i = 0;
 		for (i=0; i < sizeof(appdata.hidmsgbuf); i++)
 		{
-			uint16_t l = (uint8_t)appdata.hidmsgbuf[i];
-			sprintf(buf,"%x",l);
+			uint8_t l = (uint8_t)appdata.hidmsgbuf[i];
+			sprintf(buf,"%bx",l);
 			u2f_write_s(buf);
 		}
 		u2f_write_s("\r\n");
 #endif
-
-		i = hid_u2f_request((struct u2f_hid_msg*)appdata.hidmsgbuf,
-						&res);
-		if (i == U2FHID_REPLY || i == U2FHID_INCOMPLETE)
-		{
-			USBD_Write(EP1IN, resbuf, 64, false);
-		}
-		else
-		{
-
-		}
-
+		u2f_hid_request((struct u2f_hid_msg*)appdata.hidmsgbuf);
 	}
-	else
-	{
-		u2f_print(
 
-				);
-
-	}
 	return 0;
 }
+
 

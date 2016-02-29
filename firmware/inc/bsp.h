@@ -39,6 +39,7 @@ void qu2f_write_s(char* d);
 void qu2f_write_n(char* buf, uint32_t val, int base);
 
 
+void usb_write(uint8_t* buf, uint8_t len);
 
 
 

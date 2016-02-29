@@ -61,11 +61,12 @@ void flush_messages()
 #endif
 
 
-void putf(void* _notused, char c)
+void putf(char c)
 {
-	xdata int i;
+	uint8_t i;
 	SBUF0 = c;
-	for (i=0; i<400; i++);
+	for (i=0; i<200; i++){}
+	for (i=0; i<200; i++){}
 }
 
 void u2f_write_s(char* d)
@@ -74,9 +75,147 @@ void u2f_write_s(char* d)
 	while(*d)
 	{
 		// UART0 output queue
-		putf(NULL,*d++);
+		putf(*d++);
 
 	}
+}
+
+static void int2str_reduce_10(char ** snum, uint32_t copy)
+{
+    do
+    {
+        *snum++;
+        copy /= 10;
+    }while(copy);
+}
+
+static void int2str_reduce_16(char ** snum, uint32_t copy)
+{
+    do
+    {
+        *snum++;
+        copy >>= 4;
+    }while(copy);
+}
+
+static const char * __digits = "0123456789abcdef";
+static char __int2str_buf[9];
+
+static void int2str_map_10(char ** snum, uint32_t i)
+{
+    do
+    {
+        *--*snum = __digits[i % 10];
+        i /= 10;
+    }while(i);
+}
+
+static void int2str_map_16(char ** snum, uint32_t i)
+{
+    do
+    {
+        *--*snum = __digits[i & 0xf];
+        i >>= 4;
+    }while(i);
+}
+
+#define dint2str(i)     __int2str10(i)
+#define xint2str(i)     __int2str16(i)
+
+char * __int2str10(int32_t i)
+{
+    char * snum = __int2str_buf;
+    if (i<0) *snum++ = '-';
+    int2str_reduce_10(&snum, i);
+    *snum = '\0';
+    int2str_map_10(&snum, i);
+    return snum;
+}
+
+char * __int2str16(int32_t i)
+{
+    char * snum = __int2str_buf;
+    if (i<0) *snum++ = '-';
+    int2str_reduce_16(&snum, i);
+    *snum = '\0';
+    int2str_map_16(&snum, i);
+    return snum;
+}
+
+void u2f_putb(uint8_t i)
+{
+    u2f_write_s(dint2str((uint32_t)i));
+}
+
+void u2f_putd(int16_t i)
+{
+    u2f_write_s(dint2str((int32_t)i));
+}
+
+void u2f_putx(int16_t i)
+{
+    u2f_write_s(xint2str((int32_t)i));
+}
+
+void u2f_putl(int32_t i)
+{
+    u2f_write_s(dint2str((int32_t)i));
+}
+
+void u2f_printd(const char * tag, uint8_t c, ...)
+{
+    u2f_write_s(tag);
+    va_list args;
+    va_start(args,c);
+    while(c--)
+    {
+        u2f_putd(va_arg(args, int16_t));
+        u2f_write_s(" ");
+    }
+    u2f_write_s("\r\n");
+    va_end(args);
+}
+
+void u2f_printl(const char * tag, uint8_t c, ...)
+{
+    u2f_write_s(tag);
+    va_list args;
+    va_start(args,c);
+    while(c--)
+    {
+        u2f_putl(va_arg(args, int32_t));
+        u2f_write_s(" ");
+    }
+    u2f_write_s("\r\n");
+    va_end(args);
+}
+
+void u2f_printx(const char * tag, uint8_t c, ...)
+{
+    u2f_write_s(tag);
+    va_list args;
+    va_start(args,c);
+    while(c--)
+    {
+        u2f_putx(va_arg(args, int16_t));
+        u2f_write_s(" ");
+    }
+    u2f_write_s("\r\n");
+    va_end(args);
+}
+
+void u2f_printb(const char * tag, uint8_t c, ...)
+{
+    u2f_write_s(tag);
+    va_list args;
+    va_start(args,c);
+    while(c--)
+    {
+        u2f_putb(va_arg(args, uint8_t));
+        u2f_write_s(" ");
+    }
+    u2f_write_s("\r\n");
+    va_end(args);
 }
 
 void usb_write(uint8_t* buf, uint8_t len)

@@ -71,7 +71,7 @@ int16_t main(void) {
 	// Enable interrupts
 	IE_EA = 1;
 
-	u2f_print("U2F ZERO\r\n");
+	u2f_print_s("U2F ZERO\r\n");
 
 	run_tests();
 	test_ecc508a();
@@ -80,7 +80,7 @@ int16_t main(void) {
 
 		if (ms_since(ms_heart,500))
 		{
-			u2f_print("ms %lu\r\n", get_ms());
+			u2f_printl("ms ", 1, get_ms());
 			LED_G = !LED_G;
 		}
 
@@ -90,7 +90,7 @@ int16_t main(void) {
 			if (!USBD_EpIsBusy(EP1OUT))
 			{
 				listen_for_pkt(&appdata);
-				u2f_print("read added\r\n");
+				u2f_print_s("read added\r\n");
 			}
 
 		}
@@ -117,7 +117,7 @@ int16_t main(void) {
 				}
 				break;
 			case APP_ERROR:
-				u2f_print("error: %bx\r\n", appdata.error);
+				u2f_printb("error: ", 1, appdata.error);
 				appdata.state = APP_NOTHING;
 				break;
 		}

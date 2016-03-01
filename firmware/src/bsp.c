@@ -67,6 +67,7 @@ void putf(char c)
 	SBUF0 = c;
 	for (i=0; i<200; i++){}
 	for (i=0; i<200; i++){}
+	for (i=0; i<200; i++){}
 }
 
 void u2f_write_s(char* d)
@@ -142,9 +143,10 @@ char * __int2str16(int32_t i)
     return snum;
 }
 
+
 void u2f_putb(uint8_t i)
 {
-    u2f_write_s(dint2str((uint32_t)i));
+    u2f_write_s(xint2str((uint32_t)i));
 }
 
 void u2f_putd(int16_t i)
@@ -159,13 +161,17 @@ void u2f_putx(int16_t i)
 
 void u2f_putl(int32_t i)
 {
-    u2f_write_s(dint2str((int32_t)i));
+	u2f_write_s(dint2str((int32_t)i));
+}
+void u2f_putlx(int32_t i)
+{
+	u2f_write_s(xint2str((int32_t)i));
 }
 
 void u2f_printd(const char * tag, uint8_t c, ...)
 {
+	va_list args;
     u2f_write_s(tag);
-    va_list args;
     va_start(args,c);
     while(c--)
     {
@@ -178,8 +184,8 @@ void u2f_printd(const char * tag, uint8_t c, ...)
 
 void u2f_printl(const char * tag, uint8_t c, ...)
 {
-    u2f_write_s(tag);
     va_list args;
+    u2f_write_s(tag);
     va_start(args,c);
     while(c--)
     {
@@ -192,8 +198,8 @@ void u2f_printl(const char * tag, uint8_t c, ...)
 
 void u2f_printx(const char * tag, uint8_t c, ...)
 {
-    u2f_write_s(tag);
     va_list args;
+    u2f_write_s(tag);
     va_start(args,c);
     while(c--)
     {
@@ -206,8 +212,8 @@ void u2f_printx(const char * tag, uint8_t c, ...)
 
 void u2f_printb(const char * tag, uint8_t c, ...)
 {
+	va_list args;
     u2f_write_s(tag);
-    va_list args;
     va_start(args,c);
     while(c--)
     {
@@ -218,9 +224,27 @@ void u2f_printb(const char * tag, uint8_t c, ...)
     va_end(args);
 }
 
+void u2f_printlx(const char * tag, uint8_t c, ...)
+{
+    va_list args;
+    u2f_write_s(tag);
+    va_start(args,c);
+    while(c--)
+    {
+        u2f_putlx(va_arg(args, int32_t));
+        u2f_write_s(" ");
+    }
+    u2f_write_s("\r\n");
+    va_end(args);
+}
+
 void usb_write(uint8_t* buf, uint8_t len)
 {
-	USBD_Write(EP1IN, buf, len, false);
+	int16_t ec;
+	if (USB_STATUS_OK != (ec=USBD_Write(EP1IN, buf, len, false)))
+	{
+		u2f_printd("USB error",1, -ec);
+	}
 }
 
 

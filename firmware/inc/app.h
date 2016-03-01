@@ -15,7 +15,7 @@ SI_SBIT(SCL, SFR_P1, 3);               // and P1.3
 SI_SBIT (LED1, SFR_P1, 4);             // LED green
 
 // debug options
-#define U2F_PRINT
+//#define U2F_PRINT
 #define DBG_MESSAGE_SIZE 		30
 #define DBG_MSG_COUNT			4
 

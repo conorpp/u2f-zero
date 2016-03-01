@@ -60,6 +60,12 @@ int16_t main(void) {
 	data uint16_t ms_wink;
 	data uint8_t winks = 0;
 
+
+	uint8_t b = 0x66;
+	uint16_t  d = 7777;
+	uint32_t l = 0x12345678;
+
+
 	enter_DefaultMode_from_RESET();
 	init(&appdata);
 
@@ -71,8 +77,11 @@ int16_t main(void) {
 	// Enable interrupts
 	IE_EA = 1;
 
-	u2f_print_s("U2F ZERO\r\n");
+	u2f_prints("U2F ZERO\r\n");
 
+	u2f_printb("b:",1,b);
+	u2f_printd("d:",1,d);
+	u2f_printlx("lx:",1,l);
 	run_tests();
 	test_ecc508a();
 
@@ -87,10 +96,10 @@ int16_t main(void) {
 
 		if ( USBD_GetUsbState() == USBD_STATE_CONFIGURED)
 		{
-			if (!USBD_EpIsBusy(EP1OUT))
+			if (!USBD_EpIsBusy(EP1OUT) && !USBD_EpIsBusy(EP1IN))
 			{
 				listen_for_pkt(&appdata);
-				u2f_print_s("read added\r\n");
+				u2f_prints("read added\r\n");
 			}
 
 		}

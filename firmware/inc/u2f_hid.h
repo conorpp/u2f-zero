@@ -40,12 +40,13 @@
 
 #define U2FHID_INIT_PAYLOAD_SIZE  (HID_PACKET_SIZE-7)
 #define U2FHID_CONT_PAYLOAD_SIZE  (HID_PACKET_SIZE-5)
+#define U2FHID_MAX_PAYLOAD_SIZE  (7609)
 
 #define U2FHID_LEN(req) (*(uint16_t*)&req->pkt.init.bcnth)
 #define U2FHID_SET_LEN(req,len) (*(uint16_t*)&req->pkt.init.bcnth = (uint16_t)len)
 
 #define U2FHID_TIMEOUT_MS 1500
-#define U2FHID_TIMEOUT(hid) ((hid)->last_buffered > U2FHID_TIMEOUT_MS)
+#define U2FHID_TIMEOUT(hid) (get_ms() - (hid)->last_buffered > U2FHID_TIMEOUT_MS)
 
 struct u2f_hid_msg
 {

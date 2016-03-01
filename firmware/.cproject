@@ -108,7 +108,7 @@
 							<option id="com.silabs.ide.si8051.keil.toolchain.category.general.memory_model.250818744" name="Memory model" superClass="com.silabs.ide.si8051.keil.toolchain.category.general.memory_model" value="com.silabs.ide.si8051.keil.toolchain.category.general.memory_model.large" valueType="enumerated"/>
 							<targetPlatform binaryParser="com.silabs.ide.si8051.debug.omf.OMF;com.silabs.ide.si8051.debug.omf.OMF2;com.silabs.ide.debug.core.BIN;com.silabs.ide.debug.core.HEX;com.silabs.ide.debug.core.S37" id="com.silabs.ide.si8051.keil.targetplatform.406719948" isAbstract="false" superClass="com.silabs.ide.si8051.keil.targetplatform"/>
 							<builder buildPath="${workspace_loc:/u2f-firmware}/Keil 8051 v9.53 - Release" errorParsers="org.eclipse.cdt.core.GmakeErrorParser;org.eclipse.cdt.core.CWDLocator" id="com.silabs.ide.si8051.keil.builder.1235887623" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Keil Builder" parallelBuildOn="false" superClass="com.silabs.ide.si8051.keil.builder"/>
-							<tool errorParsers="com.silabs.ide.si8051.keil.KeilErrorParser" id="com.silabs.ide.si8051.keil.toolchain.compiler.1998078110" name="Keil 8051 Compiler" superClass="com.silabs.ide.si8051.keil.toolchain.compiler">
+							<tool command="C51" errorParsers="com.silabs.ide.si8051.keil.KeilErrorParser" id="com.silabs.ide.si8051.keil.toolchain.compiler.1998078110" name="Keil 8051 Compiler" superClass="com.silabs.ide.si8051.keil.toolchain.compiler">
 								<option id="com.silabs.ide.si8051.keil.compiler.category.optimization.level.817809365" name="Level" superClass="com.silabs.ide.si8051.keil.compiler.category.optimization.level" value="com.silabs.ide.si8051.keil.compiler.category.optimization.level.9" valueType="enumerated"/>
 								<option id="com.silabs.ide.si8051.keil.compiler.category.symbols.def.617432341" name="Defined symbols (DEFINE(...))" superClass="com.silabs.ide.si8051.keil.compiler.category.symbols.def"/>
 								<option id="com.silabs.ide.si8051.keil.compiler.category.optimization.emphasis.1009890806" name="Emphasis" superClass="com.silabs.ide.si8051.keil.compiler.category.optimization.emphasis" value="com.silabs.ide.si8051.keil.compiler.category.optimization.emphasis.size" valueType="enumerated"/>
@@ -126,6 +126,7 @@
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/tests&quot;"/>
 								</option>
 								<option id="com.silabs.ide.si8051.keil.compiler.category.general.code.389376290" name="Code size" superClass="com.silabs.ide.si8051.keil.compiler.category.general.code" value="com.silabs.ide.si8051.keil.compiler.category.general.code.large" valueType="enumerated"/>
+								<option id="com.silabs.ide.si8051.keil.compiler.category.misc.extraflags.762226691" name="Additional Flags" superClass="com.silabs.ide.si8051.keil.compiler.category.misc.extraflags" value="" valueType="string"/>
 								<inputType id="com.silabs.ide.si8051.keil.compiler.inputType.261436307" superClass="com.silabs.ide.si8051.keil.compiler.inputType"/>
 							</tool>
 							<tool command="A51" errorParsers="com.silabs.ide.si8051.keil.KeilErrorParser" id="com.silabs.ide.si8051.keil.toolchain.assembler.1919193369" name="Keil 8051 Assembler" superClass="com.silabs.ide.si8051.keil.toolchain.assembler">

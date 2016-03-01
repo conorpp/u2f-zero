@@ -138,7 +138,7 @@ int8_t atecc_send_recv(uint8_t cmd, uint8_t p1, uint16_t p2,
 		errors++;
 		if (errors > 5)
 		{
-			u2f_print("fail recv %bx\r\n", appdata.error);
+			u2f_printb("fail recv ", 1,appdata.error);
 			flush_messages();
 		}
 		switch(appdata.error)
@@ -214,13 +214,13 @@ static void dump_config(uint8_t* buf)
 		dump_hex(res.buf,res.len);
 	}
 
-	u2f_print("config crc: %x\r\n", reverse_bits(crc));
+	u2f_printx("config crc:", 1,reverse_bits(crc));
 }
 
 static void atecc_setup_config(uint8_t* buf)
 {
 	struct atecc_response res;
-	int i;
+	uint8_t i;
 
 	struct atecc_slot_config sc;
 	struct atecc_key_config kc;
@@ -235,7 +235,7 @@ static void atecc_setup_config(uint8_t* buf)
 	{
 		if ( atecc_write_eeprom(ATECC_EEPROM_SLOT(i), ATECC_EEPROM_SLOT_OFFSET(i), &sc, ATECC_EEPROM_SLOT_SIZE) != 0)
 		{
-			u2f_print("1 atecc_write_eeprom failed %bd\r\n",i);
+			u2f_printb("1 atecc_write_eeprom failed ",1, i);
 		}
 
 	}
@@ -244,7 +244,7 @@ static void atecc_setup_config(uint8_t* buf)
 	sc.writeconfig = 0x2;
 	if ( atecc_write_eeprom(ATECC_EEPROM_SLOT(15), ATECC_EEPROM_SLOT_OFFSET(15), &sc, ATECC_EEPROM_SLOT_SIZE) != 0)
 	{
-		u2f_print("2 atecc_write_eeprom failed %bd\r\n",i);
+		u2f_printb("2 atecc_write_eeprom failed %bd\r\n",1,i);
 	}
 
 	kc.private = 1;
@@ -265,7 +265,7 @@ static void atecc_setup_config(uint8_t* buf)
 		}
 		if ( atecc_write_eeprom(ATECC_EEPROM_KEY(i), ATECC_EEPROM_KEY_OFFSET(i), &kc, ATECC_EEPROM_KEY_SIZE) != 0)
 		{
-			u2f_print("3 atecc_write_eeprom failed %bd\r\n" ,i);
+			u2f_printb("3 atecc_write_eeprom failed " ,1,i);
 		}
 
 	}
@@ -274,7 +274,7 @@ static void atecc_setup_config(uint8_t* buf)
 	buf[0] = 0xAA;
 	if ( atecc_write_eeprom(ATECC_EEPROM_B2A(18), ATECC_EEPROM_B2O(18), buf, 1) != 0)
 	{
-		u2f_print("otp write failed\r\n");
+		u2f_prints("otp write failed\r\n");
 	}
 
 	dump_config(buf);
@@ -303,7 +303,7 @@ void atecc_setup_device(uint8_t * buf)
 			ATECC_LOCK_CONFIG, 0xf2cd, NULL, 0,
 			buf, sizeof(buf), NULL))
 	{
-		u2f_print("ATECC_CMD_LOCK failed\r\n");
+		u2f_prints("ATECC_CMD_LOCK failed\r\n");
 		return;
 	}
 

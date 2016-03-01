@@ -30,12 +30,10 @@ uint8_t tmpBuffer;
 
 #ifdef PRINT_EVENTS
 
-#define u2f_print_ev u2f_print
-#define u2f_write_s_ev u2f_write_s
+#define u2f_print_ev(s) u2f_prints(s)
 
 #else
 #define u2f_print_ev(x)
-#define u2f_write_s_ev(x)
 #endif
 
 
@@ -107,7 +105,6 @@ USB_Status_TypeDef USBD_SetupCmdCb(
 	        break;
 
 	      case USB_HID_GET_REPORT:
-	    	  //u2f_print("input report\r\n");
 
 	        break;
 
@@ -116,7 +113,6 @@ USB_Status_TypeDef USBD_SetupCmdCb(
 	            && (setup->wLength == 0)
 	            && (setup->bmRequestType.Direction != USB_SETUP_DIR_IN))
 	        {
-	        	// u2f_print("set idle\r\n");
 	          idleTimerSet(setup->wValue >> 8);
 	          retVal = USB_STATUS_OK;
 	        }
@@ -160,13 +156,13 @@ uint16_t USBD_XferCompleteCb(uint8_t epAddr, USB_Status_TypeDef status,
 		for (i=0; i < sizeof(appdata.hidmsgbuf); i++)
 		{
 			uint8_t l = (uint8_t)appdata.hidmsgbuf[i];
-			sprintf(buf,"%bx",l);
-			u2f_write_s(buf);
+			u2f_putb(l);
 		}
-		u2f_write_s("\r\n");
+		u2f_prints("\r\n");
 #endif
 		u2f_hid_request((struct u2f_hid_msg*)appdata.hidmsgbuf);
 	}
+
 
 	return 0;
 }

@@ -64,40 +64,29 @@ static int test_sha()
 static void slot_dump(void* slot)
 {
 	struct atecc_slot_config* a = (struct atecc_slot_config*) slot;
-	flush_messages();
-	u2f_print("    readkey %bx\r\n", a->readkey);
-	if (a->nomac) u2f_print("    nomac\r\n");
-	flush_messages();
-	if (a->limiteduse) u2f_print("    limiteduse\r\n");
-	if (a->encread) u2f_print("    encread\r\n");
-	flush_messages();
-	if (a->secret) u2f_print("    secret\r\n");
-	u2f_print("    writekey %bx\r\n", a->writekey);
-	flush_messages();
-	u2f_print("    writeconfig %bx\r\n", a->writeconfig);
-	flush_messages();
+	u2f_printb("    readkey ",1,a->readkey);
+	if (a->nomac) u2f_prints("    nomac\r\n");
+	if (a->limiteduse) u2f_prints("    limiteduse\r\n");
+	if (a->encread) u2f_prints("    encread\r\n");
+	if (a->secret) u2f_prints("    secret\r\n");
+	u2f_printb("    writekey ", 1,a->writekey);
+	u2f_printb("    writeconfig ",1, a->writeconfig);
 }
 
 static void key_dump(void* slot)
 {
 	struct atecc_key_config* a = (struct atecc_slot_config*) slot;
-	flush_messages();
 
-	if (a->private) u2f_print("    private\r\n");
-	if (a->pubinfo) u2f_print("    pubinfo\r\n");
-	flush_messages();
-	u2f_print("    keytype %bx\r\n", a->keytype);
-	if (a->lockable) u2f_print("    lockable\r\n");
-	flush_messages();
-	if (a->reqrandom) u2f_print("    reqrandom\r\n");
-	if (a->reqauth) u2f_print("    reqauth\r\n");
-	flush_messages();
-	u2f_print("    authkey %bx\r\n", a->authkey);
-	if (a->intrusiondisable) u2f_print("    intrusiondisable\r\n");
-	flush_messages();
-	if (a->rfu) u2f_print("    rfu\r\n");
-	u2f_print("    x509id %bx\r\n", a->x509id);
-	flush_messages();
+	if (a->private) u2f_prints("    private\r\n");
+	if (a->pubinfo) u2f_prints("    pubinfo\r\n");
+	u2f_printb("    keytype  ", 1,a->keytype);
+	if (a->lockable) u2f_prints("    lockable\r\n");
+	if (a->reqrandom) u2f_prints("    reqrandom\r\n");
+	if (a->reqauth) u2f_prints("    reqauth\r\n");
+	u2f_printb("    authkey ",1, a->authkey);
+	if (a->intrusiondisable) u2f_prints("    intrusiondisable\r\n");
+	if (a->rfu) u2f_prints("    rfu\r\n");
+	u2f_printb("    x509id ",1, a->x509id);
 }
 
 static int test_atecc_eeprom()
@@ -151,11 +140,11 @@ static int test_atecc_eeprom()
 			ATECC_RW_CONFIG, 5,NULL,0,
 			buf,sizeof(buf), &res);
 
-	u2f_print("-- slot 0 --\r\n");
+	u2f_prints("-- slot 0 --\r\n");
 	dump_hex(res.buf,2);
 	slot_dump(res.buf);
 
-	u2f_print("-- slot 1 --\r\n");
+	u2f_prints("-- slot 1 --\r\n");
 	dump_hex(res.buf+2,2);
 	slot_dump(res.buf+2);
 
@@ -168,11 +157,11 @@ static int test_atecc_eeprom()
 			ATECC_RW_CONFIG, 24,NULL,0,
 			buf,sizeof(buf), &res);
 
-	u2f_print("-- key 0 --\r\n");
+	u2f_prints("-- key 0 --\r\n");
 	dump_hex(res.buf,2);
 	key_dump(res.buf);
 
-	u2f_print("-- key 1 --\r\n");
+	u2f_prints("-- key 1 --\r\n");
 	dump_hex(res.buf+2,2);
 	key_dump(res.buf+2);
 
@@ -204,7 +193,7 @@ int test_key_signing()
 
 	dump_hex(res.buf, res.len);
 
-	u2f_print("sig:\r\n");
+	u2f_prints("sig:\r\n");
 
 	atecc_send_recv(ATECC_CMD_SIGN,
 			ATECC_SIGN_EXTERNAL, 0, NULL, 0,
@@ -296,7 +285,7 @@ void run_tests()
 	if (rc == 0)
 		PRINT("--- SHA TEST SUCCESS ---\r\n");
 	else
-		PRINT("--- SHA TEST FAILED %d ---\r\n",rc);
+		PRINT("--- SHA TEST FAILED ---\r\n");
 #endif
 
 #ifdef TEST_ATECC_EEPROM
@@ -305,7 +294,7 @@ void run_tests()
 	if (rc == 0)
 		PRINT("--- EEPROM TEST SUCCESS ---\r\n");
 	else
-		PRINT("--- EEPROM TEST FAILED %d ---\r\n",rc);
+		PRINT("--- EEPROM TEST FAILED ---\r\n");
 #endif
 
 #ifdef TEST_KEY_SIGNING
@@ -314,7 +303,7 @@ void run_tests()
 	if (rc == 0)
 		PRINT("--- KEY SIGNING SUCCESS ---\r\n");
 	else
-		PRINT("--- KEY SIGNING FAILED %d ---\r\n",rc);
+		PRINT("--- KEY SIGNING FAILED ---\r\n");
 #endif
 
 #ifdef TEST_EFM8UB1_EEPROM

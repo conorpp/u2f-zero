@@ -44,13 +44,9 @@ static struct hid_layer_param
 	// total length of response in bytes
 	uint16_t res_len;
 
-#ifndef U2F_PRINT
 	#define BUFFER_SIZE 300
 	uint8_t buffer[BUFFER_SIZE];
-#else
-	#define BUFFER_SIZE 70
-	uint8_t buffer[BUFFER_SIZE];
-#endif
+
 
 } hid_layer;
 

@@ -140,7 +140,6 @@ int8_t atecc_send_recv(uint8_t cmd, uint8_t p1, uint16_t p2,
 		if (errors > 5)
 		{
 			u2f_printb("fail recv ", 1,appdata.error);
-			flush_messages();
 		}
 		switch(appdata.error)
 		{

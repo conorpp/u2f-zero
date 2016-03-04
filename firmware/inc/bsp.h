@@ -32,42 +32,43 @@ SI_SBIT(LED_G, SFR_P1, 4);
 
 void u2f_delay(int16_t ms);
 
-void u2f_write_s(char* d);
-
 void usb_write(uint8_t* buf, uint8_t len);
 
-
-//void u2f_putv(uint32_t i, uint8_t base);
-//
-//#define u2f_put(i) u2f_putv(i,10)
-//#define u2f_putx(i) u2f_putv(i,16)
-void u2f_putb(uint8_t i);
-void u2f_putd(int16_t i);
-void u2f_putx(uint16_t i);
-void u2f_putl(int32_t i);
-void u2f_putlx(int32_t i);
-
-#define u2f_prints(c) u2f_write_s(c)
-void u2f_printb(const char * tag, uint8_t c, ...);
-void u2f_printd(const char * tag, uint8_t c, ...);
-void u2f_printx(const char * tag, uint8_t c, ...);
-void u2f_printl(const char * tag, uint8_t c, ...);
-void u2f_printlx(const char * tag, uint8_t c, ...);
 
 
 #ifdef U2F_PRINT
 
-	void u2f_print(char* fmt, ...);
-
-	// not reentrant
 	void dump_hex(uint8_t* hex, uint8_t len);
-	void flush_messages();
+	void u2f_putb(uint8_t i);
+	void u2f_putd(int16_t i);
+	void u2f_putx(uint16_t i);
+	void u2f_putl(int32_t i);
+	void u2f_putlx(int32_t i);
+
+	void u2f_prints(const char * str);
+	void u2f_printb(const char * tag, uint8_t c, ...);
+	void u2f_printd(const char * tag, uint8_t c, ...);
+	void u2f_printx(const char * tag, uint8_t c, ...);
+	void u2f_printl(const char * tag, uint8_t c, ...);
+	void u2f_printlx(const char * tag, uint8_t c, ...);
 
 #else
-	#define u2f_print(x)
-	// #define dump_hex(x)
-	void dump_hex(uint8_t* hex, uint8_t len);
-	#define flush_messages(x)
+
+	#define u2f_printx(x)
+	#define u2f_printb(x)
+	#define u2f_printlx(x)
+	#define u2f_printl(x)
+	#define u2f_printd(x)
+	#define u2f_prints(x)
+
+	#define u2f_putx(x)
+	#define u2f_putb(x)
+	#define u2f_putl(x)
+	#define u2f_putlx(x)
+
+	#define putf(x)
+	#define dump_hex(x)
+
 #endif
 
 

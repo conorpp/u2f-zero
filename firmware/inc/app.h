@@ -15,9 +15,7 @@ SI_SBIT(SCL, SFR_P1, 3);               // and P1.3
 SI_SBIT (LED1, SFR_P1, 4);             // LED green
 
 // debug options
-//#define U2F_PRINT
-#define DBG_MESSAGE_SIZE 		30
-#define DBG_MSG_COUNT			4
+#define U2F_PRINT
 
 #define KEYHANDLES_START 			(EEPROM_DATA_START + 30)
 #define KEYHANDLES_COUNT			14
@@ -57,72 +55,10 @@ struct APP_DATA
 
 extern data struct APP_DATA appdata;
 
-struct debug_msg
-{
-	char buf[DBG_MESSAGE_SIZE];
-};
 
 void set_app_error(APP_ERROR_CODE ec);
 
 
-
-
-#define FIFO_HEADER(NAME, TYPE)\
-void NAME##_fifo_init();\
-int NAME##_fifo_append(TYPE* _data);\
-int NAME##_fifo_get(TYPE* _data)
-
-
-#ifdef U2F_PRINT
-FIFO_HEADER(debug, struct debug_msg);
-#else
-#define debug_fifo_init(x)
-#define debug_fifo_get(x)
-#define debug_fifo_append(x)
-#endif
-
-#define FIFO_CREATE(NAME, TYPE, SIZE) \
-static SI_SEGMENT_VARIABLE(NAME##MEM[SIZE],TYPE,SI_SEG_XDATA);\
-volatile TYPE* NAME##WP;\
-volatile TYPE* NAME##RP;\
-void NAME##_fifo_init()\
-{\
-	NAME##WP = NAME##MEM;\
-	NAME##RP = NAME##MEM;\
-}\
-int NAME##_fifo_append(TYPE* _data)\
-{\
-	volatile TYPE* next = 0;\
-	next = NAME##WP + 1;\
-	if (next == (NAME##MEM + SIZE))\
-	{\
-		next = NAME##MEM;\
-	}\
-	if (next == NAME##RP)\
-	{\
-		return -1;\
-	}\
-	else\
-	{\
-		*(NAME##WP) = *_data;\
-		NAME##WP = next;\
-		return 0;\
-	}\
-}\
-int NAME##_fifo_get(TYPE* _data)\
-{\
-	if (NAME##RP == NAME##WP)\
-	{\
-		return -1;\
-	}\
-	*_data = *(NAME##RP);\
-	NAME##RP = NAME##RP + 1;\
-	if (NAME##RP == &NAME##MEM[SIZE])\
-	{\
-		NAME##RP = NAME##MEM;\
-	}\
-	return 0;\
-}
 
 
 #endif /* APP_H_ */

@@ -10,6 +10,12 @@
 #include "u2f_hid.h"
 #include "atecc508a.h"
 
+struct key_handle
+{
+	uint8_t index;
+	uint8_t entropy[3];
+};
+
 static struct u2f_hid_msg res;
 static uint8_t* resbuf = (uint8_t*)&res;
 static uint8_t resoffset = 0;
@@ -84,7 +90,8 @@ void u2f_new_keypair(uint8_t * handle, uint8_t * pubkey)
 {
 
 }
-code char __attest[] =
+
+code char __attest[] = ""
 "\x30\x82\x01\x72\x30\x82\x01\x18\x02\x01\x01\x30\x0a\x06\x08\x2a\x86\x48\xce\x3d"
 "\x04\x03\x02\x30\x45\x31\x0b\x30\x09\x06\x03\x55\x04\x06\x13\x02\x41\x55\x31\x13"
 "\x30\x11\x06\x03\x55\x04\x08\x0c\x0a\x53\x6f\x6d\x65\x2d\x53\x74\x61\x74\x65\x31"

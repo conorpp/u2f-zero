@@ -86,7 +86,7 @@ static void u2f_hid_reset_packet()
 }
 
 // writes what has been buffered and clears memory
-static void u2f_hid_end_packet()
+static void u2f_hid_flush()
 {
 	if (_hid_offset)
 	{
@@ -299,7 +299,7 @@ static void hid_u2f_parse(struct u2f_hid_msg* req)
 			// write back the same data nonce
 			u2f_hid_writeback(req->pkt.init.payload, 8);
 			u2f_hid_writeback(init_res, 9);
-			u2f_hid_end_packet();
+			u2f_hid_flush();
 			hid_layer.current_cid = init_res->cid;
 
 			break;
@@ -332,7 +332,7 @@ static void hid_u2f_parse(struct u2f_hid_msg* req)
 			}
 
 			// u2f_printd("reslen byteswritten ",2, hid_layer.res_len,hid_layer.bytes_written);
-			if (hid_layer.res_len == hid_layer.bytes_written) u2f_hid_end_packet();
+			if (hid_layer.res_len == hid_layer.bytes_written) u2f_hid_flush();
 			break;
 
 		case U2FHID_WINK:
@@ -345,7 +345,7 @@ static void hid_u2f_parse(struct u2f_hid_msg* req)
 			}
 			hid_layer.res_len = 0;
 			u2f_hid_writeback(NULL, 0);
-			u2f_hid_end_packet();
+			u2f_hid_flush();
 			appdata.state = APP_WINK;
 			break;
 		case U2FHID_LOCK:

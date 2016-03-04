@@ -43,7 +43,7 @@ void usb_write(uint8_t* buf, uint8_t len);
 //#define u2f_putx(i) u2f_putv(i,16)
 void u2f_putb(uint8_t i);
 void u2f_putd(int16_t i);
-void u2f_putx(int16_t i);
+void u2f_putx(uint16_t i);
 void u2f_putl(int32_t i);
 void u2f_putlx(int32_t i);
 

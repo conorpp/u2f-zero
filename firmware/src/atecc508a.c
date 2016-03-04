@@ -6,6 +6,7 @@
  */
 #include <endian.h>
 #include <stdint.h>
+#include "app.h"
 #include "atecc508a.h"
 #include "i2c.h"
 
@@ -56,7 +57,7 @@ void atecc_wake()
 
 int8_t atecc_recv(uint8_t * buf, uint8_t buflen, struct atecc_response* res)
 {
-	data uint8_t pkt_len;
+	uint8_t pkt_len;
 	smb_init_crc();
 	pkt_len = smb_read( ATECC508A_ADDR,buf,buflen);
 	if (SMB_WAS_NACKED())

@@ -779,7 +779,7 @@
  *              The value of the string descriptor
  ******************************************************************************/
 #define LANGID_STATIC_CONST_STRING_DESC(__name, __val) \
-  SI_SEGMENT_VARIABLE(__name,  static const USB_LangId_StringDescriptor_Typedef, SI_SEG_CODE) = \
+  SI_SEGMENT_VARIABLE(__name,  static const USB_LangId_StringDescriptor_Typedef, __code) = \
     { (((SLAB_USB_NUM_LANGUAGES * 2) + 2) << 8) + USB_STRING_DESCRIPTOR, __val }
 
 /**  @} (end addtogroup efm8_usb_macros Macros) */

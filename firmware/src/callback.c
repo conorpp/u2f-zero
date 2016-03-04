@@ -147,8 +147,6 @@ USB_Status_TypeDef USBD_SetupCmdCb(
 uint16_t USBD_XferCompleteCb(uint8_t epAddr, USB_Status_TypeDef status,
 		uint16_t xferred, uint16_t remaining) {
 
-	char buf[4];
-
 	if (epAddr == EP1OUT)
 	{
 #ifdef U2F_PRINT

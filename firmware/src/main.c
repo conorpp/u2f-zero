@@ -11,6 +11,7 @@
 #include "app.h"
 #include "i2c.h"
 #include "u2f_hid.h"
+#include "u2f.h"
 #include "tests.h"
 
 
@@ -44,9 +45,126 @@ void set_app_error(APP_ERROR_CODE ec)
 	appdata.error = ec;
 }
 
-int8_t test_ecc508a()
+uint8_t readByte (uint16_t addr)
 {
 
+	uint8_t code * pread;               // FLASH read pointer
+	uint8_t byte;
+	DISABLE_INTERUPTS();
+   pread = (uint8_t code *) addr;
+
+   byte = *pread;                      // Read the byte
+
+   ENABLE_INTERUPTS();
+
+   return byte;
+}
+
+void writeByte (uint16_t addr, uint8_t byte)
+{
+   bit EA_SAVE = IE_EA;                // Preserve IE_EA
+   uint8_t xdata * data pwrite;           // Flash write pointer
+
+   IE_EA = 0;                          // Disable interrupts
+
+   VDM0CN = 0x80;                      // Enable VDD monitor
+
+   RSTSRC = 0x02;                      // Enable VDD monitor as a reset source
+
+   pwrite = (uint8_t xdata *) addr;
+
+   FLKEY  = 0xA5;                      // Key Sequence 1
+   FLKEY  = 0xF1;                      // Key Sequence 2
+   PSCTL |= 0x01;                      // PSWE = 1 which enables writes
+
+   VDM0CN = 0x80;                      // Enable VDD monitor
+
+   RSTSRC = 0x02;                      // Enable VDD monitor as a reset source
+   *pwrite = byte;                     // Write the byte
+
+   PSCTL &= ~0x01;                     // PSWE = 0 which disable writes
+
+   IE_EA = EA_SAVE;                    // Restore interrupts
+}
+
+void FLASH_PageErase (uint16_t addr)
+{
+   bit EA_SAVE = IE_EA;                // Preserve IE_EA
+   uint8_t xdata * data pwrite;           // Flash write pointer
+
+   IE_EA = 0;                          // Disable interrupts
+
+   VDM0CN = 0x80;                      // Enable VDD monitor
+
+   RSTSRC = 0x02;                      // Enable VDD monitor as a reset source
+
+   pwrite = (uint8_t xdata *) addr;
+
+   FLKEY  = 0xA5;                      // Key Sequence 1
+   FLKEY  = 0xF1;                      // Key Sequence 2
+   PSCTL |= 0x03;                      // PSWE = 1; PSEE = 1
+
+   VDM0CN = 0x80;                      // Enable VDD monitor
+
+   RSTSRC = 0x02;                      // Enable VDD monitor as a reset source
+   *pwrite = 0;                        // Initiate page erase
+
+   PSCTL &= ~0x03;                     // PSWE = 0; PSEE = 0
+
+   IE_EA = EA_SAVE;                    // Restore interrupts
+}
+
+#define EEPROM_DATA_START 			0xF800
+#define KEYHANDLES_START 			(EEPROM_DATA_START + 30)
+#define KEYHANDLES_COUNT			14
+
+void dump_eeprom()
+{
+	// 0xF800 - 0xFB7F
+	uint16_t i = 0xF800;
+	uint8_t eep;
+	for (; i <= 0xFBFF; i++)
+	{
+		eep = readByte(i);
+		u2f_putb(eep);
+	}
+
+	for (i=0; i <= 0x100; i++)
+	{
+		eep = readByte(i);
+		u2f_putb(eep);
+	}
+
+}
+
+
+int8_t test_eeprom()
+{
+	uint8_t secbyte;
+	uint16_t i;
+
+	// Enable flash erasing, then start a write cycle on the selected page
+	secbyte = readByte(0xFBFF);
+	u2f_printb("security_byte: ",1,secbyte);
+//	PSCTL |= PSCTL_PSEE__ERASE_ENABLED;
+	if (secbyte == 0xff)
+	{
+		FLASH_PageErase(0xFBC0);
+		writeByte(0xFBFF, -32);
+	}
+	else
+	{
+		writeByte(KEYHANDLES_START, 0x55);
+		for (i = 0; i < KEYHANDLES_COUNT ; i++)
+		{
+			writeByte(KEYHANDLES_START+(i<<2)+0, 0x55);
+			writeByte(KEYHANDLES_START+(i<<2)+1, 0x66);
+			writeByte(KEYHANDLES_START+(i<<2)+2, 0x77);
+			writeByte(KEYHANDLES_START+(i<<2)+3, 0x88);
+		}
+	}
+//	writeByte(0xFBFF, -32);
+	dump_eeprom();
 	return 0;
 }
 
@@ -54,6 +172,7 @@ int8_t test_ecc508a()
 
 int16_t main(void) {
 
+	data uint8_t secbyte = readByte(0xFBFF);
 	data uint8_t i = 0;
 	data uint16_t last_ms = get_ms();
 	data uint16_t ms_heart;
@@ -83,8 +202,8 @@ int16_t main(void) {
 	u2f_printd("d:",1,d);
 	u2f_printlx("lx:",1,l);
 	run_tests();
-	test_ecc508a();
-
+	test_eeprom();
+	u2f_printb("security_byte: ",1,secbyte);
 	while (1) {
 
 		if (ms_since(ms_heart,500))

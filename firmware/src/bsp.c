@@ -72,7 +72,7 @@ void putf(char c)
 
 void u2f_write_s(char* d)
 {
-	data uint16_t i;
+	static SI_SEG_DATA uint16_t i;
 	while(*d)
 	{
 		// UART0 output queue
@@ -154,7 +154,7 @@ void u2f_putd(int16_t i)
     u2f_write_s(dint2str((int32_t)i));
 }
 
-void u2f_putx(int16_t i)
+void u2f_putx(uint16_t i)
 {
     u2f_write_s(xint2str((int32_t)i));
 }
@@ -203,7 +203,7 @@ void u2f_printx(const char * tag, uint8_t c, ...)
     va_start(args,c);
     while(c--)
     {
-        u2f_putx(va_arg(args, int16_t));
+        u2f_putx(va_arg(args, uint16_t));
         u2f_write_s(" ");
     }
     u2f_write_s("\r\n");

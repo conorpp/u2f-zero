@@ -8,10 +8,11 @@
 #ifndef TESTS_H_
 #define TESTS_H_
 
-//#define ENABLE_TESTS
+#define ENABLE_TESTS
 
 //#define TEST_SHA
-//#define TEST_EEPROM
+//#define TEST_ATECC_EEPROM
+#define TEST_EFM8UB1_EEPROM
 //#define TEST_KEY_SIGNING		// requires key and locked eeprom
 
 #ifdef ENABLE_TESTS

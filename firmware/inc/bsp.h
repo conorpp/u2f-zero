@@ -65,7 +65,8 @@ void u2f_printlx(const char * tag, uint8_t c, ...);
 
 #else
 	#define u2f_print(x)
-	#define dump_hex(x)
+	// #define dump_hex(x)
+	void dump_hex(uint8_t* hex, uint8_t len);
 	#define flush_messages(x)
 #endif
 

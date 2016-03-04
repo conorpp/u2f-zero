@@ -61,6 +61,18 @@ void flush_messages()
 #endif
 
 
+
+
+void dump_hex(uint8_t* hex, uint8_t len)
+{
+	uint8_t i;
+	for (i=0 ; i < len ; i++)
+	{
+		u2f_putb(hex[i]);
+	}
+	u2f_prints("\r\n");
+}
+
 void putf(char c)
 {
 	uint8_t i;

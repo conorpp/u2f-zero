@@ -4,28 +4,24 @@
  *  Created on: Feb 14, 2016
  *      Author: Conor
  */
-
-#include <stdarg.h>
+#include <SI_EFM8UB1_Register_Enums.h>
 #include <stdio.h>
+#include <stdint.h>
 #include "app.h"
 #include "bsp.h"
 #include "i2c.h"
 #include "atecc508a.h"
+#include "eeprom.h"
 #include "tests.h"
 
 
 #ifdef ENABLE_TESTS
 
 
-static void PRINT(const char * fmt, ...)
+static void PRINT(const char * s)
 {
-	va_list args;
-
-	va_start(args,fmt);
-	vsprintf(appdata.hidmsgbuf, fmt, args);
-	va_end(args);
-
-	u2f_write_s(appdata.hidmsgbuf);
+	u2f_prints(s);
+	u2f_prints("\r\n");
 }
 
 
@@ -63,7 +59,7 @@ static int test_sha()
 #define test_sha(x)
 #endif
 
-#ifdef TEST_EEPROM
+#ifdef TEST_ATECC_EEPROM
 
 static void slot_dump(void* slot)
 {
@@ -104,7 +100,7 @@ static void key_dump(void* slot)
 	flush_messages();
 }
 
-static int test_eeprom()
+static int test_atecc_eeprom()
 {
 	uint8_t buf[7];
 	uint16_t c1,c2,c3,c4;
@@ -188,7 +184,7 @@ static int test_eeprom()
 	return 0;
 }
 #else
-#define test_eeprom(x)
+#define test_atecc_eeprom(x)
 #endif
 
 #ifdef TEST_KEY_SIGNING
@@ -222,6 +218,74 @@ int test_key_signing()
 #define test_key_signing(x)
 #endif
 
+#ifdef TEST_EFM8UB1_EEPROM
+
+void dump_eeprom()
+{
+	// 0xF800 - 0xFB7F
+	uint16_t i = 0xF800;
+	uint8_t eep;
+	for (; i <= 0xF800 + 300; i++)
+	{
+		eeprom_read(i,&eep,1);
+		u2f_putb(eep);
+	}
+}
+
+int8_t test_efm8ub1_eeprom()
+{
+	uint16_t crc = 0;
+	uint8_t secbyte;
+	int8_t i;
+	char k[] = "\x55\x66\x77\x88";
+	char buf[4];
+
+	eeprom_read(0xFBFF,&secbyte,1);
+
+	u2f_printb("security_byte: ",1,secbyte);
+
+	if (secbyte == 0xff)
+	{
+		eeprom_erase(0xFBC0);
+		i = -32;
+		eeprom_write(0xFBFF, &i, 1);
+		u2f_prints("eeprom_write\r\n");
+	}
+
+	eeprom_write(KEYHANDLES_START + 0, k, 4);
+	eeprom_write(KEYHANDLES_START + 4, k, 4);
+	eeprom_write(KEYHANDLES_START + 8, k, 4);
+	eeprom_write(KEYHANDLES_START + 12, k, 4);
+
+	eeprom_read(KEYHANDLES_START + 0,buf,4);
+	for(i=0; i < 4; i++) crc = feed_crc(crc, buf[i]);
+	dump_hex(buf,4);
+	dump_hex(k,4);
+	eeprom_read(KEYHANDLES_START + 4,buf,4);
+	for(i=0; i < 4; i++) crc = feed_crc(crc, buf[i]);
+	dump_hex(buf,4);
+	dump_hex(k,4);
+	eeprom_read(KEYHANDLES_START + 8,buf,4);
+	for(i=0; i < 4; i++) crc = feed_crc(crc, buf[i]);
+	dump_hex(buf,4);
+	dump_hex(k,4);
+	eeprom_read(KEYHANDLES_START + 12,buf,4);
+	for(i=0; i < 4; i++) crc = feed_crc(crc, buf[i]);
+	dump_hex(buf,4);
+	dump_hex(k,4);
+
+	u2f_printx("crc: ", 1, crc);
+
+	if (crc == 0xd1e8)
+		return 0;
+	return -1;
+}
+
+#else
+#define test_efm8ub1_eeprom(x)
+#endif
+
+
 void run_tests()
 {
 	int rc;
@@ -235,9 +299,9 @@ void run_tests()
 		PRINT("--- SHA TEST FAILED %d ---\r\n",rc);
 #endif
 
-#ifdef TEST_EEPROM
-	PRINT("--- STARTING EEPROM TEST ---\r\n");
-	rc = test_eeprom();
+#ifdef TEST_ATECC_EEPROM
+	PRINT("--- STARTING ATECC EEPROM TEST ---\r\n");
+	rc = test_atecc_eeprom();
 	if (rc == 0)
 		PRINT("--- EEPROM TEST SUCCESS ---\r\n");
 	else
@@ -252,6 +316,16 @@ void run_tests()
 	else
 		PRINT("--- KEY SIGNING FAILED %d ---\r\n",rc);
 #endif
+
+#ifdef TEST_EFM8UB1_EEPROM
+	PRINT("--- STARTING EFM8UB1 EEPROM TEST ---\r\n");
+	rc = test_efm8ub1_eeprom();
+	if (rc == 0)
+		PRINT("--- EFM8UB1 EEPROM SUCCESS ---\r\n");
+	else
+		PRINT("--- EFM8UB1 EEPROM FAILED ---\r\n");
+#endif
+
 
 }
 

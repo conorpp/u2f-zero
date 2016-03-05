@@ -8,6 +8,10 @@
 #ifndef EEPROM_H_
 #define EEPROM_H_
 
+#include "app.h"
+
+void eeprom_init();
+
 void eeprom_read(uint16_t addr, uint8_t * buf, uint8_t len);
 
 void _eeprom_write(uint16_t addr, uint8_t * buf, uint8_t len, uint8_t flags);

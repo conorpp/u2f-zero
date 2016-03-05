@@ -26,7 +26,7 @@
 
 uint8_t tmpBuffer;
 
-#define PRINT_EVENTS
+//#define PRINT_EVENTS
 
 #ifdef PRINT_EVENTS
 
@@ -144,21 +144,24 @@ USB_Status_TypeDef USBD_SetupCmdCb(
 }
 
 
+uint8_t hidmsgbuf[64];
+
 uint16_t USBD_XferCompleteCb(uint8_t epAddr, USB_Status_TypeDef status,
 		uint16_t xferred, uint16_t remaining) {
+
 
 	if (epAddr == EP1OUT)
 	{
 #ifdef U2F_PRINT
 		int i = 0;
-		for (i=0; i < sizeof(appdata.hidmsgbuf); i++)
+		for (i=0; i < sizeof(hidmsgbuf); i++)
 		{
-			uint8_t l = (uint8_t)appdata.hidmsgbuf[i];
+			uint8_t l = (uint8_t)hidmsgbuf[i];
 			u2f_putb(l);
 		}
 		u2f_prints("\r\n");
 #endif
-		u2f_hid_request((struct u2f_hid_msg*)appdata.hidmsgbuf);
+		u2f_hid_request((struct u2f_hid_msg*)hidmsgbuf);
 	}
 
 

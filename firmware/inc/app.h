@@ -17,8 +17,6 @@ SI_SBIT (LED1, SFR_P1, 4);             // LED green
 // debug options
 #define U2F_PRINT
 
-#define KEYHANDLES_START 			(EEPROM_DATA_START + 30)
-#define KEYHANDLES_COUNT			14
 
 typedef enum
 {
@@ -47,16 +45,21 @@ APP_ERROR_CODE;
 
 struct APP_DATA
 {
-	uint8_t hidmsgbuf[64];
-	uint8_t tmp[10];
+	// must be at least 37 bytes
+	uint8_t tmp[40];
 	uint8_t state;
 	uint8_t error;
 };
+
+extern uint8_t hidmsgbuf[64];
 
 extern data struct APP_DATA appdata;
 
 
 void set_app_error(APP_ERROR_CODE ec);
+
+// should be called after initializing eeprom
+void u2f_init();
 
 
 

@@ -8,7 +8,10 @@
 #include "bsp.h"
 #include "u2f.h"
 #include "u2f_hid.h"
+#include "eeprom.h"
 #include "atecc508a.h"
+
+
 
 struct key_handle
 {
@@ -16,10 +19,57 @@ struct key_handle
 	uint8_t entropy[3];
 };
 
+struct key_storage_header
+{
+	uint8_t num_keys;
+	uint16_t valid_keys;
+	uint8_t num_issued;
+} key_store;
+
+#define U2F_NUM_KEYS 			14
+#define U2F_KEY_HEADER_ADDR		0xF800
+#define U2F_KEYS_ADDR			(0xF800 + sizeof(struct key_storage_header))
+
+#define IS_KEY_VALID(mask,key)	((~mask) & (1<<key))
+
 static struct u2f_hid_msg res;
 static uint8_t* resbuf = (uint8_t*)&res;
 static uint8_t resoffset = 0;
 static uint8_t resseq = 0;
+
+static void flush_key_store()
+{
+	eeprom_write(U2F_KEY_HEADER_ADDR, (uint8_t* )&key_store, sizeof(struct key_storage_header));
+}
+
+void u2f_init()
+{
+	uint8_t i,j;
+	struct atecc_response res;
+
+	eeprom_read(U2F_KEY_HEADER_ADDR, (uint8_t* )&key_store, sizeof(struct key_storage_header));
+
+	// initialize key handles
+	if (key_store.num_keys != U2F_NUM_KEYS)
+	{
+		key_store.num_keys = U2F_NUM_KEYS;
+		key_store.valid_keys = 0;
+		key_store.num_issued = 0;
+		flush_key_store();
+
+		for (i=0; i < 2; i++)
+		{
+			atecc_send_recv(ATECC_CMD_RNG,ATECC_RNG_P1,ATECC_RNG_P2,
+							NULL, 0,
+							appdata.tmp,
+							sizeof(appdata.tmp), &res);
+			for (j=0; j < U2F_NUM_KEYS/2; j++) res.buf[j * U2F_KEY_HANDLE_SIZE] = j+1 + i*U2F_NUM_KEYS/2;
+			eeprom_write(U2F_KEYS_ADDR + i * (U2F_KEY_HANDLE_SIZE * U2F_NUM_KEYS/2),
+							res.buf, U2F_KEY_HANDLE_SIZE * U2F_NUM_KEYS/2);
+		}
+
+	}
+}
 
 void u2f_response_writeback(uint8_t * buf, uint8_t len)
 {
@@ -91,7 +141,7 @@ void u2f_new_keypair(uint8_t * handle, uint8_t * pubkey)
 
 }
 
-code char __attest[] = ""
+code char __attest[] =
 "\x30\x82\x01\x72\x30\x82\x01\x18\x02\x01\x01\x30\x0a\x06\x08\x2a\x86\x48\xce\x3d"
 "\x04\x03\x02\x30\x45\x31\x0b\x30\x09\x06\x03\x55\x04\x06\x13\x02\x41\x55\x31\x13"
 "\x30\x11\x06\x03\x55\x04\x08\x0c\x0a\x53\x6f\x6d\x65\x2d\x53\x74\x61\x74\x65\x31"

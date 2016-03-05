@@ -9,7 +9,17 @@
 
 #include "eeprom.h"
 
-
+void eeprom_init()
+{
+	uint8_t secbyte;
+	eeprom_read(0xFBFF,&secbyte,1);
+	if (secbyte == 0xff)
+	{
+		eeprom_erase(0xFBC0);
+		secbyte = -32;
+		eeprom_write(0xFBFF, &secbyte, 1);
+	}
+}
 
 void eeprom_read(uint16_t addr, uint8_t * buf, uint8_t len)
 {

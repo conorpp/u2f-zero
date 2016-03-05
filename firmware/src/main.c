@@ -24,6 +24,8 @@ static void init(struct APP_DATA* ap)
 	u2f_hid_init();
 	smb_init();
 	atecc_idle();
+	eeprom_init();
+	u2f_init();
 }
 
 void set_app_error(APP_ERROR_CODE ec)
@@ -32,9 +34,27 @@ void set_app_error(APP_ERROR_CODE ec)
 	appdata.error = ec;
 }
 
+
+void dump_eeprom()
+{
+	// 0xF800 - 0xFB7F
+	uint16_t i = 0xF800;
+	uint8_t eep;
+	for (; i <= 0xF800 + 196; i++)
+	{
+		eeprom_read(i,&eep,1);
+		u2f_putb(eep);
+		u2f_prints(" ");
+	}
+	u2f_prints("\r\n");
+}
+
 int8_t test_eeprom()
 {
 
+
+	dump_eeprom();
+	return 0;
 }
 
 #define ms_since(ms,num) (((uint16_t)get_ms() - (ms)) >= num ? (1|(ms=(uint16_t)get_ms())):0)
@@ -74,7 +94,7 @@ int16_t main(void) {
 		{
 			if (!USBD_EpIsBusy(EP1OUT) && !USBD_EpIsBusy(EP1IN))
 			{
-				USBD_Read(EP1OUT, appdata.hidmsgbuf, sizeof(appdata.hidmsgbuf), true);
+				USBD_Read(EP1OUT, hidmsgbuf, sizeof(hidmsgbuf), true);
 				u2f_prints("read added\r\n");
 			}
 

@@ -1,4 +1,5 @@
 #include "app.h"
+#include "bsp.h"
 #include "u2f.h"
 
 #ifndef U2F_DISABLE
@@ -41,16 +42,22 @@ static int16_t u2f_register(struct u2f_register_request * req)
     uint8_t key_handle[U2F_KEY_HANDLE_SIZE];
     uint8_t pubkey[64];
 
+    u2f_prints("u2f_register\r\n");
+
     if (u2f_get_user_feedback() != 0)
     {
+    	u2f_prints("u2f_get_user_feedback fail\r\n");
         return U2F_SW_CONDITIONS_NOT_SATISFIED;
     }
 
+    u2f_prints("u2f_new_keypair\r\n");
     if ( u2f_new_keypair(key_handle, pubkey) == -1)
     {
+    	u2f_prints("u2f_new_keypair fail\r\n");
     	return U2F_SW_CONDITIONS_NOT_SATISFIED;
     }
 
+    u2f_prints("u2f_sha\r\n");
     u2f_sha256_start();
     u2f_sha256_update(i,1);
     u2f_sha256_update(req->app,32);
@@ -60,10 +67,14 @@ static int16_t u2f_register(struct u2f_register_request * req)
     u2f_sha256_update(pubkey,64);
     u2f_sha256_finish();
     
+    u2f_prints("u2f_ecdsa_sign\r\n");
+
     if (u2f_ecdsa_sign((uint8_t*)req, U2F_ATTESTATION_HANDLE) == -1)
 	{
     	return SW_WRONG_DATA;
 	}
+    u2f_prints("u2f_response_writeback\r\n");
+    u2f_hid_set_len(131 + U2F_KEY_HANDLE_SIZE + u2f_attestation_cert_size());
     u2f_response_writeback(i,2);
     u2f_response_writeback(pubkey,64);
     i[0] = U2F_KEY_HANDLE_SIZE;

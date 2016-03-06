@@ -57,7 +57,39 @@ void dump_eeprom()
 
 int8_t test_app()
 {
-
+//    uint8_t i[] = {0x5,U2F_EC_FMT_UNCOMPRESSED};
+//
+//    uint8_t key_handle[U2F_KEY_HANDLE_SIZE];
+//    uint8_t pubkey[64];
+//
+//    u2f_prints("u2f_register\r\n");
+//
+//    if (u2f_get_user_feedback() != 0)
+//    {
+//    	u2f_prints("u2f_get_user_feedback fail\r\n");
+//        return U2F_SW_CONDITIONS_NOT_SATISFIED;
+//    }
+//
+//    u2f_prints("u2f_new_keypair\r\n");
+//    if ( u2f_new_keypair(key_handle, pubkey) == -1)
+//    {
+//    	u2f_prints("u2f_new_keypair fail\r\n");
+//    	return U2F_SW_CONDITIONS_NOT_SATISFIED;
+//    }
+//
+//    u2f_prints("u2f_sha\r\n");
+//    u2f_sha256_start();
+//    u2f_sha256_update(i,1);
+//    u2f_sha256_update(pubkey,32);
+//    u2f_sha256_update(pubkey,32);
+//    u2f_sha256_update(key_handle,U2F_KEY_HANDLE_SIZE);
+//    u2f_sha256_update(i+1,1);
+//    u2f_sha256_update(pubkey,64);
+//    u2f_sha256_finish();
+//    if (u2f_ecdsa_sign(pubkey, U2F_ATTESTATION_HANDLE) == -1)
+//	{
+//    	return SW_WRONG_DATA;
+//	}
 
 	return 0;
 }
@@ -96,14 +128,10 @@ int16_t main(void) {
 		}
 
 
-		if ( USBD_GetUsbState() == USBD_STATE_CONFIGURED)
+		if (!USBD_EpIsBusy(EP1OUT) && !USBD_EpIsBusy(EP1IN) && appdata.state != APP_HID_MSG)
 		{
-			if (!USBD_EpIsBusy(EP1OUT) && !USBD_EpIsBusy(EP1IN))
-			{
-				USBD_Read(EP1OUT, hidmsgbuf, sizeof(hidmsgbuf), true);
-				u2f_prints("read added\r\n");
-			}
-
+			USBD_Read(EP1OUT, hidmsgbuf, sizeof(hidmsgbuf), true);
+			u2f_prints("read added\r\n");
 		}
 
 		switch(appdata.state)
@@ -112,10 +140,8 @@ int16_t main(void) {
 				break;
 			case APP_HID_MSG:
 				u2f_hid_request(appdata.hid_msg);
-
 				if (appdata.state == APP_HID_MSG)
 					appdata.state = APP_NOTHING;
-
 				break;
 			case APP_WINK:
 				LED_B = 0;

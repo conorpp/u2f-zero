@@ -15,8 +15,8 @@
 
 
 // application settings
-#define U2F_ATTESTATION_KEY_SLOT	15
-//#define ATECC_SETUP_DEVICE
+#define U2F_ATTESTATION_KEY_SLOT	14
+// #define ATECC_SETUP_DEVICE
 
 // efm8ub1 application eeprom memory mappings
 #define U2F_KEY_HEADER_ADDR		0xF800
@@ -78,7 +78,7 @@ void atecc_setup_device(uint8_t * buf);
 #define U2F_DISABLE
 #define u2f_init(x)
 #define u2f_hid_init(x)
-
+#define u2f_hid_request(x)
 #else
 
 #define atecc_setup_device(x)

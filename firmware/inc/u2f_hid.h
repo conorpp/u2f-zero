@@ -92,6 +92,11 @@ typedef enum
 
 void u2f_hid_init();
 
+
+// set the length of the total payload to be sent
+//  @len length of payload in bytes
+void u2f_hid_set_len(uint16_t len);
+
 // u2f_hid_writeback handles the sequencing and per packet buffering
 // @payload the buffer to write
 // @len length of buffer

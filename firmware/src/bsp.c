@@ -19,9 +19,15 @@ void u2f_delay(uint16_t ms) {
 void usb_write(uint8_t* buf, uint8_t len)
 {
 	int16_t ec;
-	if (USB_STATUS_OK != (ec=USBD_Write(EP1IN, buf, len, false)))
+	uint8_t errors;
+	while (USB_STATUS_OK != (ec=USBD_Write(EP1IN, buf, len, false)))
 	{
-		u2f_printd("USB error",1, -ec);
+		u2f_delay(2);
+		if (errors++ > 26)
+		{
+			u2f_printd("USB error",1, -ec);
+			break;
+		}
 	}
 }
 

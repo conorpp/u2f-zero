@@ -36,7 +36,7 @@ static struct hid_layer_param
 	uint8_t current_cmd;
 
 	uint32_t last_buffered;
-//	uint16_t bytes_buffered;
+	uint16_t bytes_buffered;
 
 	// number of payload bytes written in response
 	uint16_t bytes_written;
@@ -46,7 +46,7 @@ static struct hid_layer_param
 	// total length of response in bytes
 	uint16_t res_len;
 
-	#define BUFFER_SIZE 300
+	#define BUFFER_SIZE 150
 	uint8_t buffer[BUFFER_SIZE];
 
 
@@ -74,8 +74,15 @@ void u2f_hid_init()
 	_hid_in_session = 0;
 }
 
+void u2f_hid_set_len(uint16_t len)
+{
+	hid_layer.res_len = len;
+}
+
+
 static void u2f_hid_reset_packet()
 {
+	u2f_prints("HID RESET\r\n");
 	_hid_seq = 0;
 	_hid_offset = 0;
 	_hid_in_session = 0;
@@ -88,9 +95,7 @@ void u2f_hid_flush()
 {
 	if (_hid_offset)
 	{
-
 		usb_write(_hid_pkt, HID_PACKET_SIZE);
-
 	}
 	u2f_hid_reset_packet();
 }
@@ -220,46 +225,24 @@ static void stamp_error(uint32_t cid, uint8_t err)
 	del_cid(cid);
 }
 
-//// TODO double check if this is really needed
-//static void start_buffering(struct hid_layer_param* hid, struct u2f_hid_msg* req)
-//{
-//	hid->bytes_buffered = U2FHID_INIT_PAYLOAD_SIZE;
-//	hid->bytes_remain = U2FHID_LEN(req) - U2FHID_INIT_PAYLOAD_SIZE;
-//	hid->last_buffered = get_ms();
-//	memmove(hid->buffer, req->pkt.init.payload, U2FHID_INIT_PAYLOAD_SIZE);
-//}
-//
-//static int buffer_request(struct hid_layer_param* hid, struct u2f_hid_msg* req)
-//{
-//	if (hid->bytes_remain < U2FHID_CONT_PAYLOAD_SIZE)
-//	{
-//		if (hid->bytes_buffered + hid->bytes_remain > BUFFER_SIZE)
-//		{
-//			goto fail;
-//		}
-//		memmove(hid->buffer + hid->bytes_buffered, req->pkt.cont.payload, hid->bytes_remain);
-//		hid->bytes_buffered += hid->bytes_remain;
-//		hid->bytes_remain = 0;
-//		hid->state = HID_READY;
-//	}
-//	else
-//	{
-//		if (hid->bytes_buffered + U2FHID_CONT_PAYLOAD_SIZE > BUFFER_SIZE)
-//		{
-//			goto fail;
-//		}
-//		memmove(hid->buffer+ hid->bytes_buffered, req->pkt.cont.payload, U2FHID_CONT_PAYLOAD_SIZE);
-//		hid->bytes_buffered += U2FHID_CONT_PAYLOAD_SIZE;
-//		hid->bytes_remain -= U2FHID_CONT_PAYLOAD_SIZE;
-//	}
-//	hid->last_buffered = get_ms();
-//	return 0;
-//
-//	fail:
-//	hid->state = HID_READY;
-//	u2f_prints("buffer full\r\n");
-//	return -1;
-//}
+// TODO double check if this is really needed
+static void start_buffering(struct u2f_hid_msg* req)
+{
+	_hid_in_session = 1;
+	hid_layer.bytes_buffered = U2FHID_INIT_PAYLOAD_SIZE;
+	memmove(hid_layer.buffer, req->pkt.init.payload, U2FHID_INIT_PAYLOAD_SIZE);
+}
+
+static int buffer_request(struct u2f_hid_msg* req)
+{
+	if (hid_layer.bytes_buffered + U2FHID_CONT_PAYLOAD_SIZE > BUFFER_SIZE)
+	{
+		u2f_prints("buffer full\r\n");
+		return -1;
+	}
+	memmove(hid_layer.buffer + hid_layer.bytes_buffered, req->pkt.cont.payload, U2FHID_CONT_PAYLOAD_SIZE);
+	hid_layer.bytes_buffered += U2FHID_CONT_PAYLOAD_SIZE;
+}
 
 static void hid_u2f_parse(struct u2f_hid_msg* req)
 {
@@ -278,7 +261,7 @@ static void hid_u2f_parse(struct u2f_hid_msg* req)
 				u2f_prints("invalid len init\r\n");
 				goto fail;
 			}
-			hid_layer.res_len = 17;
+			u2f_hid_set_len(17);
 
 			u2f_printlx("cid: ",1,hid_layer.current_cid);
 			if (hid_layer.current_cid == 0)
@@ -310,8 +293,24 @@ static void hid_u2f_parse(struct u2f_hid_msg* req)
 				u2f_prints("invalid len msg\r\n");
 				goto fail;
 			}
+			u2f_prints("U2FHID_MSG\r\n");
+			// buffer 2 payloads (120 bytes) to get full U2F message
+			// assuming key handle is < 45 bytes
+			//		7 bytes for apdu header
+			//		7 + 66 bytes + key handle for authenticate message
+			//      7 + 64 for register message
+			if (hid_layer.bytes_buffered == 0)
+			{
+				start_buffering(req);
+				u2f_prints("buffer start\r\n");
+			}
+			else
+			{
+				u2f_prints("buffer end\r\n");
+				buffer_request(req);
+				u2f_request((struct u2f_request_apdu *)hid_layer.buffer);
+			}
 
-			u2f_request((struct u2f_request_apdu *)req->pkt.init.payload);
 
 			break;
 		case U2FHID_PING:
@@ -320,8 +319,7 @@ static void hid_u2f_parse(struct u2f_hid_msg* req)
 
 			if (!u2f_hid_busy())
 			{
-
-				hid_layer.res_len = U2FHID_LEN(req);
+				u2f_hid_set_len(U2FHID_LEN(req));
 				u2f_hid_writeback(req->pkt.init.payload, MIN(hid_layer.res_len, U2FHID_INIT_PAYLOAD_SIZE));
 			}
 			else
@@ -329,7 +327,6 @@ static void hid_u2f_parse(struct u2f_hid_msg* req)
 				u2f_hid_writeback(req->pkt.cont.payload, MIN(hid_layer.res_len - hid_layer.bytes_written, U2FHID_CONT_PAYLOAD_SIZE));
 			}
 
-			// u2f_printd("reslen byteswritten ",2, hid_layer.res_len,hid_layer.bytes_written);
 			if (hid_layer.res_len == hid_layer.bytes_written) u2f_hid_flush();
 			break;
 
@@ -341,7 +338,7 @@ static void hid_u2f_parse(struct u2f_hid_msg* req)
 				stamp_error(hid_layer.current_cid, ERR_INVALID_LEN);
 				u2f_prints("invalid len wink but who cares\r\n");
 			}
-			hid_layer.res_len = 0;
+			u2f_hid_set_len(0);
 			u2f_hid_writeback(NULL, 0);
 			u2f_hid_flush();
 			appdata.state = APP_WINK;
@@ -423,15 +420,7 @@ void u2f_hid_request(struct u2f_hid_msg* req)
 					u2f_prints("this should resync but im lazy\r\n");
 				}
 				hid_layer.last_buffered = get_ms();
-//				// TODO verify packets arrive in ascending order
-//				if (buffer_request(&hid_layer, req) != 0)
-//				{
-//					// no suitable error code so ignore
-//					u2f_prints("cant buffer request\r\n");
-//					return;
-//				}
-//				u2f_printlx("buffered from ", 1, req->cid);
-//				payload = hid_layer.buffer;
+				// TODO verify packets arrive in ascending order
 
 			}
 			else if (U2FHID_TIMEOUT(&hid_layer))

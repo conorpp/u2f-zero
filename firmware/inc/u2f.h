@@ -126,5 +126,8 @@ int8_t u2f_new_keypair(uint8_t * handle, uint8_t * pubkey);
 // method to return pointer to attestation cert
 uint8_t * u2f_get_attestation_cert();
 
+// method to set the total length of the response for use by underlying layer
+// @len the length of U2F response in bytes
+void set_response_length(uint16_t len);
 
 #endif /* U2F_H_ */

@@ -101,7 +101,7 @@ void u2f_hid_flush()
 }
 
 
-void u2f_hid_writeback(uint8_t * payload, uint8_t len)
+void u2f_hid_writeback(uint8_t * payload, uint16_t len)
 {
 	struct u2f_hid_msg * r = (struct u2f_hid_response *) _hid_pkt;
 	_hid_in_session = 1;

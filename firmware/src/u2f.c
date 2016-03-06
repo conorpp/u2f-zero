@@ -52,6 +52,7 @@ static int16_t u2f_register(struct u2f_register_request * req)
 
     uint8_t key_handle[U2F_KEY_HANDLE_SIZE];
     uint8_t pubkey[64];
+    const uint16_t attest_size = u2f_attestation_cert_size();
 
     if (u2f_get_user_feedback() != 0)
     {
@@ -83,8 +84,8 @@ static int16_t u2f_register(struct u2f_register_request * req)
     i[0] = U2F_KEY_HANDLE_SIZE;
     u2f_response_writeback(i,1);
     u2f_response_writeback(key_handle,U2F_KEY_HANDLE_SIZE);
-    u2f_response_writeback(u2f_get_attestation_cert(),u2f_attestation_cert_size()-254/2);
-    u2f_response_writeback(u2f_get_attestation_cert()+u2f_attestation_cert_size(),254/2);
+
+    u2f_response_writeback(u2f_get_attestation_cert(),u2f_attestation_cert_size());
 
     u2f_response_writeback((uint8_t*)req, 64);
 

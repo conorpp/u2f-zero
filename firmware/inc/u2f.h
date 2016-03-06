@@ -83,7 +83,7 @@ uint16_t u2f_attestation_cert_size();
 // callback for u2f to send back response data
 //  @buf data to write back
 //  @len length of buf in bytes
-void u2f_response_writeback(uint8_t * buf, uint8_t len);
+void u2f_response_writeback(uint8_t * buf, uint16_t len);
 
 // callback when u2f finishes and will
 // indicate when all buffer data, if any, should be written

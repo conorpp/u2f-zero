@@ -73,7 +73,7 @@ void u2f_init()
 	}
 }
 
-void u2f_response_writeback(uint8_t * buf, uint8_t len)
+void u2f_response_writeback(uint8_t * buf, uint16_t len)
 {
 	u2f_hid_writeback(buf, len);
 }

@@ -101,7 +101,7 @@ void u2f_hid_set_len(uint16_t len);
 // @payload the buffer to write
 // @len length of buffer
 // @@prereq is that hid_layer.current_cid, hid_layer.res_len each set to correct values
-void u2f_hid_writeback(uint8_t * payload, uint8_t len);
+void u2f_hid_writeback(uint8_t * payload, uint16_t len);
 
 // u2f_hid_flush flush any remaining data that may be buffered.
 void u2f_hid_flush();

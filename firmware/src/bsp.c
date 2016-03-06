@@ -20,6 +20,8 @@ void usb_write(uint8_t* buf, uint8_t len)
 {
 	int16_t ec;
 	uint8_t errors;
+	u2f_prints("tx: ");
+	dump_hex(buf,len);
 	while (USB_STATUS_OK != (ec=USBD_Write(EP1IN, buf, len, false)))
 	{
 		u2f_delay(2);

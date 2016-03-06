@@ -48,7 +48,7 @@ void u2f_request(struct u2f_request_apdu * req)
 
 static int16_t u2f_register(struct u2f_register_request * req)
 {
-    uint8_t i[] = {0x5,U2F_EC_FMT_UNCOMPRESSED};
+    uint8_t i[] = {0x0,U2F_EC_FMT_UNCOMPRESSED};
 
     uint8_t key_handle[U2F_KEY_HANDLE_SIZE];
     uint8_t pubkey[64];
@@ -63,22 +63,30 @@ static int16_t u2f_register(struct u2f_register_request * req)
     {
     	return U2F_SW_CONDITIONS_NOT_SATISFIED;
     }
-
+    u2f_prints("chal: ");
+    dump_hex(req->chal,32);
+    u2f_prints("app: ");
+    dump_hex(req->app,32);
     u2f_sha256_start();
     u2f_sha256_update(i,1);
     u2f_sha256_update(req->app,32);
+
+
     u2f_sha256_update(req->chal,32);
+
+
     u2f_sha256_update(key_handle,U2F_KEY_HANDLE_SIZE);
     u2f_sha256_update(i+1,1);
     u2f_sha256_update(pubkey,64);
     u2f_sha256_finish();
     
-
     if (u2f_ecdsa_sign((uint8_t*)req, U2F_ATTESTATION_HANDLE) == -1)
 	{
     	return SW_WRONG_DATA;
 	}
+
     u2f_hid_set_len(133 + U2F_KEY_HANDLE_SIZE + u2f_attestation_cert_size());
+    i[0] = 0x5;
     u2f_response_writeback(i,2);
     u2f_response_writeback(pubkey,64);
     i[0] = U2F_KEY_HANDLE_SIZE;
@@ -88,6 +96,9 @@ static int16_t u2f_register(struct u2f_register_request * req)
     u2f_response_writeback(u2f_get_attestation_cert(),u2f_attestation_cert_size());
 
     u2f_response_writeback((uint8_t*)req, 64);
+
+    u2f_prints("sig: ");
+    dump_hex((uint8_t*)req, 64);
 
     return U2F_SW_NO_ERROR;
 }

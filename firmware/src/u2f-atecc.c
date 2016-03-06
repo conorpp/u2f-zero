@@ -98,6 +98,7 @@ static struct atecc_response res_digest;
 
 void u2f_sha256_start()
 {
+	u2f_prints("sha input: \r\n");
 	shaoffset = 0;
 	atecc_send_recv(ATECC_CMD_SHA,
 			ATECC_SHA_START, 0,NULL,0,
@@ -108,11 +109,15 @@ void u2f_sha256_start()
 void u2f_sha256_update(uint8_t * buf, uint8_t len)
 {
 	uint8_t i = 0;
+	u2f_prints("(prog) ");
+	dump_hex(buf,len);
+	u2f_prints("\r\n");
 	while(len--)
 	{
 		shabuf[shaoffset++] = *buf++;
 		if (shaoffset == 64)
 		{
+			dump_hex(shabuf,64);
 			atecc_send_recv(ATECC_CMD_SHA,
 					ATECC_SHA_UPDATE, 64,shabuf,64,
 					appdata.tmp, sizeof(appdata.tmp), NULL);
@@ -124,10 +129,12 @@ void u2f_sha256_update(uint8_t * buf, uint8_t len)
 
 void u2f_sha256_finish()
 {
+	dump_hex(shabuf,shaoffset);
 	atecc_send_recv(ATECC_CMD_SHA,
 			ATECC_SHA_END, shaoffset,shabuf,shaoffset,
 			shabuf, sizeof(shabuf), &res_digest);
 
+	u2f_prints("sha digest:\r\n");
 	dump_hex(res_digest.buf, res_digest.len);
 }
 

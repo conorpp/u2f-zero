@@ -48,3 +48,7 @@ firmware/Keil*
 *.pem
 *.csr
 *.der
+
+# binaries
+hex2pubkey
+signcert

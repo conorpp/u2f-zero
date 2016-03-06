@@ -152,17 +152,10 @@ uint16_t USBD_XferCompleteCb(uint8_t epAddr, USB_Status_TypeDef status,
 
 	if (epAddr == EP1OUT)
 	{
-#ifdef U2F_PRINT
-		int i = 0;
-		for (i=0; i < sizeof(hidmsgbuf); i++)
-		{
-			uint8_t l = (uint8_t)hidmsgbuf[i];
-			u2f_putb(l);
-		}
-		u2f_prints("\r\n");
-#endif
+		dump_hex(hidmsgbuf, sizeof(hidmsgbuf));
+
 #ifndef U2F_HID_DISABLE
-		u2f_hid_request((struct u2f_hid_msg*)hidmsgbuf);
+		set_app_u2f_hid_msg((struct u2f_hid_msg *) hidmsgbuf );
 #endif
 	}
 

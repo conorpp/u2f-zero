@@ -34,6 +34,12 @@ void set_app_error(APP_ERROR_CODE ec)
 	appdata.error = ec;
 }
 
+void set_app_u2f_hid_msg(struct u2f_hid_msg * msg )
+{
+	appdata.state = APP_HID_MSG;
+	appdata.hid_msg = msg;
+}
+
 
 void dump_eeprom()
 {
@@ -103,6 +109,13 @@ int16_t main(void) {
 		switch(appdata.state)
 		{
 			case APP_NOTHING:
+				break;
+			case APP_HID_MSG:
+				u2f_hid_request(appdata.hid_msg);
+
+				if (appdata.state == APP_HID_MSG)
+					appdata.state = APP_NOTHING;
+
 				break;
 			case APP_WINK:
 				LED_B = 0;

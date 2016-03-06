@@ -8,6 +8,7 @@
 
 #include <SI_EFM8UB1_Register_Enums.h>
 #include <stdarg.h>
+#include "u2f_hid.h"
 
 // debug options
 #define U2F_PRINT
@@ -25,6 +26,7 @@
 typedef enum
 {
 	APP_NOTHING = 0,
+	APP_HID_MSG,
 	APP_WINK,
 	_APP_WINK,
 	APP_ERROR,
@@ -54,13 +56,16 @@ struct APP_DATA
 	uint8_t tmp[70];
 	uint8_t state;
 	uint8_t error;
+
+	struct u2f_hid_msg * hid_msg;
+
 };
 
 extern uint8_t hidmsgbuf[64];
 
 extern data struct APP_DATA appdata;
 
-
+void set_app_u2f_hid_msg(struct u2f_hid_msg * msg );
 void set_app_error(APP_ERROR_CODE ec);
 
 // should be called after initializing eeprom

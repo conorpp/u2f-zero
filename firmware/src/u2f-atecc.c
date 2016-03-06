@@ -149,7 +149,6 @@ int8_t u2f_ecdsa_sign(uint8_t * dest, uint8_t * handle)
 	{
 		keyslot--;
 	}
-	u2f_printx("signing with key ",1,keyslot);
 	atecc_send_recv(ATECC_CMD_SIGN,
 			ATECC_SIGN_EXTERNAL, keyslot, NULL, 0,
 			appdata.tmp, sizeof(appdata.tmp), &res);
@@ -185,12 +184,10 @@ int8_t u2f_new_keypair(uint8_t * handle, uint8_t * pubkey)
 		return -1;
 	}
 
-	u2f_prints("about to gen key\r\n");
 	atecc_send_recv(ATECC_CMD_GENKEY,
 			ATECC_GENKEY_PRIVATE, keyslot, NULL, 0,
 			appdata.tmp, sizeof(appdata.tmp), &res);
 
-	u2f_prints("ATECC_CMD_GENKEY\r\n");
 	memmove(pubkey, res.buf, 64);
 
 	eeprom_read(U2F_KEY_ADDR(keyslot), (uint8_t* )&k, U2F_KEY_HANDLE_SIZE);

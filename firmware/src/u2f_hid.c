@@ -302,11 +302,13 @@ static void hid_u2f_parse(struct u2f_hid_msg* req)
 			if (hid_layer.bytes_buffered == 0)
 			{
 				start_buffering(req);
-				u2f_prints("buffer start\r\n");
+				if (hid_layer.bytes_buffered >= U2FHID_LEN(req))
+				{
+					u2f_request((struct u2f_request_apdu *)hid_layer.buffer);
+				}
 			}
 			else
 			{
-				u2f_prints("buffer end\r\n");
 				buffer_request(req);
 				u2f_request((struct u2f_request_apdu *)hid_layer.buffer);
 			}

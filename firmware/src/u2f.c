@@ -1,4 +1,8 @@
+#include "app.h"
 #include "u2f.h"
+
+#ifndef U2F_DISABLE
+
 
 #ifdef DEBUG_PC
 #include <stdio.h>
@@ -42,7 +46,10 @@ static int16_t u2f_register(struct u2f_register_request * req)
         return U2F_SW_CONDITIONS_NOT_SATISFIED;
     }
 
-    u2f_new_keypair(key_handle, pubkey);
+    if ( u2f_new_keypair(key_handle, pubkey) == -1)
+    {
+    	return U2F_SW_CONDITIONS_NOT_SATISFIED;
+    }
 
     u2f_sha256_start();
     u2f_sha256_update(i,1);
@@ -53,7 +60,10 @@ static int16_t u2f_register(struct u2f_register_request * req)
     u2f_sha256_update(pubkey,64);
     u2f_sha256_finish();
     
-    u2f_ecdsa_sign((uint8_t*)req, U2F_ATTESTATION_HANDLE);
+    if (u2f_ecdsa_sign((uint8_t*)req, U2F_ATTESTATION_HANDLE) == -1)
+	{
+    	return SW_WRONG_DATA;
+	}
     u2f_response_writeback(i,2);
     u2f_response_writeback(pubkey,64);
     i[0] = U2F_KEY_HANDLE_SIZE;
@@ -67,3 +77,4 @@ static int16_t u2f_register(struct u2f_register_request * req)
     return U2F_SW_NO_ERROR;
 }
 
+#endif

@@ -4,14 +4,16 @@
  *  Created on: Jan 26, 2016
  *      Author: pp
  */
+#include "app.h"
+
 #include <stdint.h>
 #include <string.h>
 
-#include "app.h"
 #include "bsp.h"
 #include "u2f_hid.h"
 #include "u2f.h"
 
+#ifndef U2F_HID_DISABLE
 
 #define CID_MAX (sizeof(CIDS)/sizeof(uint32_t))
 
@@ -82,7 +84,7 @@ static void u2f_hid_reset_packet()
 }
 
 // writes what has been buffered and clears memory
-static void u2f_hid_flush()
+void u2f_hid_flush()
 {
 	if (_hid_offset)
 	{
@@ -460,3 +462,4 @@ void u2f_hid_request(struct u2f_hid_msg* req)
 	return;
 }
 
+#endif

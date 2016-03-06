@@ -28,18 +28,6 @@ void usb_write(uint8_t* buf, uint8_t len)
 
 #ifdef U2F_PRINT
 
-
-
-void dump_hex(uint8_t* hex, uint8_t len)
-{
-	uint8_t i;
-	for (i=0 ; i < len ; i++)
-	{
-		u2f_putb(hex[i]);
-	}
-	u2f_prints("\r\n");
-}
-
 void putf(char c)
 {
 	uint8_t i;
@@ -48,6 +36,22 @@ void putf(char c)
 	for (i=0; i<200; i++){}
 	for (i=0; i<200; i++){}
 }
+
+
+void dump_hex(uint8_t* hex, uint8_t len)
+{
+	uint8_t i;
+	for (i=0 ; i < len ; i++)
+	{
+		if (hex[i]<0x10)
+		{
+			putf('0');
+		}
+		u2f_putb(hex[i]);
+	}
+	u2f_prints("\r\n");
+}
+
 
 void u2f_prints(char* d)
 {

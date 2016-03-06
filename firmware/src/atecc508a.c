@@ -9,6 +9,7 @@
 #include "app.h"
 #include "atecc508a.h"
 #include "i2c.h"
+#include "eeprom.h"
 
 #include "bsp.h"
 
@@ -127,7 +128,6 @@ int8_t atecc_send_recv(uint8_t cmd, uint8_t p1, uint16_t p2,
 	uint8_t errors = 0;
 	atecc_wake();
 	resend:
-
 	while(atecc_send(cmd, p1, p2, tx, txlen) == -1)
 	{
 		u2f_delay(10);
@@ -160,7 +160,6 @@ int8_t atecc_send_recv(uint8_t cmd, uint8_t p1, uint16_t p2,
 		}
 
 	}
-
 	atecc_idle();
 	return 0;
 }
@@ -195,7 +194,20 @@ int8_t atecc_write_eeprom(uint8_t base, uint8_t offset, uint8_t* srcbuf, uint8_t
 	return 0;
 }
 
-#ifdef SETUP_DEVICE
+#ifdef ATECC_SETUP_DEVICE
+
+static int is_locked(uint8_t * buf)
+{
+	struct atecc_response res;
+	atecc_send_recv(ATECC_CMD_READ,
+					ATECC_RW_CONFIG,87/4, NULL, 0,
+					buf, 36, &res);
+	if (res.buf[87 % 4] == 0)
+		return 1;
+	else
+		return 0;
+}
+
 
 static void dump_config(uint8_t* buf)
 {
@@ -281,10 +293,9 @@ static void atecc_setup_config(uint8_t* buf)
 }
 
 // write a message to the otp memory before locking
-static void atecc_write_otp()
+static void atecc_write_otp(uint8_t * buf)
 {
-	char msg[] = "conorpp's u2f token.\r\n\0\0\0\0";
-	char buf[7];
+	code char msg[] = "conorpp's u2f token.\r\n\0\0\0\0";
 	int i;
 	for (i=0; i<sizeof(msg); i+=4)
 	{
@@ -294,19 +305,46 @@ static void atecc_write_otp()
 	}
 }
 
+// buf should be at least 40 bytes
 void atecc_setup_device(uint8_t * buf)
 {
-	setup_config(buf);
-
-	// lock config
-	if (atecc_send_recv(ATECC_CMD_LOCK,
-			ATECC_LOCK_CONFIG, 0xf2cd, NULL, 0,
-			buf, sizeof(buf), NULL))
+	struct atecc_response res;
+	if (!is_locked(buf))
 	{
-		u2f_prints("ATECC_CMD_LOCK failed\r\n");
-		return;
+		atecc_setup_config(buf);
+
+		// lock config
+		if (atecc_send_recv(ATECC_CMD_LOCK,
+				ATECC_LOCK_CONFIG, 0xf2cd, NULL, 0,
+				buf, sizeof(buf), NULL))
+		{
+			u2f_prints("ATECC_CMD_LOCK failed\r\n");
+			return;
+		}
+
+		atecc_write_otp(buf);
+	}
+	else
+	{
+		u2f_prints("ATECC device is already locked\r\n");
 	}
 
-	write_otp();
+	eeprom_read(U2F_EEPROM_CONFIG, buf, 1);
+
+	// generate key once per flashing
+	if (buf[0] == 0xff)
+	{
+		atecc_send_recv(ATECC_CMD_GENKEY,
+				ATECC_GENKEY_PRIVATE, U2F_ATTESTATION_KEY_SLOT, NULL, 0,
+				appdata.tmp, sizeof(appdata.tmp), &res);
+
+		u2f_prints("attestation: ");
+		dump_hex(res.buf, res.len);
+
+		buf[0] = 0;
+		eeprom_write(U2F_EEPROM_CONFIG, buf, 1);
+
+	}
+
 }
 #endif

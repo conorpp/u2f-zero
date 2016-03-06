@@ -38,7 +38,7 @@ void eeprom_read(uint16_t addr, uint8_t * buf, uint8_t len)
 void _eeprom_write(uint16_t addr, uint8_t * buf, uint8_t len, uint8_t flags)
 {
 	uint8_t xdata * data eepaddr = (uint8_t xdata *) addr;
-	bit old_int;// IE_EA;
+	bit old_int;
 
 	while(len--)
 	{

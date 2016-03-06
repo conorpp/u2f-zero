@@ -16,7 +16,7 @@
 #include "tests.h"
 
 data struct APP_DATA appdata;
-
+SI_SBIT (LED1, SFR_P1, 4);             // LED green
 
 static void init(struct APP_DATA* ap)
 {
@@ -49,11 +49,10 @@ void dump_eeprom()
 	u2f_prints("\r\n");
 }
 
-int8_t test_eeprom()
+int8_t test_app()
 {
 
 
-	dump_eeprom();
 	return 0;
 }
 
@@ -79,7 +78,8 @@ int16_t main(void) {
 	u2f_prints("U2F ZERO\r\n");
 
 	run_tests();
-	test_eeprom();
+	atecc_setup_device(appdata.tmp);
+	test_app();
 
 	while (1) {
 

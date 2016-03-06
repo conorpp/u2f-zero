@@ -161,7 +161,9 @@ uint16_t USBD_XferCompleteCb(uint8_t epAddr, USB_Status_TypeDef status,
 		}
 		u2f_prints("\r\n");
 #endif
+#ifndef U2F_HID_DISABLE
 		u2f_hid_request((struct u2f_hid_msg*)hidmsgbuf);
+#endif
 	}
 
 

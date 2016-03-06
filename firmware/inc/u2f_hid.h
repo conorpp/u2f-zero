@@ -98,6 +98,9 @@ void u2f_hid_init();
 // @@prereq is that hid_layer.current_cid, hid_layer.res_len each set to correct values
 void u2f_hid_writeback(uint8_t * payload, uint8_t len);
 
+// u2f_hid_flush flush any remaining data that may be buffered.
+void u2f_hid_flush();
+
 void u2f_hid_request(struct u2f_hid_msg* req);
 
 #define U2FHID_IS_INIT(cmd)			((cmd) & 0x80)

@@ -114,12 +114,14 @@ void u2f_sha256_finish();
 // callback for u2f to compute signature on the previously computed sha256 digest
 //  @dest atleast 64 bytes to write back signature R and S values
 //  @handle for the private key to use
-void u2f_ecdsa_sign(uint8_t * dest, uint8_t * handle);
+//  @return -1 for failure, 0 for success
+int8_t u2f_ecdsa_sign(uint8_t * dest, uint8_t * handle);
 
 // callback to get a new key handle
 //  @handle location to write the key handle (should be U2F_KEY_HANDLE_SIZE bytes long)
 //  @pubkey location to write the public key R & S (64 bytes)
-void u2f_new_keypair(uint8_t * handle, uint8_t * pubkey);
+//  @return -1 for failure, 0 for success
+int8_t u2f_new_keypair(uint8_t * handle, uint8_t * pubkey);
 
 // method to return pointer to attestation cert
 uint8_t * u2f_get_attestation_cert();

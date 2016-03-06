@@ -14,7 +14,7 @@
 
 
 // application settings
-#define U2F_ATTESTATION_KEY_SLOT	14
+#define U2F_ATTESTATION_KEY_SLOT	15
 //#define ATECC_SETUP_DEVICE
 
 // efm8ub1 application eeprom memory mappings

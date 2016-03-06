@@ -26,9 +26,8 @@ struct key_storage_header
 	uint8_t num_issued;
 } key_store;
 
-#define U2F_NUM_KEYS 			14
-
-#define U2F_KEYS_ADDR			(0xF800 + sizeof(struct key_storage_header))
+#define U2F_NUM_KEYS 			15
+#define U2F_KEYS_ADDR			(0xF800)
 #define U2F_KEY_ADDR(k)			(U2F_KEYS_ADDR + ((k)*U2F_KEY_HANDLE_SIZE))
 
 
@@ -42,7 +41,8 @@ static uint8_t resseq = 0;
 
 static void flush_key_store()
 {
-	eeprom_write(U2F_KEY_HEADER_ADDR, (uint8_t* )&key_store, sizeof(struct key_storage_header));
+	eeprom_erase(U2F_EEPROM_CONFIG);
+	eeprom_write(U2F_EEPROM_CONFIG, (uint8_t* )&key_store, sizeof(struct key_storage_header));
 }
 
 void u2f_init()
@@ -50,7 +50,7 @@ void u2f_init()
 	uint8_t i,j;
 	struct atecc_response res;
 
-	eeprom_read(U2F_KEY_HEADER_ADDR, (uint8_t* )&key_store, sizeof(struct key_storage_header));
+	eeprom_read(U2F_EEPROM_CONFIG, (uint8_t* )&key_store, sizeof(struct key_storage_header));
 
 	// initialize key handles
 	if (key_store.num_keys != U2F_NUM_KEYS)

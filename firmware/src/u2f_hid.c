@@ -82,7 +82,6 @@ void u2f_hid_set_len(uint16_t len)
 
 static void u2f_hid_reset_packet()
 {
-	u2f_prints("HID RESET\r\n");
 	_hid_seq = 0;
 	_hid_offset = 0;
 	_hid_in_session = 0;
@@ -253,7 +252,7 @@ static void hid_u2f_parse(struct u2f_hid_msg* req)
 	switch(hid_layer.current_cmd)
 	{
 		case U2FHID_INIT:
-			u2f_printlx("got init packet ",1,req->cid);
+			//u2f_printlx("got init packet ",1,req->cid);
 			if (U2FHID_LEN(req) != 8)
 			{
 				// this one is safe
@@ -263,7 +262,7 @@ static void hid_u2f_parse(struct u2f_hid_msg* req)
 			}
 			u2f_hid_set_len(17);
 
-			u2f_printlx("cid: ",1,hid_layer.current_cid);
+			//u2f_printlx("cid: ",1,hid_layer.current_cid);
 			if (hid_layer.current_cid == 0)
 			{
 				u2f_prints("out of cid's\r\n");
@@ -293,7 +292,7 @@ static void hid_u2f_parse(struct u2f_hid_msg* req)
 				u2f_prints("invalid len msg\r\n");
 				goto fail;
 			}
-			u2f_prints("U2FHID_MSG\r\n");
+			//u2f_prints("U2FHID_MSG\r\n");
 			// buffer 2 payloads (120 bytes) to get full U2F message
 			// assuming key handle is < 45 bytes
 			//		7 bytes for apdu header
@@ -317,7 +316,7 @@ static void hid_u2f_parse(struct u2f_hid_msg* req)
 			break;
 		case U2FHID_PING:
 
-			u2f_prints("U2F PING\r\n");
+			//u2f_prints("U2F PING\r\n");
 
 			if (!u2f_hid_busy())
 			{
@@ -333,7 +332,7 @@ static void hid_u2f_parse(struct u2f_hid_msg* req)
 			break;
 
 		case U2FHID_WINK:
-			u2f_prints("U2F WINK\r\n");
+			//u2f_prints("U2F WINK\r\n");
 			if (U2FHID_LEN(req) != 0)
 			{
 				// this one is safe
@@ -347,7 +346,7 @@ static void hid_u2f_parse(struct u2f_hid_msg* req)
 			break;
 		case U2FHID_LOCK:
 			// TODO
-			u2f_prints("U2F LOCK\r\n");
+			//u2f_prints("U2F LOCK\r\n");
 			break;
 		default:
 			u2f_printb("invalid cmd: ", hid_layer.current_cmd);
@@ -380,7 +379,7 @@ void u2f_hid_request(struct u2f_hid_msg* req)
 	else
 	{
 		// Ignore CID's we did not allocate.
-		u2f_printlx("ignoring pkt ",1,req->cid);
+		//u2f_printlx("ignoring pkt ",1,req->cid);
 		return;
 	}
 
@@ -393,7 +392,7 @@ void u2f_hid_request(struct u2f_hid_msg* req)
 			{
 				if (U2FHID_LEN(req) > U2FHID_MAX_PAYLOAD_SIZE)
 				{
-					u2f_prints("length too big\r\n");
+					//u2f_prints("length too big\r\n");
 					stamp_error(req->cid, ERR_INVALID_LEN);
 					return;
 				}
@@ -419,7 +418,7 @@ void u2f_hid_request(struct u2f_hid_msg* req)
 				if (req->pkt.init.cmd & TYPE_INIT)
 				{
 					// TODO
-					u2f_prints("this should resync but im lazy\r\n");
+					//u2f_prints("this should resync but im lazy\r\n");
 				}
 				hid_layer.last_buffered = get_ms();
 				// TODO verify packets arrive in ascending order
@@ -428,7 +427,7 @@ void u2f_hid_request(struct u2f_hid_msg* req)
 			else if (U2FHID_TIMEOUT(&hid_layer))
 			{
 				// return timeout error for old channel and run again for new channel
-				u2f_prints("timeout, switching\r\n");
+				//u2f_prints("timeout, switching\r\n");
 				hid_layer.state = HID_READY;
 				u2f_hid_reset_packet();
 				stamp_error(hid_layer.current_cid, ERR_MSG_TIMEOUT);
@@ -440,7 +439,7 @@ void u2f_hid_request(struct u2f_hid_msg* req)
 				// Current application may not be interrupted
 				// TODO this will be bad
 				stamp_error(req->cid, ERR_CHANNEL_BUSY);
-				u2f_printlx("ERR_CHANNEL_BUSY ", 2, req->cid, hid_layer.current_cid);
+				//u2f_printlx("ERR_CHANNEL_BUSY ", 2, req->cid, hid_layer.current_cid);
 				return;
 			}
 			break;

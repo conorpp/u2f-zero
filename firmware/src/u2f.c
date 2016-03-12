@@ -14,6 +14,7 @@
 // void u2f_response_writeback(uint8_t * buf, uint8_t len);
 static int16_t u2f_register(struct u2f_register_request * req);
 static int16_t u2f_version();
+static int16_t u2f_authenticate(struct u2f_authenticate_request * req, uint8_t control);
 
 void u2f_request(struct u2f_request_apdu * req)
 {
@@ -27,6 +28,7 @@ void u2f_request(struct u2f_request_apdu * req)
             break;
         case U2F_AUTHENTICATE:
         	u2f_prints("U2F_AUTHENTICATE\r\n");
+        	 *rcode = u2f_authenticate((struct u2f_authenticate_request*)req->payload, req->p1);
         	break;
         case U2F_VERSION:
         	u2f_prints("U2F_VERSION\r\n");
@@ -39,11 +41,87 @@ void u2f_request(struct u2f_request_apdu * req)
         	u2f_prints("U2F_VENDOR_LAST\r\n");
         	break;
         default:
-
         	break;
     }
     u2f_response_writeback((uint8_t*)rcode,2);
     u2f_response_flush();
+}
+
+static uint8_t get_signature_length(uint8_t * sig)
+{
+	return 0x46 + ((sig[32] & 0x80) == 0x80) + ((sig[0] & 0x80) == 0x80);
+}
+
+static void dump_signature_der(uint8_t * sig)
+{
+    uint8_t pad_s = (sig[32] & 0x80) == 0x80;
+    uint8_t pad_r = (sig[0] & 0x80) == 0x80;
+    uint8_t i[] = {0x30, 0x44};
+    i[1] += (pad_s + pad_r);
+
+
+    // DER encoded signature
+    // write der sequence
+    // has to be minimum distance and padded with 0x00 if MSB is a 1.
+    u2f_response_writeback(i,2);
+    i[1] = 0;
+
+    // length of R value plus 0x00 pad if necessary
+    u2f_response_writeback("\x02",1);
+    i[0] = 0x20 + pad_r;
+    u2f_response_writeback(i,1 + pad_r);
+
+    // R value
+    u2f_response_writeback(sig, 32);
+
+    // length of S value plus 0x00 pad if necessary
+    u2f_response_writeback("\x02",1);
+    i[0] = 0x20 + pad_s;
+    u2f_response_writeback(i,1 + pad_s);
+
+    // S value
+    u2f_response_writeback(sig+32, 32);
+}
+
+// TODO replace with atecc
+static uint32_t _count = 1;
+
+static int16_t u2f_authenticate(struct u2f_authenticate_request * req, uint8_t control)
+{
+
+	uint8_t up = 1;
+	if (u2f_load_key(req->kh, req->khl) != 0)
+	{
+		u2f_hid_set_len(2);
+		return U2F_SW_WRONG_DATA;
+	}
+	else if (control == U2F_AUTHENTICATE_CHECK)
+	{
+		u2f_hid_set_len(2);
+		return U2F_SW_CONDITIONS_NOT_SATISFIED;
+	}
+	_count++;
+
+    u2f_sha256_start();
+    u2f_sha256_update(req->app,32);
+    u2f_sha256_update(&up,1);
+    u2f_sha256_update(&_count,4);
+    u2f_sha256_update(req->chal,32);
+
+    u2f_sha256_finish();
+
+    if (u2f_ecdsa_sign((uint8_t*)req, req->kh) == -1)
+	{
+    	return U2F_SW_WRONG_DATA;
+	}
+
+    u2f_hid_set_len(7 + get_signature_length((uint8_t*)req));
+
+    u2f_response_writeback(&up,1);
+    u2f_response_writeback(&_count,4);
+    dump_signature_der((uint8_t*)req);
+
+	return U2F_SW_NO_ERROR;
 }
 
 static int16_t u2f_register(struct u2f_register_request * req)
@@ -52,8 +130,7 @@ static int16_t u2f_register(struct u2f_register_request * req)
 
     uint8_t key_handle[U2F_KEY_HANDLE_SIZE];
     uint8_t pubkey[64];
-    uint8_t pad_s = 0;
-    uint8_t pad_r = 0;
+
 
     const uint16_t attest_size = u2f_attestation_cert_size();
 
@@ -66,13 +143,12 @@ static int16_t u2f_register(struct u2f_register_request * req)
     {
     	return U2F_SW_CONDITIONS_NOT_SATISFIED;
     }
+
     u2f_sha256_start();
     u2f_sha256_update(i,1);
     u2f_sha256_update(req->app,32);
 
-
     u2f_sha256_update(req->chal,32);
-
 
     u2f_sha256_update(key_handle,U2F_KEY_HANDLE_SIZE);
     u2f_sha256_update(i+1,1);
@@ -81,13 +157,10 @@ static int16_t u2f_register(struct u2f_register_request * req)
     
     if (u2f_ecdsa_sign((uint8_t*)req, U2F_ATTESTATION_HANDLE) == -1)
 	{
-    	return SW_WRONG_DATA;
+    	return U2F_SW_WRONG_DATA;
 	}
 
-    pad_r = (((uint8_t*)req)[0] & 0x80) == 0x80;
-    pad_s = (((uint8_t*)req)[32] & 0x80) == 0x80;
-
-    u2f_hid_set_len(139 + pad_s + pad_r + U2F_KEY_HANDLE_SIZE + u2f_attestation_cert_size());
+    u2f_hid_set_len(69 + get_signature_length((uint8_t*)req) + U2F_KEY_HANDLE_SIZE + u2f_attestation_cert_size());
     i[0] = 0x5;
     u2f_response_writeback(i,2);
     u2f_response_writeback(pubkey,64);
@@ -97,29 +170,7 @@ static int16_t u2f_register(struct u2f_register_request * req)
 
     u2f_response_writeback(u2f_get_attestation_cert(),u2f_attestation_cert_size());
 
-    // DER encoding
-    // write der sequence
-    // has to be minimum distance and padded with 0x00 if MSB is a 1.
-    i[0] = 0x30;
-    i[1] = 0x44 + pad_r + pad_s;
-    u2f_response_writeback(i,2);
-    i[1] = 0;
-
-    // length of R value plus 0x00 pad if necessary
-    u2f_response_writeback("\x02",1);
-    i[0] = 0x20 + pad_r;
-    u2f_response_writeback(i,1 + pad_r);
-
-    // R value
-    u2f_response_writeback((uint8_t*)req, 32);
-
-    // length of S value plus 0x00 pad if necessary
-    u2f_response_writeback("\x02",1);
-    i[0] = 0x20 + pad_s;
-    u2f_response_writeback(i,1 + pad_s);
-
-    // S value
-    u2f_response_writeback(((uint8_t*)req)+32, 32);
+    dump_signature_der((uint8_t*)req);
 
 
     return U2F_SW_NO_ERROR;

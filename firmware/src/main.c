@@ -45,7 +45,7 @@ void dump_eeprom()
 	// 0xF800 - 0xFB7F
 	uint16_t i = 0xF800;
 	uint8_t eep;
-	for (; i <= 0xF800 + 196; i++)
+	for (; i <= 0xF800 + 4 * 16; i++)
 	{
 		eeprom_read(i,&eep,1);
 		u2f_putb(eep);
@@ -56,40 +56,7 @@ void dump_eeprom()
 
 int8_t test_app()
 {
-//    uint8_t i[] = {0x5,U2F_EC_FMT_UNCOMPRESSED};
-//
-//    uint8_t key_handle[U2F_KEY_HANDLE_SIZE];
-//    uint8_t pubkey[64];
-//
-//    u2f_prints("u2f_register\r\n");
-//
-//    if (u2f_get_user_feedback() != 0)
-//    {
-//    	u2f_prints("u2f_get_user_feedback fail\r\n");
-//        return U2F_SW_CONDITIONS_NOT_SATISFIED;
-//    }
-//
-//    u2f_prints("u2f_new_keypair\r\n");
-//    if ( u2f_new_keypair(key_handle, pubkey) == -1)
-//    {
-//    	u2f_prints("u2f_new_keypair fail\r\n");
-//    	return U2F_SW_CONDITIONS_NOT_SATISFIED;
-//    }
-//
-//    u2f_prints("u2f_sha\r\n");
-//    u2f_sha256_start();
-//    u2f_sha256_update(i,1);
-//    u2f_sha256_update(pubkey,32);
-//    u2f_sha256_update(pubkey,32);
-//    u2f_sha256_update(key_handle,U2F_KEY_HANDLE_SIZE);
-//    u2f_sha256_update(i+1,1);
-//    u2f_sha256_update(pubkey,64);
-//    u2f_sha256_finish();
-//    if (u2f_ecdsa_sign(pubkey, U2F_ATTESTATION_HANDLE) == -1)
-//	{
-//    	return SW_WRONG_DATA;
-//	}
-
+	dump_eeprom();
 	return 0;
 }
 

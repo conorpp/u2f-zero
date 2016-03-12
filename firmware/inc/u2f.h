@@ -10,10 +10,6 @@
 
 #include <stdint.h>
 
-#define SW_NO_ERROR 						0x00
-#define SW_CONDITIONS_NOT_SATISFIED 		0x01
-#define SW_WRONG_DATA 						0x02
-
 #define U2F_EC_FMT_UNCOMPRESSED				0x04
 
 #define U2F_EC_POINT_SIZE					32
@@ -36,6 +32,9 @@
 // U2F_CMD_REGISTER command defines
 #define U2F_REGISTER_ID 					0x05
 #define U2F_REGISTER_HASH_ID 				0x00
+
+// U2F Authenticate
+#define U2F_AUTHENTICATE_CHECK				0x7
 
 
 struct u2f_request_apdu
@@ -62,6 +61,14 @@ struct u2f_register_request
     uint8_t chal[U2F_CHALLENGE_SIZE];
     uint8_t app[U2F_APPLICATION_SIZE];
 };
+
+struct u2f_authenticate_request
+{
+    uint8_t chal[U2F_CHALLENGE_SIZE];
+    uint8_t app[U2F_APPLICATION_SIZE];
+    uint8_t khl;
+    uint8_t kh[U2F_KEY_HANDLE_SIZE];
+} ;
 
 
 void u2f_request(struct u2f_request_apdu* req);
@@ -122,6 +129,12 @@ int8_t u2f_ecdsa_sign(uint8_t * dest, uint8_t * handle);
 //  @pubkey location to write the public key R & S (64 bytes)
 //  @return -1 for failure, 0 for success
 int8_t u2f_new_keypair(uint8_t * handle, uint8_t * pubkey);
+
+// Load a key into memory or check to see that the handle exists
+//  @handle the key handle to check
+//	@len the length of key handle in bytes
+//	@return -1 if it doesn't exist, 0 for success
+int8_t u2f_load_key(uint8_t * handle, uint8_t len);
 
 // method to return pointer to attestation cert
 uint8_t * u2f_get_attestation_cert();

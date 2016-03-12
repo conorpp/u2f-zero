@@ -134,7 +134,7 @@ int8_t u2f_ecdsa_sign(uint8_t * dest, uint8_t * handle)
 {
 	struct atecc_response res;
 	struct key_handle k;
-	uint16_t keyslot = ((struct key_handle *)handle)->index;
+	uint16_t keyslot = (uint16_t)((struct key_handle *)handle)->index;
 	if (keyslot > U2F_NUM_KEYS)
 	{
 		return -1;
@@ -147,6 +147,7 @@ int8_t u2f_ecdsa_sign(uint8_t * dest, uint8_t * handle)
 	{
 		keyslot--;
 	}
+
 	atecc_send_recv(ATECC_CMD_SIGN,
 			ATECC_SIGN_EXTERNAL, keyslot, NULL, 0,
 			appdata.tmp, sizeof(appdata.tmp), &res);
@@ -156,7 +157,7 @@ int8_t u2f_ecdsa_sign(uint8_t * dest, uint8_t * handle)
 		eeprom_read(U2F_KEY_ADDR(keyslot), (uint8_t* )&k, U2F_KEY_HANDLE_SIZE);
 
 		if (
-				((struct key_handle *)handle)->index-1 != k.index ||
+				((struct key_handle *)handle)->index != k.index ||
 				((struct key_handle *)handle)->entropy[0] != k.entropy[0] ||
 				((struct key_handle *)handle)->entropy[1] != k.entropy[1] ||
 				((struct key_handle *)handle)->entropy[2] != k.entropy[2]
@@ -189,16 +190,38 @@ int8_t u2f_new_keypair(uint8_t * handle, uint8_t * pubkey)
 	memmove(pubkey, res.buf, 64);
 
 	eeprom_read(U2F_KEY_ADDR(keyslot), (uint8_t* )&k, U2F_KEY_HANDLE_SIZE);
-	if (k.index != keyslot)
+	if (k.index-1 != keyslot)
 	{
+
 		k.index = keyslot;
 		set_app_error(ERROR_BAD_KEY_STORE);
 	}
-	k.index++;
 	memmove(handle, &k, U2F_KEY_HANDLE_SIZE);
 	key_store.num_issued++;
 	flush_key_store();
 
+	return 0;
+}
+
+int8_t u2f_load_key(uint8_t * handle, uint8_t len)
+{
+	struct key_handle k;
+	uint8_t keyslot = handle[0]-1;
+	if (keyslot >= U2F_NUM_KEYS)
+	{
+		return -1;
+	}
+	eeprom_read(U2F_KEY_ADDR(keyslot), (uint8_t* )&k, U2F_KEY_HANDLE_SIZE);
+
+	if (
+			handle[0] != k.index ||
+			((struct key_handle *)handle)->entropy[0] != k.entropy[0] ||
+			((struct key_handle *)handle)->entropy[1] != k.entropy[1] ||
+			((struct key_handle *)handle)->entropy[2] != k.entropy[2]
+	)
+	{
+		return -1;
+	}
 	return 0;
 }
 

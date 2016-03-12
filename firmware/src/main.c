@@ -40,23 +40,23 @@ void set_app_u2f_hid_msg(struct u2f_hid_msg * msg )
 }
 
 
-void dump_eeprom()
-{
-	// 0xF800 - 0xFB7F
-	uint16_t i = 0xF800;
-	uint8_t eep;
-	for (; i <= 0xF800 + 4 * 16; i++)
-	{
-		eeprom_read(i,&eep,1);
-		u2f_putb(eep);
-		u2f_prints(" ");
-	}
-	u2f_prints("\r\n");
-}
+//void dump_eeprom()
+//{
+//	// 0xF800 - 0xFB7F
+//	uint16_t i = 0xF800;
+//	uint8_t eep;
+//	for (; i <= 0xF800 + 4 * 16; i++)
+//	{
+//		eeprom_read(i,&eep,1);
+//		u2f_putb(eep);
+//		u2f_prints(" ");
+//	}
+//	u2f_prints("\r\n");
+//}
 
 int8_t test_app()
 {
-	dump_eeprom();
+
 	return 0;
 }
 

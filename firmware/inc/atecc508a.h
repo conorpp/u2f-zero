@@ -11,10 +11,13 @@
 #define ATECC508A_ADDR 					0xc0
 
 #define ATECC_CMD_COUNTER 				0x24
-	#define ATECC_COUNTER0 				0
-	#define ATECC_COUNTER1 				1
+	// P1
 	#define ATECC_COUNTER_READ 			0
 	#define ATECC_COUNTER_INC 			1
+	// P2
+	#define ATECC_COUNTER0 				0
+	#define ATECC_COUNTER1 				1
+
 
 #define ATECC_CMD_RNG 					0x1B
 	#define ATECC_RNG_P1 				0

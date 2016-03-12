@@ -83,13 +83,12 @@ static void dump_signature_der(uint8_t * sig)
     u2f_response_writeback(sig+32, 32);
 }
 
-// TODO replace with atecc
-static uint32_t _count = 1;
 
 static int16_t u2f_authenticate(struct u2f_authenticate_request * req, uint8_t control)
 {
 
 	uint8_t up = 1;
+	uint32_t count;
 	if (u2f_load_key(req->kh, req->khl) != 0)
 	{
 		u2f_hid_set_len(2);
@@ -100,12 +99,13 @@ static int16_t u2f_authenticate(struct u2f_authenticate_request * req, uint8_t c
 		u2f_hid_set_len(2);
 		return U2F_SW_CONDITIONS_NOT_SATISFIED;
 	}
-	_count++;
+
+	count = u2f_count();
 
     u2f_sha256_start();
     u2f_sha256_update(req->app,32);
     u2f_sha256_update(&up,1);
-    u2f_sha256_update(&_count,4);
+    u2f_sha256_update(&count,4);
     u2f_sha256_update(req->chal,32);
 
     u2f_sha256_finish();
@@ -118,7 +118,7 @@ static int16_t u2f_authenticate(struct u2f_authenticate_request * req, uint8_t c
     u2f_hid_set_len(7 + get_signature_length((uint8_t*)req));
 
     u2f_response_writeback(&up,1);
-    u2f_response_writeback(&_count,4);
+    u2f_response_writeback(&count,4);
     dump_signature_der((uint8_t*)req);
 
 	return U2F_SW_NO_ERROR;

@@ -139,6 +139,10 @@ int8_t u2f_load_key(uint8_t * handle, uint8_t len);
 // method to return pointer to attestation cert
 uint8_t * u2f_get_attestation_cert();
 
+// Should increment a 4 byte persistent/atomic counter and return it.
+// 	@return the counter
+uint32_t u2f_count();
+
 // method to set the total length of the response for use by underlying layer
 // @len the length of U2F response in bytes
 void set_response_length(uint16_t len);

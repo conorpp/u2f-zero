@@ -225,6 +225,15 @@ int8_t u2f_load_key(uint8_t * handle, uint8_t len)
 	return 0;
 }
 
+uint32_t u2f_count()
+{
+	struct atecc_response res;
+	atecc_send_recv(ATECC_CMD_COUNTER,
+			ATECC_COUNTER_INC, ATECC_COUNTER0,NULL,0,
+			appdata.tmp, sizeof(appdata.tmp), &res);
+	return le32toh(*(uint32_t*)res.buf);
+}
+
 code char __attest[] =
 		"\x30\x82\x01\x5b\x30\x82\x01\x00\x02\x01\x01\x30\x0a\x06\x08\x2a\x86\x48\xce\x3d"
 		"\x04\x03\x02\x30\x39\x31\x0b\x30\x09\x06\x03\x55\x04\x06\x13\x02\x56\x41\x31\x14"

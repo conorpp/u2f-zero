@@ -30,7 +30,6 @@ static void init(struct APP_DATA* ap)
 
 void set_app_error(APP_ERROR_CODE ec)
 {
-	appdata.state = APP_ERROR;
 	appdata.error = ec;
 }
 
@@ -160,10 +159,12 @@ int16_t main(void) {
 					appdata.state = APP_NOTHING;
 				}
 				break;
-			case APP_ERROR:
-				u2f_printb("error: ", 1, appdata.error);
-				appdata.state = APP_NOTHING;
-				break;
+		}
+
+		if (appdata.error)
+		{
+			u2f_printb("error: ", 1, appdata.error);
+			appdata.error = 0;
 		}
 
 

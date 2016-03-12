@@ -29,7 +29,6 @@ typedef enum
 	APP_HID_MSG,
 	APP_WINK,
 	_APP_WINK,
-	APP_ERROR,
 }
 APP_STATE;
 

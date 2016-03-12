@@ -52,6 +52,9 @@ static int16_t u2f_register(struct u2f_register_request * req)
 
     uint8_t key_handle[U2F_KEY_HANDLE_SIZE];
     uint8_t pubkey[64];
+    uint8_t pad_s = 0;
+    uint8_t pad_r = 0;
+
     const uint16_t attest_size = u2f_attestation_cert_size();
 
     if (u2f_get_user_feedback() != 0)
@@ -63,10 +66,6 @@ static int16_t u2f_register(struct u2f_register_request * req)
     {
     	return U2F_SW_CONDITIONS_NOT_SATISFIED;
     }
-    u2f_prints("chal: ");
-    dump_hex(req->chal,32);
-    u2f_prints("app: ");
-    dump_hex(req->app,32);
     u2f_sha256_start();
     u2f_sha256_update(i,1);
     u2f_sha256_update(req->app,32);
@@ -85,7 +84,10 @@ static int16_t u2f_register(struct u2f_register_request * req)
     	return SW_WRONG_DATA;
 	}
 
-    u2f_hid_set_len(133 + U2F_KEY_HANDLE_SIZE + u2f_attestation_cert_size());
+    pad_r = (((uint8_t*)req)[0] & 0x80) == 0x80;
+    pad_s = (((uint8_t*)req)[32] & 0x80) == 0x80;
+
+    u2f_hid_set_len(139 + pad_s + pad_r + U2F_KEY_HANDLE_SIZE + u2f_attestation_cert_size());
     i[0] = 0x5;
     u2f_response_writeback(i,2);
     u2f_response_writeback(pubkey,64);
@@ -95,10 +97,30 @@ static int16_t u2f_register(struct u2f_register_request * req)
 
     u2f_response_writeback(u2f_get_attestation_cert(),u2f_attestation_cert_size());
 
-    u2f_response_writeback((uint8_t*)req, 64);
+    // DER encoding
+    // write der sequence
+    // has to be minimum distance and padded with 0x00 if MSB is a 1.
+    i[0] = 0x30;
+    i[1] = 0x44 + pad_r + pad_s;
+    u2f_response_writeback(i,2);
+    i[1] = 0;
 
-    u2f_prints("sig: ");
-    dump_hex((uint8_t*)req, 64);
+    // length of R value plus 0x00 pad if necessary
+    u2f_response_writeback("\x02",1);
+    i[0] = 0x20 + pad_r;
+    u2f_response_writeback(i,1 + pad_r);
+
+    // R value
+    u2f_response_writeback((uint8_t*)req, 32);
+
+    // length of S value plus 0x00 pad if necessary
+    u2f_response_writeback("\x02",1);
+    i[0] = 0x20 + pad_s;
+    u2f_response_writeback(i,1 + pad_s);
+
+    // S value
+    u2f_response_writeback(((uint8_t*)req)+32, 32);
+
 
     return U2F_SW_NO_ERROR;
 }

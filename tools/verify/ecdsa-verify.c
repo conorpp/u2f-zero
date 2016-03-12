@@ -16,8 +16,7 @@ int verify(char * digest, char * pubxy, char * rs )
 {
     EC_KEY * key = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
 
-    ECDSA_SIG sig;
-    BIGNUM * bnx = NULL, * bny = NULL;
+    BIGNUM * bnx = NULL, * bny = NULL, * bnsig = NULL;
 
     char r[65], s[65], x[65], y[65];
 
@@ -26,34 +25,32 @@ int verify(char * digest, char * pubxy, char * rs )
 
     memmove(x, pubxy, 64);
     memmove(y, pubxy+64, 64);
-    memmove(r, rs, 64);
-    memmove(s, rs+64, 64);
-    memset(&sig, 0, sizeof(ECDSA_SIG));
 
     r[64] = s[64] = x[64] = y[64] = 0;
-    
     if (!BN_hex2bn(&bnx, x))
     {   return -1;  }
     if (!BN_hex2bn(&bny, y))
     {   return -1;  }
 
-    if (!BN_hex2bn(&sig.r, r))
+    unsigned char binsig[520];
+    if (!BN_hex2bn(&bnsig, rs))
     {   return -1;  }
-    if (!BN_hex2bn(&sig.s, s))
-    {   return -1;  }
+
+    int len = BN_bn2bin(bnsig,binsig);
 
     if (!EC_KEY_set_public_key_affine_coordinates(key,bnx,bny))
     {   return -1;  }
 
-    int ret = ECDSA_do_verify(digest, SHA256_DIGEST_LENGTH, &sig, key);
+    int ret = ECDSA_verify(0, digest, SHA256_DIGEST_LENGTH, binsig, len, key);
 
     EC_KEY_free(key);
     BN_free(bnx);
     BN_free(bny);
-    BN_free(sig.r);
-    BN_free(sig.s);
+    BN_free(bnsig);
 
+    printf("returning\n");
     return ret;
+
 }
 
 
@@ -66,12 +63,13 @@ int main(int argc, char * argv[])
 
     SHA256_CTX sha256;
     int n, ret;
+    int e;
 
     char * pubkey, * sig;
 
     if (argc != 3 && argc != 4)
     {
-        fprintf(stderr, "usage: %s <public-key-hex> <signature-hex> [-d]\n"
+        fprintf(stderr, "usage: %s <public-key-hex> <der-signature-hex> [-d]\n"
                         "   -d: don't take sha256sum of stdin input\n",argv[0]);
         return 1;
     }
@@ -114,7 +112,11 @@ int main(int argc, char * argv[])
     switch(ret)
     {
         case -1:
-            fprintf(stderr,"signature error: %s\n", ERR_error_string(ERR_get_error(),NULL) );
+            printf("signature error:\n");
+            while((e=ERR_get_error())!=0)
+            {
+                fprintf(stderr,"%s\n", ERR_error_string(e,NULL) );
+            }
             break;
         case 0:
             printf("signature incorrect\n");

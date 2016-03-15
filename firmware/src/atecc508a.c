@@ -128,14 +128,17 @@ int8_t atecc_send_recv(uint8_t cmd, uint8_t p1, uint16_t p2,
 	uint8_t errors = 0;
 	atecc_wake();
 	resend:
+	u2f_prints("atecc_send\r\n");
 	while(atecc_send(cmd, p1, p2, tx, txlen) == -1)
 	{
+		u2f_prints("atecc_resend\r\n");
 		u2f_delay(10);
 		errors++;
 	}
-
+	u2f_prints("atecc_recv\r\n");
 	while(atecc_recv(rx,rxlen, res) == -1)
 	{
+		u2f_prints("atecc_rerecv\r\n");
 		errors++;
 		if (errors > 5)
 		{
@@ -203,6 +206,7 @@ static int is_locked(uint8_t * buf)
 	atecc_send_recv(ATECC_CMD_READ,
 					ATECC_RW_CONFIG,87/4, NULL, 0,
 					buf, 36, &res);
+	dump_hex(res.buf, res.len);
 	if (res.buf[87 % 4] == 0)
 		return 1;
 	else
@@ -224,7 +228,7 @@ static void dump_config(uint8_t* buf)
 		{
 			crc = feed_crc(crc,res.buf[j]);
 		}
-		dump_hex(res.buf,res.len);
+		dump_hex(res.buf-3,res.len+3);
 	}
 
 	u2f_printx("config crc:", 1,reverse_bits(crc));
@@ -244,7 +248,7 @@ static void atecc_setup_config(uint8_t* buf)
 	sc.writeconfig = 0xa;
 
 	// set up read/write permissions for keys
-	for (i = 0; i < 15; i++)
+	for (i = 0; i < 16; i++)
 	{
 		if ( atecc_write_eeprom(ATECC_EEPROM_SLOT(i), ATECC_EEPROM_SLOT_OFFSET(i), &sc, ATECC_EEPROM_SLOT_SIZE) != 0)
 		{
@@ -253,41 +257,24 @@ static void atecc_setup_config(uint8_t* buf)
 
 	}
 
-	memset(&sc, 0, sizeof(struct atecc_slot_config));
-	sc.writeconfig = 0x2;
-	if ( atecc_write_eeprom(ATECC_EEPROM_SLOT(15), ATECC_EEPROM_SLOT_OFFSET(15), &sc, ATECC_EEPROM_SLOT_SIZE) != 0)
-	{
-		u2f_printb("2 atecc_write_eeprom failed %bd\r\n",1,i);
-	}
 
 	kc.private = 1;
 	kc.pubinfo = 1;
 	kc.keytype = 0x4;
+	kc.lockable = 0;
 
 	// set up config for keys
 	for (i = 0; i < 16; i++)
 	{
-		if (i > 7)
-		{
-			kc.lockable = 1;
-		}
 		if (i==15)
 		{
-			kc.private = 0;
-			kc.pubinfo = 0;
+			kc.lockable = 1;
 		}
 		if ( atecc_write_eeprom(ATECC_EEPROM_KEY(i), ATECC_EEPROM_KEY_OFFSET(i), &kc, ATECC_EEPROM_KEY_SIZE) != 0)
 		{
 			u2f_printb("3 atecc_write_eeprom failed " ,1,i);
 		}
 
-	}
-
-	// set otp to be read only
-	buf[0] = 0xAA;
-	if ( atecc_write_eeprom(ATECC_EEPROM_B2A(18), ATECC_EEPROM_B2O(18), buf, 1) != 0)
-	{
-		u2f_prints("otp write failed\r\n");
 	}
 
 	dump_config(buf);
@@ -312,22 +299,23 @@ void atecc_setup_device(uint8_t * buf)
 	struct atecc_response res;
 	if (!is_locked(buf))
 	{
+		u2f_prints("setting up config...\r\n");
+
 		atecc_setup_config(buf);
 
 		// lock config
 		if (atecc_send_recv(ATECC_CMD_LOCK,
-				ATECC_LOCK_CONFIG, 0xf2cd, NULL, 0,
+				ATECC_LOCK_CONFIG, 0xe3e5, NULL, 0,
 				buf, sizeof(buf), NULL))
 		{
 			u2f_prints("ATECC_CMD_LOCK failed\r\n");
 			return;
 		}
-
-		atecc_write_otp(buf);
 	}
 	else
 	{
 		u2f_prints("ATECC device is already locked\r\n");
+		dump_config(buf);
 	}
 
 	eeprom_read(U2F_EEPROM_CONFIG, buf, 1);

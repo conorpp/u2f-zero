@@ -22,12 +22,9 @@ extern SI_SEGMENT_VARIABLE(myUsbDevice, USBD_Device_TypeDef, MEM_MODEL_SEG);
 
 #define GetEp(epAddr)  (&myUsbDevice.ep0 + epAddr)
 
-#define _EFMSDK16
-#ifdef _EFMSDK16
-SI_SBIT(LED_R, SFR_P1, 6);
-SI_SBIT(LED_B, SFR_P1, 5);
-SI_SBIT(LED_G, SFR_P1, 4);
-#endif
+SI_SBIT(LED_B, SFR_P0, 0);
+SI_SBIT(LED_G, SFR_P0, 1);
+SI_SBIT(LED_R, SFR_P0, 2);
 
 
 void u2f_delay(int16_t ms);

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ASCII"?>
-<device:XMLDevice xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:device="http://www.silabs.com/sls/hc/document/device.ecore" name="EFM8UB10F16G-B-QFN28" partId="com.silabs.mcu.si8051.efm8ub1_g.efm8ub10f16g">
+<device:XMLDevice xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:device="http://www.silabs.com/sls/hc/document/device.ecore" name="EFM8UB10F16G-B-QFN20" partId="com.silabs.mcu.si8051.efm8ub1_g.efm8ub10f16g">
   <mode name="DefaultMode">
     <property object="ADC_0" propertyId="adc.configuration.sarclkactual" value="1.500 MHz"/>
     <property object="ADC_0" propertyId="adc.configuration.sarclocksource" value="48.000 MHz"/>
@@ -23,10 +23,23 @@
     <property object="INTERRUPT_0" propertyId="interrupt.extendedinterruptenable1.enabletimer3interrupt" value="Enabled"/>
     <property object="INTERRUPT_0" propertyId="interrupt.interruptenable.enableallinterrupts" value="Enabled"/>
     <property object="INTERRUPT_0" propertyId="interrupt.interruptenable.enabletimer2interrupt" value="Enabled"/>
-    <property object="P0.2" propertyId="ports.settings.maskvalue" value="Compared"/>
+    <property object="P0.0" propertyId="ports.settings.iomode" value="Digital Push-Pull Output"/>
+    <property object="P0.0" propertyId="ports.settings.outputmode" value="Push-pull"/>
+    <property object="P0.0" propertyId="ports.settings.skip" value="Skipped"/>
+    <property object="P0.1" propertyId="ports.settings.iomode" value="Digital Push-Pull Output"/>
+    <property object="P0.1" propertyId="ports.settings.outputmode" value="Push-pull"/>
+    <property object="P0.1" propertyId="ports.settings.skip" value="Skipped"/>
+    <property object="P0.2" propertyId="ports.settings.iomode" value="Digital Push-Pull Output"/>
+    <property object="P0.2" propertyId="ports.settings.outputmode" value="Push-pull"/>
+    <property object="P0.2" propertyId="ports.settings.skip" value="Skipped"/>
     <property object="P0.3" propertyId="ports.settings.maskvalue" value="Compared"/>
+    <property object="P0.3" propertyId="ports.settings.skip" value="Skipped"/>
     <property object="P0.4" propertyId="ports.settings.iomode" value="Digital Push-Pull Output"/>
     <property object="P0.4" propertyId="ports.settings.outputmode" value="Push-pull"/>
+    <property object="P0.6" propertyId="ports.settings.skip" value="Skipped"/>
+    <property object="P0.7" propertyId="ports.settings.skip" value="Skipped"/>
+    <property object="P1.0" propertyId="ports.settings.skip" value="Skipped"/>
+    <property object="P2.0" propertyId="ports.settings.skip" value="Skipped"/>
     <property object="PBCFG_0" propertyId="pbcfg.settings.enablecrossbar" value="Enabled"/>
     <property object="SMBUS_0" propertyId="ABPeripheral.included" value="true"/>
     <property object="SMBUS_0" propertyId="smbus.configuration.enablesmbus" value="Enabled"/>

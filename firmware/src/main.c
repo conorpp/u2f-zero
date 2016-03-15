@@ -16,7 +16,6 @@
 #include "tests.h"
 
 data struct APP_DATA appdata;
-SI_SBIT (LED1, SFR_P1, 4);             // LED green
 
 static void init(struct APP_DATA* ap)
 {
@@ -24,7 +23,7 @@ static void init(struct APP_DATA* ap)
 	u2f_hid_init();
 	smb_init();
 	atecc_idle();
-	eeprom_init();
+	// eeprom_init();
 	u2f_init();
 }
 
@@ -56,11 +55,18 @@ void set_app_u2f_hid_msg(struct u2f_hid_msg * msg )
 
 int8_t test_app()
 {
-
+	struct atecc_response res;
+	u2f_prints("atecc_send_recv\r\n");
+	atecc_send_recv(ATECC_CMD_COUNTER,
+			ATECC_COUNTER_INC, ATECC_COUNTER0,NULL,0,
+			appdata.tmp, 12, &res);
+	dump_hex(appdata.tmp, res.len+3);
 	return 0;
 }
 
 #define ms_since(ms,num) (((uint16_t)get_ms() - (ms)) >= num ? (1|(ms=(uint16_t)get_ms())):0)
+
+
 
 int16_t main(void) {
 
@@ -69,6 +75,7 @@ int16_t main(void) {
 	data uint16_t ms_heart;
 	data uint16_t ms_wink;
 	data uint8_t winks = 0;
+	uint8_t leds = 0;
 
 	enter_DefaultMode_from_RESET();
 	init(&appdata);
@@ -87,10 +94,24 @@ int16_t main(void) {
 
 	while (1) {
 
-		if (ms_since(ms_heart,500))
+		if (ms_since(ms_heart,1500))
 		{
 			u2f_printl("ms ", 1, get_ms());
-			LED_G = !LED_G;
+
+			test_app();
+			switch(leds++ % 3)
+			{
+			case 0:
+				LED_R = !LED_R;
+				break;
+			case 1:
+				LED_G = !LED_G;
+				break;
+			case 2:
+				LED_B = !LED_B;
+				break;
+			}
+
 		}
 
 

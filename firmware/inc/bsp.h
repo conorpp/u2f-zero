@@ -25,6 +25,8 @@ extern SI_SEGMENT_VARIABLE(myUsbDevice, USBD_Device_TypeDef, MEM_MODEL_SEG);
 SI_SBIT(LED_G, SFR_P0, 0);
 SI_SBIT(LED_R, SFR_P0, 1);
 SI_SBIT(LED_B, SFR_P0, 2);
+SI_SBIT(U2F_BUTTON, SFR_P1, 0);
+SI_SBIT(U2F_BUTTON_VAL, SFR_P0, 7);
 
 
 void u2f_delay(int16_t ms);

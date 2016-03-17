@@ -25,6 +25,7 @@ static void init(struct APP_DATA* ap)
 	atecc_idle();
 	// eeprom_init();
 	u2f_init();
+	U2F_BUTTON_VAL = 1;
 }
 
 void set_app_error(APP_ERROR_CODE ec)
@@ -76,6 +77,7 @@ int16_t main(void) {
 	data uint16_t ms_wink;
 	data uint8_t winks = 0;
 	uint8_t leds = 0;
+	uint16_t button = 0;
 
 	enter_DefaultMode_from_RESET();
 	init(&appdata);
@@ -94,31 +96,19 @@ int16_t main(void) {
 
 	while (1) {
 
-		if (ms_since(ms_heart,1500))
+		if (ms_since(ms_heart,500))
 		{
 			u2f_printl("ms ", 1, get_ms());
-
-			test_app();
-			switch(leds++ % 3)
-			{
-			case 0:
-				LED_R = !LED_R;
-				break;
-			case 1:
-				LED_G = !LED_G;
-				break;
-			case 2:
-				LED_B = !LED_B;
-				break;
-			}
-
+			button = U2F_BUTTON;
+			u2f_printx("button: ",1,button);
+			LED_G = !LED_G;
 		}
 
 
 		if (!USBD_EpIsBusy(EP1OUT) && !USBD_EpIsBusy(EP1IN) && appdata.state != APP_HID_MSG)
 		{
 			USBD_Read(EP1OUT, hidmsgbuf, sizeof(hidmsgbuf), true);
-			u2f_prints("read added\r\n");
+			// u2f_prints("read added\r\n");
 		}
 
 		switch(appdata.state)
@@ -136,6 +126,8 @@ int16_t main(void) {
 				appdata.state = _APP_WINK;
 				break;
 			case _APP_WINK:
+				LED_G = 1;
+				LED_R = 1;
 				if (ms_since(ms_wink,150))
 				{
 					LED_B = !LED_B;

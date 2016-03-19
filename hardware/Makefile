@@ -1,8 +1,7 @@
 
 name=u2f-zero
 gers=gerbers
-files=$(addprefix $(name)., GTL GBL GTS GBS GTO GBO GKO TXT)
-files=$(addprefix $(gers)/, GTL GBL GTS GBS GTO GBO GKO TXT)
+files=$(wildcard $(gers)/*)
 
 compress:
 	zip $(name)-gerbers.zip $(files)

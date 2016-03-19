@@ -1,9 +1,9 @@
-(module EFM8UB1 (layer F.Cu) (tedit 5686C774)
+(module EFM8UB1 (layer F.Cu) (tedit 56EDA03F)
   (descr 13)
-  (fp_text reference EFM** (at 0 -1.5) (layer F.SilkS)
+  (fp_text reference E1 (at -0.6604 -1.3716) (layer F.SilkS) hide
     (effects (font (size 0.5 0.5) (thickness 0.1)))
   )
-  (fp_text value EFM8UB1 (at 3 -1.5) (layer F.Fab) hide
+  (fp_text value EFM8UB1 (at 1.8288 -1.3716) (layer F.Fab) hide
     (effects (font (size 0.5 0.5) (thickness 0.1)))
   )
   (fp_circle (center -0.5 -0.5) (end -0.4 -0.6) (layer F.SilkS) (width 0.03))

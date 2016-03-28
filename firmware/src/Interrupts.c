@@ -84,7 +84,6 @@ SI_INTERRUPT (SMBUS0_ISR, SMBUS0_IRQn)
 			count++;
 			if (!SMB0CN0_ACK)
 			{
-				u2f_printb("N\r\n",1,count);
 				// NACK
 				// end transaction
 				SMB0CN0_STO = 1;
@@ -94,14 +93,12 @@ SI_INTERRUPT (SMBUS0_ISR, SMBUS0_IRQn)
 			else if (!SMB_WRITING())
 			{
 				// do nothing and switch to receive mode
-				u2f_prints("s2r\r\n");
 			}
 			else if (SMB.write_offset < SMB.write_len)
 			{
 				// start writing first buffer
 				// dont crc first byte for atecc508a
 				if (SMB.write_offset) _feed_crc(SMB.write_buf[SMB.write_offset]);
-				u2f_printb("wb: ", 1,SMB.write_buf[SMB.write_offset]);
 				SMB0DAT = SMB.write_buf[SMB.write_offset++];
 
 			}
@@ -132,7 +129,6 @@ SI_INTERRUPT (SMBUS0_ISR, SMBUS0_IRQn)
 				SMB0CN0_STO = 1;
 				SMB_BUSY_CLEAR();
 				SMB.errors = 0;
-				u2f_prints("IDONE\r\n");
 			}
 
 
@@ -144,7 +140,6 @@ SI_INTERRUPT (SMBUS0_ISR, SMBUS0_IRQn)
 			if (SMB.read_offset < SMB.read_len)
 			{
 				SMB.read_buf[SMB.read_offset] = SMB0DAT;
-				u2f_printb("rb: ",1,SMB.read_buf[SMB.read_offset] );
 
 				// update with length from packet
 				// warning this is device specific to atecc508a
@@ -163,7 +158,6 @@ SI_INTERRUPT (SMBUS0_ISR, SMBUS0_IRQn)
 			}
 			else
 			{
-				u2f_prints("done\r\n");
 				// end transaction
 				if (SMB_HAS_CRC())
 				{

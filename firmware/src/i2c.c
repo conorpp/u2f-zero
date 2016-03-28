@@ -49,8 +49,6 @@ void smb_write (uint8_t addr, uint8_t* buf, uint8_t len)
 {
 	if (while_busy()) return;
 
-	u2f_printb("writing bytes ",1,len);
-
    SMB_FLAGS = SMB_WRITE | SMB_BUSY | SMB.preflags;
    SMB.preflags = 0;
 

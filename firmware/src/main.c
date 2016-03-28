@@ -23,7 +23,7 @@ static void init(struct APP_DATA* ap)
 	u2f_hid_init();
 	smb_init();
 	atecc_idle();
-	// eeprom_init();
+	eeprom_init();
 	u2f_init();
 	U2F_BUTTON_VAL = 1;
 }
@@ -56,12 +56,7 @@ void set_app_u2f_hid_msg(struct u2f_hid_msg * msg )
 
 int8_t test_app()
 {
-	struct atecc_response res;
-	u2f_prints("atecc_send_recv\r\n");
-	atecc_send_recv(ATECC_CMD_COUNTER,
-			ATECC_COUNTER_INC, ATECC_COUNTER0,NULL,0,
-			appdata.tmp, 12, &res);
-	dump_hex(appdata.tmp, res.len+3);
+	//u2f_printl("count: ",1,u2f_count());
 	return 0;
 }
 
@@ -91,8 +86,8 @@ int16_t main(void) {
 	u2f_prints("U2F ZERO\r\n");
 
 	run_tests();
-	atecc_setup_device(appdata.tmp);
-	test_app();
+	atecc_setup_init(appdata.tmp);
+
 
 	while (1) {
 
@@ -102,6 +97,7 @@ int16_t main(void) {
 			button = U2F_BUTTON;
 			u2f_printx("button: ",1,button);
 			LED_G = !LED_G;
+			test_app();
 		}
 
 
@@ -116,7 +112,11 @@ int16_t main(void) {
 			case APP_NOTHING:
 				break;
 			case APP_HID_MSG:
+#ifndef ATECC_SETUP_DEVICE
 				u2f_hid_request(appdata.hid_msg);
+#else
+				atecc_setup_device((struct config_msg*)appdata.hid_msg);
+#endif
 				if (appdata.state == APP_HID_MSG)
 					appdata.state = APP_NOTHING;
 				break;

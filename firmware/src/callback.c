@@ -154,9 +154,8 @@ uint16_t USBD_XferCompleteCb(uint8_t epAddr, USB_Status_TypeDef status,
 	{
 		dump_hex(hidmsgbuf, sizeof(hidmsgbuf));
 
-#ifndef U2F_HID_DISABLE
 		set_app_u2f_hid_msg((struct u2f_hid_msg *) hidmsgbuf );
-#endif
+
 	}
 
 

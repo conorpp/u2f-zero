@@ -128,17 +128,17 @@ int8_t atecc_send_recv(uint8_t cmd, uint8_t p1, uint16_t p2,
 	uint8_t errors = 0;
 	atecc_wake();
 	resend:
-	u2f_prints("atecc_send\r\n");
 	while(atecc_send(cmd, p1, p2, tx, txlen) == -1)
 	{
-		u2f_prints("atecc_resend\r\n");
 		u2f_delay(10);
 		errors++;
+		if (errors > 8)
+		{
+			return -1;
+		}
 	}
-	u2f_prints("atecc_recv\r\n");
 	while(atecc_recv(rx,rxlen, res) == -1)
 	{
-		u2f_prints("atecc_rerecv\r\n");
 		errors++;
 		if (errors > 5)
 		{
@@ -223,12 +223,12 @@ static void dump_config(uint8_t* buf)
 	{
 		atecc_send_recv(ATECC_CMD_READ,
 				ATECC_RW_CONFIG | ATECC_RW_EXT, i << 3, NULL, 0,
-				buf, 36, &res);
+				buf, 40, &res);
 		for(j = 0; j < res.len; j++)
 		{
 			crc = feed_crc(crc,res.buf[j]);
 		}
-		dump_hex(res.buf-3,res.len+3);
+		dump_hex(res.buf,res.len);
 	}
 
 	u2f_printx("config crc:", 1,reverse_bits(crc));
@@ -293,47 +293,88 @@ static void atecc_write_otp(uint8_t * buf)
 	}
 }
 
-// buf should be at least 40 bytes
-void atecc_setup_device(uint8_t * buf)
+void atecc_setup_init(uint8_t * buf)
 {
-	struct atecc_response res;
 	if (!is_locked(buf))
 	{
 		u2f_prints("setting up config...\r\n");
-
 		atecc_setup_config(buf);
-
-		// lock config
-		if (atecc_send_recv(ATECC_CMD_LOCK,
-				ATECC_LOCK_CONFIG, 0xe3e5, NULL, 0,
-				buf, sizeof(buf), NULL))
-		{
-			u2f_prints("ATECC_CMD_LOCK failed\r\n");
-			return;
-		}
 	}
 	else
 	{
-		u2f_prints("ATECC device is already locked\r\n");
-		dump_config(buf);
+		u2f_prints("already locked\r\n");
 	}
+}
 
-	eeprom_read(U2F_EEPROM_CONFIG, buf, 1);
+// buf should be at least 40 bytes
+void atecc_setup_device(struct config_msg * msg)
+{
+	struct atecc_response res;
+	struct config_msg usbres;
 
-	// generate key once per flashing
-	if (buf[0] == 0xff)
+	static uint16_t crc = 0;
+	uint8_t buf[40];
+
+	memset(&usbres, 0, sizeof(struct config_msg));
+	usbres.cmd = msg->cmd;
+
+	switch(msg->cmd)
 	{
-		atecc_send_recv(ATECC_CMD_GENKEY,
-				ATECC_GENKEY_PRIVATE, U2F_ATTESTATION_KEY_SLOT, NULL, 0,
-				appdata.tmp, sizeof(appdata.tmp), &res);
+		case U2F_CONFIG_GET_SERIAL_NUM:
 
-		u2f_prints("attestation: ");
-		dump_hex(res.buf, res.len);
+			u2f_prints("U2F_CONFIG_GET_SERIAL_NUM\r\n");
+			atecc_send_recv(ATECC_CMD_READ,
+					ATECC_RW_CONFIG | ATECC_RW_EXT, 0, NULL, 0,
+					buf, 40, &res);
+			memmove(usbres.buf+1, res.buf, 14);
+			usbres.buf[0] = 14;
+			break;
 
-		buf[0] = 0;
-		eeprom_write(U2F_EEPROM_CONFIG, buf, 1);
+		case U2F_CONFIG_IS_BUILD:
+			u2f_prints("U2F_CONFIG_IS_BUILD\r\n");
+			usbres.buf[0] = 1;
+			break;
+		case U2F_CONFIG_IS_CONFIGURED:
+			u2f_prints("U2F_CONFIG_IS_CONFIGURED\r\n");
+			usbres.buf[0] = 1;
+			break;
+		case U2F_CONFIG_LOCK:
+			crc = *(uint16_t*)msg->buf;
+			usbres.buf[0] = 1;
+			u2f_printx("got crc: ",1,crc);
 
+			if (!is_locked(buf))
+			{
+				if (atecc_send_recv(ATECC_CMD_LOCK,
+						ATECC_LOCK_CONFIG, crc, NULL, 0,
+						buf, sizeof(buf), NULL))
+				{
+					u2f_prints("ATECC_CMD_LOCK failed\r\n");
+					return;
+				}
+			}
+			else
+			{
+				u2f_prints("already locked\r\n");
+			}
+			break;
+		case U2F_CONFIG_GENKEY:
+			u2f_prints("U2F_CONFIG_GENKEY\r\n");
+
+			atecc_send_recv(ATECC_CMD_GENKEY,
+					ATECC_GENKEY_PRIVATE, U2F_ATTESTATION_KEY_SLOT, NULL, 0,
+					appdata.tmp, sizeof(appdata.tmp), &res);
+
+			u2f_printb("key is bytes ",1,res.len);
+
+			memmove((uint8_t*)&usbres, res.buf, 64);
+
+			break;
+		default:
+			u2f_printb("invalid command: ",1,msg->cmd);
 	}
+
+	usb_write((uint8_t*)&usbres, HID_PACKET_SIZE);
 
 }
 #endif

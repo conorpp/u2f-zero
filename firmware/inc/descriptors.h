@@ -33,7 +33,7 @@ extern "C" {
 #define USB_PRODUCT_ID                     htole16(0x8acf)
 // [Product ID]$
 
-#define HID_PACKET_SIZE 64
+#define HID_PACKET_SIZE 					64
 
 extern SI_SEGMENT_VARIABLE(ReportDescriptor0[34], const uint8_t, SI_SEG_CODE);
 

@@ -1,9 +1,10 @@
 #include "app.h"
-#include "bsp.h"
-#include "u2f.h"
+
 
 #ifndef U2F_DISABLE
 
+#include "bsp.h"
+#include "u2f.h"
 
 #ifdef DEBUG_PC
 #include <stdio.h>

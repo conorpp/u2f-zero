@@ -30,7 +30,6 @@ extern void enter_DefaultMode_from_RESET(void) {
 	VREG_0_enter_DefaultMode_from_RESET();
 	PORTS_0_enter_DefaultMode_from_RESET();
 	PORTS_1_enter_DefaultMode_from_RESET();
-	PORTS_2_enter_DefaultMode_from_RESET();
 	PBCFG_0_enter_DefaultMode_from_RESET();
 	CIP51_0_enter_DefaultMode_from_RESET();
 	CLOCK_0_enter_DefaultMode_from_RESET();
@@ -115,23 +114,22 @@ extern void PORTS_0_enter_DefaultMode_from_RESET(void) {
 
 	// $[P0MDOUT - Port 0 Output Mode]
 	/*
-	 // B0 (Port 0 Bit 0 Output Mode) = PUSH_PULL (P0.0 output is push-pull.)
-	 // B1 (Port 0 Bit 1 Output Mode) = PUSH_PULL (P0.1 output is push-pull.)
-	 // B2 (Port 0 Bit 2 Output Mode) = PUSH_PULL (P0.2 output is push-pull.)
-	 // B3 (Port 0 Bit 3 Output Mode) = OPEN_DRAIN (P0.3 output is open-
+	 // B0 (Port 0 Bit 0 Output Mode) = OPEN_DRAIN (P0.0 output is open-
 	 //     drain.)
+	 // B1 (Port 0 Bit 1 Output Mode) = OPEN_DRAIN (P0.1 output is open-
+	 //     drain.)
+	 // B2 (Port 0 Bit 2 Output Mode) = PUSH_PULL (P0.2 output is push-pull.)
+	 // B3 (Port 0 Bit 3 Output Mode) = PUSH_PULL (P0.3 output is push-pull.)
 	 // B4 (Port 0 Bit 4 Output Mode) = PUSH_PULL (P0.4 output is push-pull.)
 	 // B5 (Port 0 Bit 5 Output Mode) = OPEN_DRAIN (P0.5 output is open-
 	 //     drain.)
-	 // B6 (Port 0 Bit 6 Output Mode) = OPEN_DRAIN (P0.6 output is open-
-	 //     drain.)
-	 // B7 (Port 0 Bit 7 Output Mode) = OPEN_DRAIN (P0.7 output is open-
-	 //     drain.)
+	 // B6 (Port 0 Bit 6 Output Mode) = PUSH_PULL (P0.6 output is push-pull.)
+	 // B7 (Port 0 Bit 7 Output Mode) = PUSH_PULL (P0.7 output is push-pull.)
 	 */
-	P0MDOUT = P0MDOUT_B0__PUSH_PULL | P0MDOUT_B1__PUSH_PULL
-			| P0MDOUT_B2__PUSH_PULL | P0MDOUT_B3__OPEN_DRAIN
+	P0MDOUT = P0MDOUT_B0__OPEN_DRAIN | P0MDOUT_B1__OPEN_DRAIN
+			| P0MDOUT_B2__PUSH_PULL | P0MDOUT_B3__PUSH_PULL
 			| P0MDOUT_B4__PUSH_PULL | P0MDOUT_B5__OPEN_DRAIN
-			| P0MDOUT_B6__OPEN_DRAIN | P0MDOUT_B7__OPEN_DRAIN;
+			| P0MDOUT_B6__PUSH_PULL | P0MDOUT_B7__PUSH_PULL;
 	// [P0MDOUT - Port 0 Output Mode]$
 
 	// $[P0MDIN - Port 0 Input Mode]
@@ -160,26 +158,27 @@ extern void PORTS_0_enter_DefaultMode_from_RESET(void) {
 
 	// $[P0SKIP - Port 0 Skip]
 	/*
-	 // B0 (Port 0 Bit 0 Skip) = SKIPPED (P0.0 pin is skipped by the
+	 // B0 (Port 0 Bit 0 Skip) = NOT_SKIPPED (P0.0 pin is not skipped by the
 	 //     crossbar.)
-	 // B1 (Port 0 Bit 1 Skip) = SKIPPED (P0.1 pin is skipped by the
+	 // B1 (Port 0 Bit 1 Skip) = NOT_SKIPPED (P0.1 pin is not skipped by the
 	 //     crossbar.)
-	 // B2 (Port 0 Bit 2 Skip) = SKIPPED (P0.2 pin is skipped by the
+	 // B2 (Port 0 Bit 2 Skip) = NOT_SKIPPED (P0.2 pin is not skipped by the
 	 //     crossbar.)
-	 // B3 (Port 0 Bit 3 Skip) = SKIPPED (P0.3 pin is skipped by the
+	 // B3 (Port 0 Bit 3 Skip) = NOT_SKIPPED (P0.3 pin is not skipped by the
 	 //     crossbar.)
 	 // B4 (Port 0 Bit 4 Skip) = NOT_SKIPPED (P0.4 pin is not skipped by the
 	 //     crossbar.)
 	 // B5 (Port 0 Bit 5 Skip) = NOT_SKIPPED (P0.5 pin is not skipped by the
 	 //     crossbar.)
-	 // B6 (Port 0 Bit 6 Skip) = SKIPPED (P0.6 pin is skipped by the
+	 // B6 (Port 0 Bit 6 Skip) = NOT_SKIPPED (P0.6 pin is not skipped by the
 	 //     crossbar.)
-	 // B7 (Port 0 Bit 7 Skip) = SKIPPED (P0.7 pin is skipped by the
+	 // B7 (Port 0 Bit 7 Skip) = NOT_SKIPPED (P0.7 pin is not skipped by the
 	 //     crossbar.)
 	 */
-	P0SKIP = P0SKIP_B0__SKIPPED | P0SKIP_B1__SKIPPED | P0SKIP_B2__SKIPPED
-			| P0SKIP_B3__SKIPPED | P0SKIP_B4__NOT_SKIPPED
-			| P0SKIP_B5__NOT_SKIPPED | P0SKIP_B6__SKIPPED | P0SKIP_B7__SKIPPED;
+	P0SKIP = P0SKIP_B0__NOT_SKIPPED | P0SKIP_B1__NOT_SKIPPED
+			| P0SKIP_B2__NOT_SKIPPED | P0SKIP_B3__NOT_SKIPPED
+			| P0SKIP_B4__NOT_SKIPPED | P0SKIP_B5__NOT_SKIPPED
+			| P0SKIP_B6__NOT_SKIPPED | P0SKIP_B7__NOT_SKIPPED;
 	// [P0SKIP - Port 0 Skip]$
 
 	// $[P0MASK - Port 0 Mask]
@@ -190,8 +189,8 @@ extern void PORTS_0_enter_DefaultMode_from_RESET(void) {
 	 //     ignored and will not cause a port mismatch event.)
 	 // B2 (Port 0 Bit 2 Mask Value) = IGNORED (P0.2 pin logic value is
 	 //     ignored and will not cause a port mismatch event.)
-	 // B3 (Port 0 Bit 3 Mask Value) = COMPARED (P0.3 pin logic value is
-	 //     compared to P0MAT.3.)
+	 // B3 (Port 0 Bit 3 Mask Value) = IGNORED (P0.3 pin logic value is
+	 //     ignored and will not cause a port mismatch event.)
 	 // B4 (Port 0 Bit 4 Mask Value) = IGNORED (P0.4 pin logic value is
 	 //     ignored and will not cause a port mismatch event.)
 	 // B5 (Port 0 Bit 5 Mask Value) = IGNORED (P0.5 pin logic value is
@@ -202,7 +201,7 @@ extern void PORTS_0_enter_DefaultMode_from_RESET(void) {
 	 //     ignored and will not cause a port mismatch event.)
 	 */
 	P0MASK = P0MASK_B0__IGNORED | P0MASK_B1__IGNORED | P0MASK_B2__IGNORED
-			| P0MASK_B3__COMPARED | P0MASK_B4__IGNORED | P0MASK_B5__IGNORED
+			| P0MASK_B3__IGNORED | P0MASK_B4__IGNORED | P0MASK_B5__IGNORED
 			| P0MASK_B6__IGNORED | P0MASK_B7__IGNORED;
 	// [P0MASK - Port 0 Mask]$
 
@@ -249,14 +248,13 @@ extern void PORTS_1_enter_DefaultMode_from_RESET(void) {
 
 	// $[P1MDOUT - Port 1 Output Mode]
 	/*
-	 // B0 (Port 1 Bit 0 Output Mode) = OPEN_DRAIN (P1.0 output is open-
-	 //     drain.)
+	 // B0 (Port 1 Bit 0 Output Mode) = PUSH_PULL (P1.0 output is push-pull.)
 	 // B1 (Port 1 Bit 1 Output Mode) = OPEN_DRAIN (P1.1 output is open-
 	 //     drain.)
 	 // B2 (Port 1 Bit 2 Output Mode) = OPEN_DRAIN (P1.2 output is open-
 	 //     drain.)
 	 */
-	P1MDOUT = P1MDOUT_B0__OPEN_DRAIN | P1MDOUT_B1__OPEN_DRAIN
+	P1MDOUT = P1MDOUT_B0__PUSH_PULL | P1MDOUT_B1__OPEN_DRAIN
 			| P1MDOUT_B2__OPEN_DRAIN;
 	// [P1MDOUT - Port 1 Output Mode]$
 
@@ -274,14 +272,14 @@ extern void PORTS_1_enter_DefaultMode_from_RESET(void) {
 
 	// $[P1SKIP - Port 1 Skip]
 	/*
-	 // B0 (Port 1 Bit 0 Skip) = SKIPPED (P1.0 pin is skipped by the
+	 // B0 (Port 1 Bit 0 Skip) = NOT_SKIPPED (P1.0 pin is not skipped by the
 	 //     crossbar.)
 	 // B1 (Port 1 Bit 1 Skip) = NOT_SKIPPED (P1.1 pin is not skipped by the
 	 //     crossbar.)
 	 // B2 (Port 1 Bit 2 Skip) = NOT_SKIPPED (P1.2 pin is not skipped by the
 	 //     crossbar.)
 	 */
-	P1SKIP = P1SKIP_B0__SKIPPED | P1SKIP_B1__NOT_SKIPPED
+	P1SKIP = P1SKIP_B0__NOT_SKIPPED | P1SKIP_B1__NOT_SKIPPED
 			| P1SKIP_B2__NOT_SKIPPED;
 	// [P1SKIP - Port 1 Skip]$
 
@@ -383,7 +381,6 @@ extern void PBCFG_0_enter_DefaultMode_from_RESET(void) {
 	 // URT1CTSE (UART1 CTS Input Enable) = DISABLED (UART1 CTS1 unavailable
 	 //     at Port pin.)
 	 */
-	SFRPAGE = 0x00;
 	XBR2 = XBR2_WEAKPUD__PULL_UPS_ENABLED | XBR2_XBARE__ENABLED
 			| XBR2_URT1E__DISABLED | XBR2_URT1RTSE__DISABLED
 			| XBR2_URT1CTSE__DISABLED;

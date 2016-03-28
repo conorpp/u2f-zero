@@ -16,7 +16,7 @@
 
 // application settings
 #define U2F_ATTESTATION_KEY_SLOT	15
-//#define ATECC_SETUP_DEVICE
+#define ATECC_SETUP_DEVICE
 
 // efm8ub1 application eeprom memory mappings
 #define U2F_KEY_HEADER_ADDR		0xF800
@@ -57,8 +57,21 @@ struct APP_DATA
 	uint8_t error;
 
 	struct u2f_hid_msg * hid_msg;
-
 };
+
+#define U2F_CONFIG_GET_SERIAL_NUM		0x80
+#define	U2F_CONFIG_IS_BUILD				0x81
+#define U2F_CONFIG_IS_CONFIGURED		0x82
+#define U2F_CONFIG_LOCK					0x83
+#define U2F_CONFIG_GENKEY				0x84
+
+struct config_msg
+{
+	uint8_t cmd;
+	uint8_t buf[HID_PACKET_SIZE-1];
+};
+
+
 
 extern uint8_t hidmsgbuf[64];
 
@@ -72,16 +85,24 @@ void u2f_init();
 
 #ifdef ATECC_SETUP_DEVICE
 
-void atecc_setup_device(uint8_t * buf);
+void atecc_setup_device(struct config_msg * msg);
+void atecc_setup_init(uint8_t * buf);
+
+void u2f_config_request();
+
 #define U2F_HID_DISABLE
 #define U2F_DISABLE
 #define u2f_init(x)
 #define u2f_hid_init(x)
 #define u2f_hid_request(x)
+#define u2f_hid_set_len(x)
+#define u2f_hid_flush(x)
+#define u2f_hid_writeback(x)
+
 #else
 
 #define atecc_setup_device(x)
-
+#define atecc_setup_init(x)
 #endif
 
 

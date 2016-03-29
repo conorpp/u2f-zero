@@ -52,3 +52,15 @@ firmware/Keil*
 # binaries
 hex2pubkey
 signcert
+
+#other 
+pubkey.c.txt
+*.lst
+*.obj
+*.OBJ
+*.__i
+*.__ia
+release/
+
+# hardware
+*.gbr

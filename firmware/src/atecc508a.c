@@ -326,8 +326,8 @@ void atecc_setup_device(struct config_msg * msg)
 			atecc_send_recv(ATECC_CMD_READ,
 					ATECC_RW_CONFIG | ATECC_RW_EXT, 0, NULL, 0,
 					buf, 40, &res);
-			memmove(usbres.buf+1, res.buf, 14);
-			usbres.buf[0] = 14;
+			memmove(usbres.buf+1, res.buf, 15);
+			usbres.buf[0] = 15;
 			break;
 
 		case U2F_CONFIG_IS_BUILD:

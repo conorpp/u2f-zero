@@ -32,6 +32,7 @@ typedef enum
 }
 APP_STATE;
 
+
 typedef enum
 {
 	ERROR_NOTHING = 0,
@@ -51,7 +52,7 @@ APP_ERROR_CODE;
 
 struct APP_DATA
 {
-	// must be at least 37 bytes
+	// must be at least 70 bytes
 	uint8_t tmp[70];
 	uint8_t state;
 	uint8_t error;
@@ -79,9 +80,11 @@ extern data struct APP_DATA appdata;
 
 void set_app_u2f_hid_msg(struct u2f_hid_msg * msg );
 void set_app_error(APP_ERROR_CODE ec);
+void rgb(uint8_t r, uint8_t g, uint8_t b);
 
 // should be called after initializing eeprom
 void u2f_init();
+
 
 #ifdef ATECC_SETUP_DEVICE
 

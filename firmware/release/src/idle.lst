@@ -1,4 +1,4 @@
-C51 COMPILER V9.53.0.0   IDLE                                                              03/28/2016 20:17:25 PAGE 1   
+C51 COMPILER V9.53.0.0   IDLE                                                              03/29/2016 00:06:39 PAGE 1   
 
 
 C51 COMPILER V9.53.0.0, COMPILATION OF MODULE IDLE
@@ -6,12 +6,11 @@ OBJECT MODULE PLACED IN .\src/idle.OBJ
 COMPILER INVOKED BY: Z:\home\pp\SimplicityStudio_v3\developer\toolchains\keil_8051\9.53\BIN\C51.exe /home/pp/apps/u2f-ze
                     -ro/firmware/src/idle.c OMF2 LARGE DEBUG OBJECTEXTEND ROM(LARGE) WARNINGLEVEL(2) FLOATFUZZY(3) OPTIMIZE(9,SIZE) INTVECTOR
                     -(0X0000) INTPROMOTE INCDIR(/home/pp/apps/u2f-zero/firmware/inc/config;/home/pp/apps/u2f-zero/firmware/inc;/home/pp/apps/
-                    -u2f-zero/firmware/tinyprintf;/home/pp/apps/u2f-zero/firmware/tests;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3
-                    -//Device/shared/si8051Base;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1;/home/pp/SimplicityStud
-                    -io_v3/developer/sdks/si8051/v3//Device/EFM8UB1/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Lib/efm8_usb/i
-                    -nc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1/peripheral_driver/inc;/home/pp/SimplicityStudio
-                    -_v3/developer/sdks/si8051/v3//Lib/efm8_assert) REGFILE(u2f-firmware.ORC) PRINT(.\src/idle.lst) COND PAGEWIDTH(120) PAGEL
-                    -ENGTH(65) OBJECT(.\src/idle.OBJ)
+                    -u2f-zero/firmware/tests;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/shared/si8051Base;/home/pp/Simplic
+                    -ityStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/EFM8
+                    -UB1/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Lib/efm8_usb/inc;/home/pp/SimplicityStudio_v3/developer/s
+                    -dks/si8051/v3//Device/EFM8UB1/peripheral_driver/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Lib/efm8_asse
+                    -rt) REGFILE(u2f-firmware.ORC) PRINT(.\src/idle.lst) COND PAGEWIDTH(120) PAGELENGTH(65) OBJECT(.\src/idle.OBJ)
 
 line level    source
 
@@ -63,9 +62,9 @@ line level    source
   46   2          idleTimerStart();
   47   2          return 1;
   48   2        }
-C51 COMPILER V9.53.0.0   IDLE                                                              03/28/2016 20:17:25 PAGE 2   
-
   49   1        return 0;
+C51 COMPILER V9.53.0.0   IDLE                                                              03/29/2016 00:06:39 PAGE 2   
+
   50   1      }
   51          
   52          void idleTimerSet(uint8_t rate)

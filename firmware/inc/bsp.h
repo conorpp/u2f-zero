@@ -25,8 +25,24 @@ extern SI_SEGMENT_VARIABLE(myUsbDevice, USBD_Device_TypeDef, MEM_MODEL_SEG);
 SI_SBIT(LED_B, SFR_P0, 6);
 SI_SBIT(LED_G, SFR_P0, 7);
 SI_SBIT(LED_R, SFR_P1, 0);
+
 SI_SBIT(U2F_BUTTON, SFR_P0, 2);
 SI_SBIT(U2F_BUTTON_VAL, SFR_P0, 3);
+
+#define U2F_BUTTON_IS_PRESSED() (U2F_BUTTON == 0)
+
+// Set brightness via PWM
+#define LED_B(x)\
+	PCA0CPL0 = ((((uint8_t)(x))) << PCA0CPL0_PCA0CPL0__SHIFT);\
+	PCA0CPH0 = ((((uint8_t)(x))) << PCA0CPH0_PCA0CPH0__SHIFT)
+
+#define LED_G(x) \
+	PCA0CPL1 = ((((uint8_t)(x))) << PCA0CPL1_PCA0CPL1__SHIFT); \
+	PCA0CPH1 = ((((uint8_t)(x))) << PCA0CPH1_PCA0CPH1__SHIFT)
+
+#define LED_R(x)\
+	PCA0CPL2 = ((((uint8_t)(x))) << PCA0CPL2_PCA0CPL2__SHIFT);\
+	PCA0CPH2 = ((((uint8_t)(x))) << PCA0CPH2_PCA0CPH2__SHIFT)
 
 
 void u2f_delay(int16_t ms);

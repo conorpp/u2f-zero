@@ -1,4 +1,4 @@
-C51 COMPILER V9.53.0.0   MAIN                                                              03/28/2016 20:19:13 PAGE 1   
+C51 COMPILER V9.53.0.0   MAIN                                                              03/29/2016 00:06:39 PAGE 1   
 
 
 C51 COMPILER V9.53.0.0, COMPILATION OF MODULE MAIN
@@ -6,12 +6,11 @@ OBJECT MODULE PLACED IN .\src/main.OBJ
 COMPILER INVOKED BY: Z:\home\pp\SimplicityStudio_v3\developer\toolchains\keil_8051\9.53\BIN\C51.exe /home/pp/apps/u2f-ze
                     -ro/firmware/src/main.c OMF2 LARGE DEBUG OBJECTEXTEND ROM(LARGE) WARNINGLEVEL(2) FLOATFUZZY(3) OPTIMIZE(9,SIZE) INTVECTOR
                     -(0X0000) INTPROMOTE INCDIR(/home/pp/apps/u2f-zero/firmware/inc/config;/home/pp/apps/u2f-zero/firmware/inc;/home/pp/apps/
-                    -u2f-zero/firmware/tinyprintf;/home/pp/apps/u2f-zero/firmware/tests;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3
-                    -//Device/shared/si8051Base;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1;/home/pp/SimplicityStud
-                    -io_v3/developer/sdks/si8051/v3//Device/EFM8UB1/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Lib/efm8_usb/i
-                    -nc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1/peripheral_driver/inc;/home/pp/SimplicityStudio
-                    -_v3/developer/sdks/si8051/v3//Lib/efm8_assert) REGFILE(u2f-firmware.ORC) PRINT(.\src/main.lst) COND PAGEWIDTH(120) PAGEL
-                    -ENGTH(65) OBJECT(.\src/main.OBJ)
+                    -u2f-zero/firmware/tests;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/shared/si8051Base;/home/pp/Simplic
+                    -ityStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/EFM8
+                    -UB1/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Lib/efm8_usb/inc;/home/pp/SimplicityStudio_v3/developer/s
+                    -dks/si8051/v3//Device/EFM8UB1/peripheral_driver/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Lib/efm8_asse
+                    -rt) REGFILE(u2f-firmware.ORC) PRINT(.\src/main.lst) COND PAGEWIDTH(120) PAGELENGTH(65) OBJECT(.\src/main.OBJ)
 
 line level    source
 
@@ -59,136 +58,143 @@ line level    source
   42   1      }
   43          
   44          
-  45          //void dump_eeprom()
-  46          //{
-  47          //      // 0xF800 - 0xFB7F
-  48          //      uint16_t i = 0xF800;
-C51 COMPILER V9.53.0.0   MAIN                                                              03/28/2016 20:19:13 PAGE 2   
+  45          void rgb(uint8_t r, uint8_t g, uint8_t b)
+  46          {
+  47   1              LED_B(b);
+  48   1              LED_G(g);
+  49   1              LED_R(r);
+C51 COMPILER V9.53.0.0   MAIN                                                              03/29/2016 00:06:39 PAGE 2   
 
-  49          //      uint8_t eep;
-  50          //      for (; i <= 0xF800 + 4 * 16; i++)
-  51          //      {
-  52          //              eeprom_read(i,&eep,1);
-  53          //              u2f_putb(eep);
-  54          //              u2f_prints(" ");
-  55          //      }
-  56          //      u2f_prints("\r\n");
-  57          //}
-  58          
-  59          int8_t test_app()
-  60          {
-  61   1              //u2f_printl("count: ",1,u2f_count());
-  62   1              return 0;
-  63   1      }
-  64          
-  65          #define ms_since(ms,num) (((uint16_t)get_ms() - (ms)) >= num ? (1|(ms=(uint16_t)get_ms())):0)
-  66          
-  67          
-  68          
-  69          int16_t main(void) {
-  70   1      
-  71   1              data uint8_t i = 0;
-  72   1              data uint16_t last_ms = get_ms();
-  73   1              data uint16_t ms_heart;
-  74   1              data uint16_t ms_wink;
-  75   1              data uint8_t winks = 0;
-  76   1              uint8_t leds = 0;
-  77   1              uint16_t button = 0;
-  78   1      
-  79   1              enter_DefaultMode_from_RESET();
-  80   1              init(&appdata);
-  81   1      
-  82   1              // STDIO library requires TI to print
-  83   1              SCON0_TI = 1;
-  84   1      
-  85   1              // Enable interrupts
-  86   1              IE_EA = 1;
-  87   1      
-  88   1              u2f_prints("U2F ZERO\r\n");
-  89   1      
-  90   1              run_tests();
-  91   1              atecc_setup_init(appdata.tmp);
-  92   1      
-  93   1      
-  94   1              while (1) {
-  95   2      
-  96   2                      if (ms_since(ms_heart,500))
-  97   2                      {
-  98   3                              u2f_printl("ms ", 1, get_ms());
-  99   3                              button = U2F_BUTTON;
- 100   3                              u2f_printx("button: ",1,button);
- 101   3                              LED_G = !LED_G;
- 102   3                              test_app();
- 103   3                      }
- 104   2      
- 105   2      
- 106   2                      if (!USBD_EpIsBusy(EP1OUT) && !USBD_EpIsBusy(EP1IN) && appdata.state != APP_HID_MSG)
- 107   2                      {
- 108   3                              USBD_Read(EP1OUT, hidmsgbuf, sizeof(hidmsgbuf), true);
- 109   3                              // u2f_prints("read added\r\n");
- 110   3                      }
- 111   2      
-C51 COMPILER V9.53.0.0   MAIN                                                              03/28/2016 20:19:13 PAGE 3   
+  50   1      }
+  51          
+  52          
+  53          #define ms_since(ms,num) (((uint16_t)get_ms() - (ms)) >= num ? (1|(ms=(uint16_t)get_ms())):0)
+  54          
+  55          
+  56          
+  57          int16_t main(void) {
+  58   1      
+  59   1              uint16_t ms_heart;
+  60   1              uint16_t ms_wink;
+  61   1              uint16_t ms_grad;
+  62   1              uint8_t winks = 0;
+  63   1              uint8_t grad_dir = 0;
+  64   1              uint8_t light = 0;
+  65   1      
+  66   1              enter_DefaultMode_from_RESET();
+  67   1              init(&appdata);
+  68   1      
+  69   1              // STDIO library requires TI to print
+  70   1              SCON0_TI = 1;
+  71   1      
+  72   1              // Enable interrupts
+  73   1              IE_EA = 1;
+  74   1      
+  75   1              u2f_prints("U2F ZERO\r\n");
+  76   1      
+  77   1              run_tests();
+  78   1              atecc_setup_init(appdata.tmp);
+  79   1      
+  80   1      
+  81   1              while (1) {
+  82   2      
+  83   2                      if (ms_since(ms_heart,500))
+  84   2                      {
+  85   3                              u2f_printl("ms ", 1, get_ms());
+  86   3                      }
+  87   2      
+  88   2      
+  89   2                      if (!USBD_EpIsBusy(EP1OUT) && !USBD_EpIsBusy(EP1IN) && appdata.state != APP_HID_MSG)
+  90   2                      {
+  91   3                              USBD_Read(EP1OUT, hidmsgbuf, sizeof(hidmsgbuf), true);
+  92   3                      }
+  93   2      
+  94   2                      switch(appdata.state)
+  95   2                      {
+  96   3                              case APP_NOTHING:
+  97   3                                      if (ms_since(ms_grad, 10))
+  98   3                                      {
+  99   4                                              if (light == 90)
+ 100   4                                              {
+ 101   5                                                      grad_dir = 0;
+ 102   5                                              }
+ 103   4                                              else if (light == 0)
+ 104   4                                              {
+ 105   5                                                      grad_dir = 1;
+ 106   5                                              }
+ 107   4                                              if (grad_dir)
+ 108   4                                                      if (U2F_BUTTON_IS_PRESSED())
+ 109   4                                                              rgb(0,0,light++);
+ 110   4                                                      else
+ 111   4                                                              rgb(0,light++,0);
+ 112   4                                              else
+C51 COMPILER V9.53.0.0   MAIN                                                              03/29/2016 00:06:39 PAGE 3   
 
- 112   2                      switch(appdata.state)
- 113   2                      {
- 114   3                              case APP_NOTHING:
- 115   3                                      break;
- 116   3                              case APP_HID_MSG:
- 117   3      #ifndef ATECC_SETUP_DEVICE
- 118   3                                      u2f_hid_request(appdata.hid_msg);
- 119   3      #else
+ 113   4                                                      if (U2F_BUTTON_IS_PRESSED())
+ 114   4                                                              rgb(0,0,light--);
+ 115   4                                                      else
+ 116   4                                                              rgb(0,light--,0);
+ 117   4                                      }
+ 118   3                                      break;
+ 119   3                              case APP_HID_MSG:
+ 120   3      #ifndef ATECC_SETUP_DEVICE
+ 121   3                                      u2f_hid_request(appdata.hid_msg);
+ 122   3      #else
                                               atecc_setup_device((struct config_msg*)appdata.hid_msg);
               #endif
- 122   3                                      if (appdata.state == APP_HID_MSG)
- 123   3                                              appdata.state = APP_NOTHING;
- 124   3                                      break;
- 125   3                              case APP_WINK:
- 126   3                                      LED_B = 0;
- 127   3                                      ms_wink = get_ms();
- 128   3                                      appdata.state = _APP_WINK;
- 129   3                                      break;
- 130   3                              case _APP_WINK:
- 131   3                                      LED_G = 1;
- 132   3                                      LED_R = 1;
- 133   3                                      if (ms_since(ms_wink,150))
- 134   3                                      {
- 135   4                                              LED_B = !LED_B;
- 136   4                                              winks++;
- 137   4                                      }
- 138   3                                      if (winks == 5)
- 139   3                                      {
- 140   4                                              winks = 0;
- 141   4                                              appdata.state = APP_NOTHING;
- 142   4                                      }
- 143   3                                      break;
- 144   3                      }
- 145   2      
- 146   2                      if (appdata.error)
- 147   2                      {
- 148   3                              u2f_printb("error: ", 1, appdata.error);
- 149   3                              appdata.error = 0;
- 150   3                      }
- 151   2      
- 152   2      
- 153   2              }
- 154   1      }
- 155          
- 156          
+ 125   3                                      if (appdata.state == APP_HID_MSG)
+ 126   3                                              appdata.state = APP_NOTHING;
+ 127   3                                      break;
+ 128   3                              case APP_WINK:
+ 129   3                                      rgb(0,0,150);
+ 130   3                                      light = 150;
+ 131   3                                      ms_wink = get_ms();
+ 132   3                                      appdata.state = _APP_WINK;
+ 133   3                                      break;
+ 134   3                              case _APP_WINK:
+ 135   3      
+ 136   3                                      if (ms_since(ms_wink,150))
+ 137   3                                      {
+ 138   4                                              rgb(0,0,light);
+ 139   4                                              light = light == 0 ? 150 : 0;
+ 140   4                                              winks++;
+ 141   4                                      }
+ 142   3                                      if (winks == 5)
+ 143   3                                      {
+ 144   4                                              winks = 0;
+ 145   4                                              appdata.state = APP_NOTHING;
+ 146   4                                      }
+ 147   3                                      break;
+ 148   3                      }
+ 149   2      
+ 150   2                      if (appdata.error)
+ 151   2                      {
+ 152   3                              u2f_printb("error: ", 1, appdata.error);
+ 153   3                              appdata.error = 0;
+ 154   3                              rgb(200,0,0);
+ 155   3                      }
+ 156   2      
+ 157   2      
+ 158   2              }
+ 159   1      }
+ 160          
+ 161          
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    369    ----
-   CONSTANT SIZE    =     32    ----
-   XDATA SIZE       =   ----       3
+   CODE SIZE        =    507    ----
+   CONSTANT SIZE    =     23    ----
+   XDATA SIZE       =   ----       9
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =     75       8
+   DATA SIZE        =     75    ----
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
    EDATA SIZE       =   ----    ----
    HDATA SIZE       =   ----    ----
    XDATA CONST SIZE =   ----    ----
    FAR CONST SIZE   =   ----    ----
+C51 COMPILER V9.53.0.0   MAIN                                                              03/29/2016 00:06:39 PAGE 4   
+
 END OF MODULE INFORMATION.
 
 

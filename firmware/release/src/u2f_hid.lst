@@ -1,4 +1,4 @@
-C51 COMPILER V9.53.0.0   U2F_HID                                                           03/28/2016 20:18:26 PAGE 1   
+C51 COMPILER V9.53.0.0   U2F_HID                                                           03/29/2016 00:06:40 PAGE 1   
 
 
 C51 COMPILER V9.53.0.0, COMPILATION OF MODULE U2F_HID
@@ -6,12 +6,11 @@ OBJECT MODULE PLACED IN .\src/u2f_hid.OBJ
 COMPILER INVOKED BY: Z:\home\pp\SimplicityStudio_v3\developer\toolchains\keil_8051\9.53\BIN\C51.exe /home/pp/apps/u2f-ze
                     -ro/firmware/src/u2f_hid.c OMF2 LARGE DEBUG OBJECTEXTEND ROM(LARGE) WARNINGLEVEL(2) FLOATFUZZY(3) OPTIMIZE(9,SIZE) INTVEC
                     -TOR(0X0000) INTPROMOTE INCDIR(/home/pp/apps/u2f-zero/firmware/inc/config;/home/pp/apps/u2f-zero/firmware/inc;/home/pp/ap
-                    -ps/u2f-zero/firmware/tinyprintf;/home/pp/apps/u2f-zero/firmware/tests;/home/pp/SimplicityStudio_v3/developer/sdks/si8051
-                    -/v3//Device/shared/si8051Base;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1;/home/pp/SimplicityS
-                    -tudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Lib/efm8_us
-                    -b/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1/peripheral_driver/inc;/home/pp/SimplicityStu
-                    -dio_v3/developer/sdks/si8051/v3//Lib/efm8_assert) REGFILE(u2f-firmware.ORC) PRINT(.\src/u2f_hid.lst) COND PAGEWIDTH(120)
-                    - PAGELENGTH(65) OBJECT(.\src/u2f_hid.OBJ)
+                    -ps/u2f-zero/firmware/tests;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/shared/si8051Base;/home/pp/Simp
+                    -licityStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/E
+                    -FM8UB1/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Lib/efm8_usb/inc;/home/pp/SimplicityStudio_v3/develope
+                    -r/sdks/si8051/v3//Device/EFM8UB1/peripheral_driver/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Lib/efm8_a
+                    -ssert) REGFILE(u2f-firmware.ORC) PRINT(.\src/u2f_hid.lst) COND PAGEWIDTH(120) PAGELENGTH(65) OBJECT(.\src/u2f_hid.OBJ)
 
 line level    source
 
@@ -54,445 +53,451 @@ line level    source
   37          
   38                  uint32_t last_buffered;
   39                  uint16_t bytes_buffered;
-  40          
-  41                  // number of payload bytes written in response
-  42                  uint16_t bytes_written;
-  43          
+  40                  uint16_t req_len;
+  41          
+  42                  // number of payload bytes written in response
+  43                  uint16_t bytes_written;
   44          
   45          
-  46                  // total length of response in bytes
-  47                  uint16_t res_len;
-  48          
-C51 COMPILER V9.53.0.0   U2F_HID                                                           03/28/2016 20:18:26 PAGE 2   
+  46          
+  47                  // total length of response in bytes
+  48                  uint16_t res_len;
+  49          
+C51 COMPILER V9.53.0.0   U2F_HID                                                           03/29/2016 00:06:40 PAGE 2   
 
-  49                  #define BUFFER_SIZE 150
-  50                  uint8_t buffer[BUFFER_SIZE];
-  51          
+  50                  #define BUFFER_SIZE 200
+  51                  uint8_t buffer[BUFFER_SIZE];
   52          
-  53          } hid_layer;
-  54          
-  55          struct CID CIDS[5];
-  56          static uint8_t CID_NUM = 0;
-  57          
-  58          static uint8_t _hid_pkt[HID_PACKET_SIZE];
-  59          static uint8_t _hid_offset = 0;
-  60          static uint8_t _hid_seq = 0;
-  61          static uint8_t _hid_in_session = 0;
-  62          
-  63          #define u2f_hid_busy() (_hid_in_session)
-  64          
-  65          #define MIN(a,b) ((a) < (b) ? (a):(b))
-  66          
-  67          void u2f_hid_init()
-  68          {
-  69   1              memset(CIDS, 0, sizeof(CIDS));
-  70   1              memset(&hid_layer, 0, sizeof(hid_layer));
-  71   1              CID_NUM = 0;
-  72   1              _hid_offset = 0;
-  73   1              _hid_seq = 0;
-  74   1              _hid_in_session = 0;
-  75   1      }
-  76          
-  77          void u2f_hid_set_len(uint16_t len)
-  78          {
-  79   1              hid_layer.res_len = len;
-  80   1      }
-  81          
+  53          
+  54          } hid_layer;
+  55          
+  56          struct CID CIDS[5];
+  57          static uint8_t CID_NUM = 0;
+  58          
+  59          static uint8_t _hid_pkt[HID_PACKET_SIZE];
+  60          static uint8_t _hid_offset = 0;
+  61          static uint8_t _hid_seq = 0;
+  62          static uint8_t _hid_in_session = 0;
+  63          
+  64          #define u2f_hid_busy() (_hid_in_session)
+  65          
+  66          #define MIN(a,b) ((a) < (b) ? (a):(b))
+  67          
+  68          void u2f_hid_init()
+  69          {
+  70   1              memset(CIDS, 0, sizeof(CIDS));
+  71   1              memset(&hid_layer, 0, sizeof(hid_layer));
+  72   1              CID_NUM = 0;
+  73   1              _hid_offset = 0;
+  74   1              _hid_seq = 0;
+  75   1              _hid_in_session = 0;
+  76   1      }
+  77          
+  78          void u2f_hid_set_len(uint16_t len)
+  79          {
+  80   1              hid_layer.res_len = len;
+  81   1      }
   82          
-  83          static void u2f_hid_reset_packet()
-  84          {
-  85   1              _hid_seq = 0;
-  86   1              _hid_offset = 0;
-  87   1              _hid_in_session = 0;
-  88   1              memset(&hid_layer, 0, sizeof(hid_layer));
-  89   1              memset(_hid_pkt, 0, HID_PACKET_SIZE);
-  90   1      }
-  91          
-  92          // writes what has been buffered and clears memory
-  93          void u2f_hid_flush()
-  94          {
-  95   1              if (_hid_offset)
-  96   1              {
-  97   2                      usb_write(_hid_pkt, HID_PACKET_SIZE);
-  98   2              }
-  99   1              u2f_hid_reset_packet();
- 100   1      }
- 101          
+  83          
+  84          static void u2f_hid_reset_packet()
+  85          {
+  86   1              _hid_seq = 0;
+  87   1              _hid_offset = 0;
+  88   1              _hid_in_session = 0;
+  89   1              memset(&hid_layer, 0, sizeof(hid_layer));
+  90   1              memset(_hid_pkt, 0, HID_PACKET_SIZE);
+  91   1      }
+  92          
+  93          // writes what has been buffered and clears memory
+  94          void u2f_hid_flush()
+  95          {
+  96   1              if (_hid_offset)
+  97   1              {
+  98   2                      usb_write(_hid_pkt, HID_PACKET_SIZE);
+  99   2              }
+ 100   1              u2f_hid_reset_packet();
+ 101   1      }
  102          
- 103          void u2f_hid_writeback(uint8_t * payload, uint16_t len)
- 104          {
- 105   1              struct u2f_hid_msg * r = (struct u2f_hid_response *) _hid_pkt;
- 106   1              _hid_in_session = 1;
- 107   1              if (_hid_offset == 0)
- 108   1              {
- 109   2                      r->cid = hid_layer.current_cid;
- 110   2                      if (!_hid_seq)
- 111   2                      {
-C51 COMPILER V9.53.0.0   U2F_HID                                                           03/28/2016 20:18:26 PAGE 3   
+ 103          
+ 104          void u2f_hid_writeback(uint8_t * payload, uint16_t len)
+ 105          {
+ 106   1              struct u2f_hid_msg * r = (struct u2f_hid_response *) _hid_pkt;
+ 107   1              _hid_in_session = 1;
+ 108   1              if (_hid_offset == 0)
+ 109   1              {
+ 110   2                      r->cid = hid_layer.current_cid;
+ 111   2                      if (!_hid_seq)
+ 112   2                      {
+C51 COMPILER V9.53.0.0   U2F_HID                                                           03/29/2016 00:06:40 PAGE 3   
 
- 112   3                              r->pkt.init.cmd = hid_layer.current_cmd;
- 113   3                              U2FHID_SET_LEN(r, hid_layer.res_len);
- 114   3                              _hid_offset = 7;
- 115   3                      }
- 116   2                      else
- 117   2                      {
- 118   3                              r->pkt.cont.seq = _hid_seq - 1;
- 119   3                              _hid_offset = 5;
- 120   3                              if (_hid_seq-1 > 127)
- 121   3                              {
- 122   4                                      set_app_error(ERROR_SEQ_EXCEEDED);
- 123   4                                      return;
- 124   4                              }
- 125   3                      }
- 126   2              }
- 127   1              while(len--)
- 128   1              {
- 129   2                      _hid_pkt[_hid_offset++] = *payload++;
- 130   2                      hid_layer.bytes_written++;
- 131   2                      if (_hid_offset == HID_PACKET_SIZE)
- 132   2                      {
- 133   3                              _hid_offset = 0;
- 134   3                              _hid_seq++;
- 135   3      
- 136   3                              usb_write(_hid_pkt, HID_PACKET_SIZE);
- 137   3                              memset(_hid_pkt, 0, HID_PACKET_SIZE);
- 138   3      
- 139   3                              if (len)
- 140   3                              {
- 141   4                                      u2f_hid_writeback(payload, len);
- 142   4                                      return;
- 143   4                              }
- 144   3                              else break;
- 145   3                      }
- 146   2              }
- 147   1      
- 148   1      }
- 149          
- 150          static uint8_t is_cid_free(struct CID* c)
- 151          {
- 152   1              return (c->cid == 0 || get_ms() - c->last_used > 1000);
- 153   1      }
- 154          
- 155          static void refresh_cid(struct CID* c)
- 156          {
- 157   1              c->last_used = get_ms();
- 158   1      }
- 159          
+ 113   3                              r->pkt.init.cmd = hid_layer.current_cmd;
+ 114   3                              U2FHID_SET_LEN(r, hid_layer.res_len);
+ 115   3                              _hid_offset = 7;
+ 116   3                      }
+ 117   2                      else
+ 118   2                      {
+ 119   3                              r->pkt.cont.seq = _hid_seq - 1;
+ 120   3                              _hid_offset = 5;
+ 121   3                              if (_hid_seq-1 > 127)
+ 122   3                              {
+ 123   4                                      set_app_error(ERROR_SEQ_EXCEEDED);
+ 124   4                                      return;
+ 125   4                              }
+ 126   3                      }
+ 127   2              }
+ 128   1              while(len--)
+ 129   1              {
+ 130   2                      _hid_pkt[_hid_offset++] = *payload++;
+ 131   2                      hid_layer.bytes_written++;
+ 132   2                      if (_hid_offset == HID_PACKET_SIZE)
+ 133   2                      {
+ 134   3                              _hid_offset = 0;
+ 135   3                              _hid_seq++;
+ 136   3      
+ 137   3                              usb_write(_hid_pkt, HID_PACKET_SIZE);
+ 138   3                              memset(_hid_pkt, 0, HID_PACKET_SIZE);
+ 139   3      
+ 140   3                              if (len)
+ 141   3                              {
+ 142   4                                      u2f_hid_writeback(payload, len);
+ 143   4                                      return;
+ 144   4                              }
+ 145   3                              else break;
+ 146   3                      }
+ 147   2              }
+ 148   1      
+ 149   1      }
+ 150          
+ 151          static uint8_t is_cid_free(struct CID* c)
+ 152          {
+ 153   1              return (c->cid == 0 || get_ms() - c->last_used > 1000);
+ 154   1      }
+ 155          
+ 156          static void refresh_cid(struct CID* c)
+ 157          {
+ 158   1              c->last_used = get_ms();
+ 159   1      }
  160          
- 161          static uint32_t get_new_cid()
- 162          {
- 163   1              static uint32_t base = 0xcafebabe;
- 164   1              int i;
- 165   1              for(i = 0; i < CID_MAX; i++)
- 166   1              {
- 167   2                      if (is_cid_free(CIDS+i))
- 168   2                      {
- 169   3                              goto newcid;
- 170   3                      }
- 171   2              }
- 172   1              return 0;
- 173   1              newcid:
- 174   1      
-C51 COMPILER V9.53.0.0   U2F_HID                                                           03/28/2016 20:18:26 PAGE 4   
+ 161          
+ 162          static uint32_t get_new_cid()
+ 163          {
+ 164   1              static uint32_t base = 0xcafebabe;
+ 165   1              int i;
+ 166   1              for(i = 0; i < CID_MAX; i++)
+ 167   1              {
+ 168   2                      if (is_cid_free(CIDS+i))
+ 169   2                      {
+ 170   3                              goto newcid;
+ 171   3                      }
+ 172   2              }
+ 173   1              return 0;
+ 174   1              newcid:
+ 175   1      
+C51 COMPILER V9.53.0.0   U2F_HID                                                           03/29/2016 00:06:40 PAGE 4   
 
- 175   1              do
- 176   1              {
- 177   2                      CIDS[i].cid = base + CID_NUM++;
- 178   2              }while(CIDS[i].cid == 0 || CIDS[i].cid == U2FHID_BROADCAST);
- 179   1      
- 180   1              refresh_cid(CIDS+i);
- 181   1      
- 182   1              return CIDS[i].cid;
- 183   1      }
- 184          
- 185          static struct CID* get_cid(uint32_t cid)
- 186          {
- 187   1              uint8_t i;
- 188   1              for(i = 0; i < CID_MAX; i++)
- 189   1              {
- 190   2                      if (CIDS[i].cid == cid)
- 191   2                      {
- 192   3                              return CIDS+i;
- 193   3                      }
- 194   2              }
- 195   1              return NULL;
- 196   1      }
- 197          static void del_cid(uint32_t cid)
- 198          {
- 199   1              uint8_t i;
- 200   1              for(i = 0; i < CID_MAX; i++)
- 201   1              {
- 202   2                      if (CIDS[i].cid == cid)
- 203   2                      {
- 204   3                              CIDS[i].cid = 0;
- 205   3                      }
- 206   2              }
- 207   1      }
- 208          
- 209          static int check_cid(uint32_t cid)
- 210          {
- 211   1              return (get_cid(cid) != NULL);
- 212   1      }
- 213          
- 214          static void stamp_error(uint32_t cid, uint8_t err)
- 215          {
- 216   1              struct u2f_hid_msg * res = (struct u2f_hid_msg *)_hid_pkt;
- 217   1              res->cid = cid;
- 218   1              res->pkt.init.cmd = U2FHID_ERROR;
- 219   1              res->pkt.init.payload[0] = err;
- 220   1              res->pkt.init.bcnth = 0;
- 221   1              res->pkt.init.bcntl = 1;
- 222   1              // TODO this is tramping on potential other response data
- 223   1              usb_write(_hid_pkt, HID_PACKET_SIZE);
- 224   1              del_cid(cid);
- 225   1      }
- 226          
- 227          // TODO double check if this is really needed
- 228          static void start_buffering(struct u2f_hid_msg* req)
- 229          {
- 230   1              _hid_in_session = 1;
- 231   1              hid_layer.bytes_buffered = U2FHID_INIT_PAYLOAD_SIZE;
- 232   1              memmove(hid_layer.buffer, req->pkt.init.payload, U2FHID_INIT_PAYLOAD_SIZE);
- 233   1      }
- 234          
- 235          static int buffer_request(struct u2f_hid_msg* req)
- 236          {
- 237   1              if (hid_layer.bytes_buffered + U2FHID_CONT_PAYLOAD_SIZE > BUFFER_SIZE)
-C51 COMPILER V9.53.0.0   U2F_HID                                                           03/28/2016 20:18:26 PAGE 5   
+ 176   1              do
+ 177   1              {
+ 178   2                      CIDS[i].cid = base + CID_NUM++;
+ 179   2              }while(CIDS[i].cid == 0 || CIDS[i].cid == U2FHID_BROADCAST);
+ 180   1      
+ 181   1              refresh_cid(CIDS+i);
+ 182   1      
+ 183   1              return CIDS[i].cid;
+ 184   1      }
+ 185          
+ 186          static struct CID* get_cid(uint32_t cid)
+ 187          {
+ 188   1              uint8_t i;
+ 189   1              for(i = 0; i < CID_MAX; i++)
+ 190   1              {
+ 191   2                      if (CIDS[i].cid == cid)
+ 192   2                      {
+ 193   3                              return CIDS+i;
+ 194   3                      }
+ 195   2              }
+ 196   1              return NULL;
+ 197   1      }
+ 198          static void del_cid(uint32_t cid)
+ 199          {
+ 200   1              uint8_t i;
+ 201   1              for(i = 0; i < CID_MAX; i++)
+ 202   1              {
+ 203   2                      if (CIDS[i].cid == cid)
+ 204   2                      {
+ 205   3                              CIDS[i].cid = 0;
+ 206   3                      }
+ 207   2              }
+ 208   1      }
+ 209          
+ 210          static int check_cid(uint32_t cid)
+ 211          {
+ 212   1              return (get_cid(cid) != NULL);
+ 213   1      }
+ 214          
+ 215          static void stamp_error(uint32_t cid, uint8_t err)
+ 216          {
+ 217   1              struct u2f_hid_msg * res = (struct u2f_hid_msg *)_hid_pkt;
+ 218   1              res->cid = cid;
+ 219   1              res->pkt.init.cmd = U2FHID_ERROR;
+ 220   1              res->pkt.init.payload[0] = err;
+ 221   1              res->pkt.init.bcnth = 0;
+ 222   1              res->pkt.init.bcntl = 1;
+ 223   1              // TODO this is tramping on potential other response data
+ 224   1              usb_write(_hid_pkt, HID_PACKET_SIZE);
+ 225   1              del_cid(cid);
+ 226   1      }
+ 227          
+ 228          // TODO double check if this is really needed
+ 229          static void start_buffering(struct u2f_hid_msg* req)
+ 230          {
+ 231   1              _hid_in_session = 1;
+ 232   1              hid_layer.bytes_buffered = U2FHID_INIT_PAYLOAD_SIZE;
+ 233   1              hid_layer.req_len = U2FHID_LEN(req);
+ 234   1              memmove(hid_layer.buffer, req->pkt.init.payload, U2FHID_INIT_PAYLOAD_SIZE);
+ 235   1      }
+ 236          
+ 237          static int buffer_request(struct u2f_hid_msg* req)
+ 238          {
+C51 COMPILER V9.53.0.0   U2F_HID                                                           03/29/2016 00:06:40 PAGE 5   
 
- 238   1              {
- 239   2                      u2f_prints("buffer full\r\n");
- 240   2                      return -1;
- 241   2              }
- 242   1              memmove(hid_layer.buffer + hid_layer.bytes_buffered, req->pkt.cont.payload, U2FHID_CONT_PAYLOAD_SIZE);
- 243   1              hid_layer.bytes_buffered += U2FHID_CONT_PAYLOAD_SIZE;
- 244   1      }
- 245          
- 246          static void hid_u2f_parse(struct u2f_hid_msg* req)
- 247          {
- 248   1      
- 249   1              uint16_t len = 0;
- 250   1              struct u2f_hid_init_response * init_res = appdata.tmp;
+ 239   1              if (hid_layer.bytes_buffered + U2FHID_CONT_PAYLOAD_SIZE > BUFFER_SIZE)
+ 240   1              {
+ 241   2                      u2f_prints("buffer full\r\n");
+ 242   2                      stamp_error(req->cid, ERR_OTHER);
+ 243   2                      return -1;
+ 244   2              }
+ 245   1              memmove(hid_layer.buffer + hid_layer.bytes_buffered, req->pkt.cont.payload, U2FHID_CONT_PAYLOAD_SIZE);
+ 246   1              hid_layer.bytes_buffered += U2FHID_CONT_PAYLOAD_SIZE;
+ 247   1      }
+ 248          
+ 249          static void hid_u2f_parse(struct u2f_hid_msg* req)
+ 250          {
  251   1      
- 252   1              switch(hid_layer.current_cmd)
- 253   1              {
- 254   2                      case U2FHID_INIT:
- 255   2                              //u2f_printlx("got init packet ",1,req->cid);
- 256   2                              if (U2FHID_LEN(req) != 8)
- 257   2                              {
- 258   3                                      // this one is safe
- 259   3                                      stamp_error(hid_layer.current_cid, ERR_INVALID_LEN);
- 260   3                                      u2f_prints("invalid len init\r\n");
- 261   3                                      goto fail;
- 262   3                              }
- 263   2                              u2f_hid_set_len(17);
- 264   2      
- 265   2                              //u2f_printlx("cid: ",1,hid_layer.current_cid);
- 266   2                              if (hid_layer.current_cid == 0)
- 267   2                              {
- 268   3                                      u2f_prints("out of cid's\r\n");
- 269   3                                      goto fail;
- 270   3                              }
- 271   2      
- 272   2                              init_res->cid = get_new_cid();
- 273   2                              init_res->version_id = 1;
- 274   2                              init_res->version_major = 1;
- 275   2                              init_res->version_minor = 0;
- 276   2                              init_res->version_build = 0;
- 277   2                              init_res->cflags = 0;
- 278   2      
- 279   2                              // write back the same data nonce
- 280   2                              u2f_hid_writeback(req->pkt.init.payload, 8);
- 281   2                              u2f_hid_writeback(init_res, 9);
-*** WARNING C182 IN LINE 281 OF /home/pp/apps/u2f-zero/firmware/src/u2f_hid.c: pointer to different objects
- 282   2                              u2f_hid_flush();
- 283   2                              hid_layer.current_cid = init_res->cid;
- 284   2      
- 285   2                              break;
- 286   2                      case U2FHID_MSG:
+ 252   1              uint16_t len = 0;
+ 253   1              struct u2f_hid_init_response * init_res = appdata.tmp;
+ 254   1      
+ 255   1              switch(hid_layer.current_cmd)
+ 256   1              {
+ 257   2                      case U2FHID_INIT:
+ 258   2                              //u2f_printlx("got init packet ",1,req->cid);
+ 259   2                              if (U2FHID_LEN(req) != 8)
+ 260   2                              {
+ 261   3                                      // this one is safe
+ 262   3                                      stamp_error(hid_layer.current_cid, ERR_INVALID_LEN);
+ 263   3                                      u2f_prints("invalid len init\r\n");
+ 264   3                                      goto fail;
+ 265   3                              }
+ 266   2                              u2f_hid_set_len(17);
+ 267   2      
+ 268   2                              //u2f_printlx("cid: ",1,hid_layer.current_cid);
+ 269   2                              if (hid_layer.current_cid == 0)
+ 270   2                              {
+ 271   3                                      u2f_prints("out of cid's\r\n");
+ 272   3                                      goto fail;
+ 273   3                              }
+ 274   2      
+ 275   2                              init_res->cid = get_new_cid();
+ 276   2                              init_res->version_id = 1;
+ 277   2                              init_res->version_major = 1;
+ 278   2                              init_res->version_minor = 0;
+ 279   2                              init_res->version_build = 0;
+ 280   2                              init_res->cflags = 0;
+ 281   2      
+ 282   2                              // write back the same data nonce
+ 283   2                              u2f_hid_writeback(req->pkt.init.payload, 8);
+ 284   2                              u2f_hid_writeback(init_res, 9);
+*** WARNING C182 IN LINE 284 OF /home/pp/apps/u2f-zero/firmware/src/u2f_hid.c: pointer to different objects
+ 285   2                              u2f_hid_flush();
+ 286   2                              hid_layer.current_cid = init_res->cid;
  287   2      
- 288   2                              if (U2FHID_LEN(req) < 4)
- 289   2                              {
- 290   3                                      // TODO bad
- 291   3                                      stamp_error(hid_layer.current_cid, ERR_INVALID_LEN);
- 292   3                                      u2f_prints("invalid len msg\r\n");
- 293   3                                      goto fail;
- 294   3                              }
- 295   2                              //u2f_prints("U2FHID_MSG\r\n");
- 296   2                              // buffer 2 payloads (120 bytes) to get full U2F message
- 297   2                              // assuming key handle is < 45 bytes
- 298   2                              //              7 bytes for apdu header
- 299   2                              //              7 + 66 bytes + key handle for authenticate message
-C51 COMPILER V9.53.0.0   U2F_HID                                                           03/28/2016 20:18:26 PAGE 6   
+ 288   2                              break;
+ 289   2                      case U2FHID_MSG:
+ 290   2      
+ 291   2                              if (U2FHID_LEN(req) < 4)
+ 292   2                              {
+ 293   3                                      // TODO bad
+ 294   3                                      stamp_error(hid_layer.current_cid, ERR_INVALID_LEN);
+ 295   3                                      u2f_prints("invalid len msg\r\n");
+ 296   3                                      goto fail;
+ 297   3                              }
+ 298   2                              //u2f_prints("U2FHID_MSG\r\n");
+ 299   2                              // buffer 2 payloads (120 bytes) to get full U2F message
+ 300   2                              // assuming key handle is < 45 bytes
+C51 COMPILER V9.53.0.0   U2F_HID                                                           03/29/2016 00:06:40 PAGE 6   
 
- 300   2                              //      7 + 64 for register message
- 301   2                              if (hid_layer.bytes_buffered == 0)
- 302   2                              {
- 303   3                                      start_buffering(req);
- 304   3                                      if (hid_layer.bytes_buffered >= U2FHID_LEN(req))
- 305   3                                      {
- 306   4                                              u2f_request((struct u2f_request_apdu *)hid_layer.buffer);
- 307   4                                      }
- 308   3                              }
- 309   2                              else
- 310   2                              {
- 311   3                                      buffer_request(req);
- 312   3                                      u2f_request((struct u2f_request_apdu *)hid_layer.buffer);
- 313   3                              }
- 314   2      
- 315   2      
- 316   2                              break;
- 317   2                      case U2FHID_PING:
- 318   2      
- 319   2                              //u2f_prints("U2F PING\r\n");
+ 301   2                              //              7 bytes for apdu header
+ 302   2                              //              7 + 66 bytes + key handle for authenticate message
+ 303   2                              //      7 + 64 for register message
+ 304   2                              if (hid_layer.bytes_buffered == 0)
+ 305   2                              {
+ 306   3                                      start_buffering(req);
+ 307   3                                      if (hid_layer.bytes_buffered >= U2FHID_LEN(req))
+ 308   3                                      {
+ 309   4                                              u2f_request((struct u2f_request_apdu *)hid_layer.buffer);
+ 310   4                                      }
+ 311   3                              }
+ 312   2                              else
+ 313   2                              {
+ 314   3                                      buffer_request(req);
+ 315   3                                      if (hid_layer.bytes_buffered >= hid_layer.req_len)
+ 316   3                                      {
+ 317   4                                              u2f_request((struct u2f_request_apdu *)hid_layer.buffer);
+ 318   4                                      }
+ 319   3                              }
  320   2      
- 321   2                              if (!u2f_hid_busy())
- 322   2                              {
- 323   3                                      u2f_hid_set_len(U2FHID_LEN(req));
- 324   3                                      u2f_hid_writeback(req->pkt.init.payload, MIN(hid_layer.res_len, U2FHID_INIT_PAYLOAD_SIZE));
- 325   3                              }
- 326   2                              else
- 327   2                              {
- 328   3                                      u2f_hid_writeback(req->pkt.cont.payload, MIN(hid_layer.res_len - hid_layer.bytes_written, U2FHID_CONT_
+ 321   2      
+ 322   2                              break;
+ 323   2                      case U2FHID_PING:
+ 324   2      
+ 325   2                              //u2f_prints("U2F PING\r\n");
+ 326   2      
+ 327   2                              if (!u2f_hid_busy())
+ 328   2                              {
+ 329   3                                      u2f_hid_set_len(U2FHID_LEN(req));
+ 330   3                                      u2f_hid_writeback(req->pkt.init.payload, MIN(hid_layer.res_len, U2FHID_INIT_PAYLOAD_SIZE));
+ 331   3                              }
+ 332   2                              else
+ 333   2                              {
+ 334   3                                      u2f_hid_writeback(req->pkt.cont.payload, MIN(hid_layer.res_len - hid_layer.bytes_written, U2FHID_CONT_
              -PAYLOAD_SIZE));
- 329   3                              }
- 330   2      
- 331   2                              if (hid_layer.res_len == hid_layer.bytes_written) u2f_hid_flush();
- 332   2                              break;
- 333   2      
- 334   2                      case U2FHID_WINK:
- 335   2                              //u2f_prints("U2F WINK\r\n");
- 336   2                              if (U2FHID_LEN(req) != 0)
- 337   2                              {
- 338   3                                      // this one is safe
- 339   3                                      stamp_error(hid_layer.current_cid, ERR_INVALID_LEN);
- 340   3                                      u2f_prints("invalid len wink but who cares\r\n");
- 341   3                              }
- 342   2                              u2f_hid_set_len(0);
- 343   2                              u2f_hid_writeback(NULL, 0);
- 344   2                              u2f_hid_flush();
- 345   2                              appdata.state = APP_WINK;
- 346   2                              break;
- 347   2                      case U2FHID_LOCK:
- 348   2                              // TODO
- 349   2                              //u2f_prints("U2F LOCK\r\n");
- 350   2                              break;
- 351   2                      default:
- 352   2                              u2f_printb("invalid cmd: ", hid_layer.current_cmd);
- 353   2                              stamp_error(hid_layer.current_cid, ERR_INVALID_CMD);
- 354   2                              goto fail;
- 355   2              }
- 356   1      
- 357   1              return;
- 358   1      
- 359   1              fail:
- 360   1                      u2f_prints("U2F HID FAIL\r\n");
- 361   1              return;
-C51 COMPILER V9.53.0.0   U2F_HID                                                           03/28/2016 20:18:26 PAGE 7   
+ 335   3                              }
+ 336   2      
+ 337   2                              if (hid_layer.res_len == hid_layer.bytes_written) u2f_hid_flush();
+ 338   2                              break;
+ 339   2      
+ 340   2                      case U2FHID_WINK:
+ 341   2                              //u2f_prints("U2F WINK\r\n");
+ 342   2                              if (U2FHID_LEN(req) != 0)
+ 343   2                              {
+ 344   3                                      // this one is safe
+ 345   3                                      stamp_error(hid_layer.current_cid, ERR_INVALID_LEN);
+ 346   3                                      u2f_prints("invalid len wink but who cares\r\n");
+ 347   3                              }
+ 348   2                              u2f_hid_set_len(0);
+ 349   2                              u2f_hid_writeback(NULL, 0);
+ 350   2                              u2f_hid_flush();
+ 351   2                              appdata.state = APP_WINK;
+ 352   2                              break;
+ 353   2                      case U2FHID_LOCK:
+ 354   2                              // TODO
+ 355   2                              //u2f_prints("U2F LOCK\r\n");
+ 356   2                              break;
+ 357   2                      default:
+ 358   2                              u2f_printb("invalid cmd: ", hid_layer.current_cmd);
+ 359   2                              stamp_error(hid_layer.current_cid, ERR_INVALID_CMD);
+ 360   2                              goto fail;
+ 361   2              }
+ 362   1      
+C51 COMPILER V9.53.0.0   U2F_HID                                                           03/29/2016 00:06:40 PAGE 7   
 
- 362   1      }
- 363          
- 364          
- 365          void u2f_hid_request(struct u2f_hid_msg* req)
- 366          {
- 367   1              uint8_t* payload = req->pkt.init.payload;
- 368   1              struct CID* cid = get_cid(req->cid);
- 369   1      
- 370   1      
- 371   1              if (cid != NULL)
- 372   1              {
- 373   2                      refresh_cid(cid);
- 374   2              }
- 375   1              else if (req->cid == U2FHID_BROADCAST)
- 376   1              {
- 377   2      
- 378   2              }
- 379   1              else
- 380   1              {
- 381   2                      // Ignore CID's we did not allocate.
- 382   2                      //u2f_printlx("ignoring pkt ",1,req->cid);
- 383   2                      return;
+ 363   1              return;
+ 364   1      
+ 365   1              fail:
+ 366   1                      u2f_prints("U2F HID FAIL\r\n");
+ 367   1              return;
+ 368   1      }
+ 369          
+ 370          
+ 371          void u2f_hid_request(struct u2f_hid_msg* req)
+ 372          {
+ 373   1              uint8_t* payload = req->pkt.init.payload;
+ 374   1              struct CID* cid = get_cid(req->cid);
+ 375   1      
+ 376   1      
+ 377   1              if (cid != NULL)
+ 378   1              {
+ 379   2                      refresh_cid(cid);
+ 380   2              }
+ 381   1              else if (req->cid == U2FHID_BROADCAST)
+ 382   1              {
+ 383   2      
  384   2              }
- 385   1      
- 386   1              hid_layer.state = (u2f_hid_busy()) ? HID_BUSY : HID_READY;
- 387   1      
- 388   1              switch(hid_layer.state)
- 389   1              {
- 390   2                      case HID_READY:
- 391   2                              if (req->pkt.init.cmd & TYPE_INIT)
- 392   2                              {
- 393   3                                      if (U2FHID_LEN(req) > U2FHID_MAX_PAYLOAD_SIZE)
- 394   3                                      {
- 395   4                                              //u2f_prints("length too big\r\n");
- 396   4                                              stamp_error(req->cid, ERR_INVALID_LEN);
- 397   4                                              return;
- 398   4                                      }
- 399   3                                      u2f_hid_reset_packet();
- 400   3                                      hid_layer.current_cid = req->cid;
- 401   3                                      hid_layer.current_cmd = req->pkt.init.cmd;
- 402   3                                      hid_layer.last_buffered = get_ms();
- 403   3      
- 404   3      
- 405   3                              }
- 406   2                              else
- 407   2                              {
- 408   3                                      stamp_error(req->cid, ERR_INVALID_CMD);
- 409   3                                      u2f_prints("ERR_INVALID_CMD\r\n");
- 410   3                                      return;
+ 385   1              else
+ 386   1              {
+ 387   2                      // Ignore CID's we did not allocate.
+ 388   2                      //u2f_printlx("ignoring pkt ",1,req->cid);
+ 389   2                      return;
+ 390   2              }
+ 391   1      
+ 392   1              hid_layer.state = (u2f_hid_busy()) ? HID_BUSY : HID_READY;
+ 393   1      
+ 394   1              switch(hid_layer.state)
+ 395   1              {
+ 396   2                      case HID_READY:
+ 397   2                              if (req->pkt.init.cmd & TYPE_INIT)
+ 398   2                              {
+ 399   3                                      if (U2FHID_LEN(req) > U2FHID_MAX_PAYLOAD_SIZE)
+ 400   3                                      {
+ 401   4                                              //u2f_prints("length too big\r\n");
+ 402   4                                              stamp_error(req->cid, ERR_INVALID_LEN);
+ 403   4                                              return;
+ 404   4                                      }
+ 405   3                                      u2f_hid_reset_packet();
+ 406   3                                      hid_layer.current_cid = req->cid;
+ 407   3                                      hid_layer.current_cmd = req->pkt.init.cmd;
+ 408   3                                      hid_layer.last_buffered = get_ms();
+ 409   3      
+ 410   3      
  411   3                              }
- 412   2      
- 413   2                              break;
- 414   2                      case HID_BUSY:
- 415   2                              // buffer long requests
- 416   2                              if (req->cid == hid_layer.current_cid)
- 417   2                              {
- 418   3                                      if (req->pkt.init.cmd & TYPE_INIT)
- 419   3                                      {
- 420   4                                              // TODO
- 421   4                                              //u2f_prints("this should resync but im lazy\r\n");
- 422   4                                      }
- 423   3                                      hid_layer.last_buffered = get_ms();
- 424   3                                      // TODO verify packets arrive in ascending order
-C51 COMPILER V9.53.0.0   U2F_HID                                                           03/28/2016 20:18:26 PAGE 8   
+ 412   2                              else
+ 413   2                              {
+ 414   3                                      stamp_error(req->cid, ERR_INVALID_CMD);
+ 415   3                                      u2f_prints("ERR_INVALID_CMD\r\n");
+ 416   3                                      return;
+ 417   3                              }
+ 418   2      
+ 419   2                              break;
+ 420   2                      case HID_BUSY:
+ 421   2                              // buffer long requests
+ 422   2                              if (req->cid == hid_layer.current_cid)
+ 423   2                              {
+ 424   3                                      if (req->pkt.init.cmd & TYPE_INIT)
+ 425   3                                      {
+C51 COMPILER V9.53.0.0   U2F_HID                                                           03/29/2016 00:06:40 PAGE 8   
 
- 425   3      
- 426   3                              }
- 427   2                              else if (U2FHID_TIMEOUT(&hid_layer))
- 428   2                              {
- 429   3                                      // return timeout error for old channel and run again for new channel
- 430   3                                      //u2f_prints("timeout, switching\r\n");
- 431   3                                      hid_layer.state = HID_READY;
- 432   3                                      u2f_hid_reset_packet();
- 433   3                                      stamp_error(hid_layer.current_cid, ERR_MSG_TIMEOUT);
- 434   3                                      u2f_hid_request(req);
- 435   3                                      return;
- 436   3                              }
- 437   2                              else
- 438   2                              {
- 439   3                                      // Current application may not be interrupted
- 440   3                                      // TODO this will be bad
- 441   3                                      stamp_error(req->cid, ERR_CHANNEL_BUSY);
- 442   3                                      //u2f_printlx("ERR_CHANNEL_BUSY ", 2, req->cid, hid_layer.current_cid);
- 443   3                                      return;
- 444   3                              }
- 445   2                              break;
- 446   2      
- 447   2              }
- 448   1      
- 449   1              hid_u2f_parse(req);
- 450   1      
- 451   1      
- 452   1              return;
- 453   1      }
- 454          
- 455          #endif
-*** WARNING C291 IN LINE 244 OF /home/pp/apps/u2f-zero/firmware/src/u2f_hid.c: not every exit path returns a value
+ 426   4                                              // TODO
+ 427   4                                              //u2f_prints("this should resync but im lazy\r\n");
+ 428   4                                      }
+ 429   3                                      hid_layer.last_buffered = get_ms();
+ 430   3                                      // TODO verify packets arrive in ascending order
+ 431   3      
+ 432   3                              }
+ 433   2                              else if (U2FHID_TIMEOUT(&hid_layer))
+ 434   2                              {
+ 435   3                                      // return timeout error for old channel and run again for new channel
+ 436   3                                      //u2f_prints("timeout, switching\r\n");
+ 437   3                                      hid_layer.state = HID_READY;
+ 438   3                                      u2f_hid_reset_packet();
+ 439   3                                      stamp_error(hid_layer.current_cid, ERR_MSG_TIMEOUT);
+ 440   3                                      u2f_hid_request(req);
+ 441   3                                      return;
+ 442   3                              }
+ 443   2                              else
+ 444   2                              {
+ 445   3                                      // Current application may not be interrupted
+ 446   3                                      // TODO this will be bad
+ 447   3                                      stamp_error(req->cid, ERR_CHANNEL_BUSY);
+ 448   3                                      //u2f_printlx("ERR_CHANNEL_BUSY ", 2, req->cid, hid_layer.current_cid);
+ 449   3                                      return;
+ 450   3                              }
+ 451   2                              break;
+ 452   2      
+ 453   2              }
+ 454   1      
+ 455   1              hid_u2f_parse(req);
+ 456   1      
+ 457   1      
+ 458   1              return;
+ 459   1      }
+ 460          
+ 461          #endif
+*** WARNING C291 IN LINE 247 OF /home/pp/apps/u2f-zero/firmware/src/u2f_hid.c: not every exit path returns a value
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   1813    ----
+   CODE SIZE        =   1860    ----
    CONSTANT SIZE    =    146    ----
-   XDATA SIZE       =    278      45
+   XDATA SIZE       =    330      45
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----    ----

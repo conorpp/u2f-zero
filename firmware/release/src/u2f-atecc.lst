@@ -1,4 +1,4 @@
-C51 COMPILER V9.53.0.0   U2F_ATECC                                                         03/28/2016 20:18:26 PAGE 1   
+C51 COMPILER V9.53.0.0   U2F_ATECC                                                         03/29/2016 00:06:39 PAGE 1   
 
 
 C51 COMPILER V9.53.0.0, COMPILATION OF MODULE U2F_ATECC
@@ -6,12 +6,12 @@ OBJECT MODULE PLACED IN .\src/u2f-atecc.OBJ
 COMPILER INVOKED BY: Z:\home\pp\SimplicityStudio_v3\developer\toolchains\keil_8051\9.53\BIN\C51.exe /home/pp/apps/u2f-ze
                     -ro/firmware/src/u2f-atecc.c OMF2 LARGE DEBUG OBJECTEXTEND ROM(LARGE) WARNINGLEVEL(2) FLOATFUZZY(3) OPTIMIZE(9,SIZE) INTV
                     -ECTOR(0X0000) INTPROMOTE INCDIR(/home/pp/apps/u2f-zero/firmware/inc/config;/home/pp/apps/u2f-zero/firmware/inc;/home/pp/
-                    -apps/u2f-zero/firmware/tinyprintf;/home/pp/apps/u2f-zero/firmware/tests;/home/pp/SimplicityStudio_v3/developer/sdks/si80
-                    -51/v3//Device/shared/si8051Base;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1;/home/pp/Simplicit
-                    -yStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Lib/efm8_
-                    -usb/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1/peripheral_driver/inc;/home/pp/SimplicityS
-                    -tudio_v3/developer/sdks/si8051/v3//Lib/efm8_assert) REGFILE(u2f-firmware.ORC) PRINT(.\src/u2f-atecc.lst) COND PAGEWIDTH(
-                    -120) PAGELENGTH(65) OBJECT(.\src/u2f-atecc.OBJ)
+                    -apps/u2f-zero/firmware/tests;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/shared/si8051Base;/home/pp/Si
+                    -mplicityStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device
+                    -/EFM8UB1/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Lib/efm8_usb/inc;/home/pp/SimplicityStudio_v3/develo
+                    -per/sdks/si8051/v3//Device/EFM8UB1/peripheral_driver/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Lib/efm8
+                    -_assert) REGFILE(u2f-firmware.ORC) PRINT(.\src/u2f-atecc.lst) COND PAGEWIDTH(120) PAGELENGTH(65) OBJECT(.\src/u2f-atecc.
+                    -OBJ)
 
 line level    source
 
@@ -63,7 +63,7 @@ line level    source
   46   1      }
   47          
   48          void u2f_init()
-C51 COMPILER V9.53.0.0   U2F_ATECC                                                         03/28/2016 20:18:26 PAGE 2   
+C51 COMPILER V9.53.0.0   U2F_ATECC                                                         03/29/2016 00:06:39 PAGE 2   
 
   49          {
   50   1              uint8_t i,j;
@@ -74,240 +74,260 @@ line level    source
   55   1              // initialize key handles
   56   1              if (key_store.num_keys != U2F_NUM_KEYS)
   57   1              {
-  58   2                      u2f_prints("init key handles\r\n");
-  59   2                      key_store.num_keys = U2F_NUM_KEYS;
-  60   2                      key_store.valid_keys = 0;
-  61   2                      key_store.num_issued = 0;
-  62   2                      flush_key_store();
-  63   2      
-  64   2                      for (i=0; i < 2; i++)
-  65   2                      {
-  66   3                              atecc_send_recv(ATECC_CMD_RNG,ATECC_RNG_P1,ATECC_RNG_P2,
-  67   3                                                              NULL, 0,
-  68   3                                                              appdata.tmp,
-  69   3                                                              sizeof(appdata.tmp), &res);
-  70   3                              for (j=0; j < U2F_NUM_KEYS/2; j++) res.buf[j * U2F_KEY_HANDLE_SIZE] = j+1 + i*U2F_NUM_KEYS/2;
-  71   3                              eeprom_write(U2F_KEYS_ADDR + i * (U2F_KEY_HANDLE_SIZE * U2F_NUM_KEYS/2),
-  72   3                                                              res.buf, U2F_KEY_HANDLE_SIZE * U2F_NUM_KEYS/2);
-  73   3                      }
-  74   2      
-  75   2              }
-  76   1      }
-  77          
-  78          void u2f_response_writeback(uint8_t * buf, uint16_t len)
-  79          {
-  80   1              u2f_hid_writeback(buf, len);
-  81   1      }
-  82          
-  83          void u2f_response_flush()
-  84          {
-  85   1              u2f_hid_flush();
-  86   1      }
-  87          
-  88          void u2f_response_start()
-  89          {
-  90   1      }
-  91          
-  92          int8_t u2f_get_user_feedback()
-  93          {
-  94   1              return 0;
-  95   1      }
-  96          
-  97          static uint8_t shabuf[70];
-  98          static uint8_t shaoffset = 0;
-  99          static struct atecc_response res_digest;
- 100          
- 101          void u2f_sha256_start()
- 102          {
- 103   1              shaoffset = 0;
- 104   1              atecc_send_recv(ATECC_CMD_SHA,
- 105   1                              ATECC_SHA_START, 0,NULL,0,
- 106   1                              appdata.tmp, sizeof(appdata.tmp), NULL);
- 107   1      }
- 108          
- 109          
- 110          void u2f_sha256_update(uint8_t * buf, uint8_t len)
- 111          {
-C51 COMPILER V9.53.0.0   U2F_ATECC                                                         03/28/2016 20:18:26 PAGE 3   
+  58   2                      key_store.num_keys = U2F_NUM_KEYS;
+  59   2                      key_store.valid_keys = 0;
+  60   2                      key_store.num_issued = 0;
+  61   2                      flush_key_store();
+  62   2      
+  63   2                      for (i=0; i < 2; i++)
+  64   2                      {
+  65   3                              atecc_send_recv(ATECC_CMD_RNG,ATECC_RNG_P1,ATECC_RNG_P2,
+  66   3                                                              NULL, 0,
+  67   3                                                              appdata.tmp,
+  68   3                                                              sizeof(appdata.tmp), &res);
+  69   3                              for (j=0; j < U2F_NUM_KEYS/2; j++) res.buf[j * U2F_KEY_HANDLE_SIZE] = j+1 + i*U2F_NUM_KEYS/2;
+  70   3                              eeprom_write(U2F_KEYS_ADDR + i * (U2F_KEY_HANDLE_SIZE * U2F_NUM_KEYS/2),
+  71   3                                                              res.buf, U2F_KEY_HANDLE_SIZE * U2F_NUM_KEYS/2);
+  72   3                      }
+  73   2      
+  74   2              }
+  75   1      }
+  76          
+  77          void u2f_response_writeback(uint8_t * buf, uint16_t len)
+  78          {
+  79   1              u2f_hid_writeback(buf, len);
+  80   1      }
+  81          
+  82          void u2f_response_flush()
+  83          {
+  84   1              u2f_hid_flush();
+  85   1      }
+  86          
+  87          void u2f_response_start()
+  88          {
+  89   1      }
+  90          
+  91          int8_t u2f_get_user_feedback()
+  92          {
+  93   1              uint32_t t = get_ms();
+  94   1              while(!U2F_BUTTON_IS_PRESSED())
+  95   1              {
+  96   2                      // turn yellow
+  97   2                      rgb(128,128,0);
+  98   2                      if (get_ms() - t > 10000)
+  99   2                              break;
+ 100   2              }
+ 101   1      
+ 102   1              if (U2F_BUTTON_IS_PRESSED())
+ 103   1              {
+ 104   2                      rgb(0,150,128);
+ 105   2              }
+ 106   1              else
+ 107   1              {
+ 108   2                      rgb(200,0,0);
+ 109   2                      return 1;
+ 110   2              }
+ 111   1      
+C51 COMPILER V9.53.0.0   U2F_ATECC                                                         03/29/2016 00:06:39 PAGE 3   
 
- 112   1              uint8_t i = 0;
- 113   1              while(len--)
- 114   1              {
- 115   2                      shabuf[shaoffset++] = *buf++;
- 116   2                      if (shaoffset == 64)
- 117   2                      {
- 118   3                              atecc_send_recv(ATECC_CMD_SHA,
- 119   3                                              ATECC_SHA_UPDATE, 64,shabuf,64,
- 120   3                                              appdata.tmp, sizeof(appdata.tmp), NULL);
- 121   3                              shaoffset = 0;
- 122   3                      }
- 123   2              }
- 124   1      }
- 125          
+ 112   1              return 0;
+ 113   1      }
+ 114          
+ 115          static uint8_t shabuf[70];
+ 116          static uint8_t shaoffset = 0;
+ 117          static struct atecc_response res_digest;
+ 118          
+ 119          void u2f_sha256_start()
+ 120          {
+ 121   1              shaoffset = 0;
+ 122   1              atecc_send_recv(ATECC_CMD_SHA,
+ 123   1                              ATECC_SHA_START, 0,NULL,0,
+ 124   1                              appdata.tmp, sizeof(appdata.tmp), NULL);
+ 125   1      }
  126          
- 127          void u2f_sha256_finish()
- 128          {
- 129   1              atecc_send_recv(ATECC_CMD_SHA,
- 130   1                              ATECC_SHA_END, shaoffset,shabuf,shaoffset,
- 131   1                              shabuf, sizeof(shabuf), &res_digest);
- 132   1      }
- 133          
- 134          
- 135          int8_t u2f_ecdsa_sign(uint8_t * dest, uint8_t * handle)
- 136          {
- 137   1              struct atecc_response res;
- 138   1              struct key_handle k;
- 139   1              uint16_t keyslot = (uint16_t)((struct key_handle *)handle)->index;
- 140   1              if (keyslot > U2F_NUM_KEYS)
- 141   1              {
- 142   2                      return -1;
- 143   2              }
- 144   1              if (keyslot == 0)
- 145   1              {
- 146   2                      keyslot = U2F_ATTESTATION_KEY_SLOT;
- 147   2              }
- 148   1              else
- 149   1              {
- 150   2                      keyslot--;
- 151   2              }
- 152   1      
- 153   1              atecc_send_recv(ATECC_CMD_SIGN,
- 154   1                              ATECC_SIGN_EXTERNAL, keyslot, NULL, 0,
- 155   1                              appdata.tmp, sizeof(appdata.tmp), &res);
- 156   1      
- 157   1              if (keyslot != U2F_ATTESTATION_KEY_SLOT)
- 158   1              {
- 159   2                      eeprom_read(U2F_KEY_ADDR(keyslot), (uint8_t* )&k, U2F_KEY_HANDLE_SIZE);
- 160   2      
- 161   2                      if (
- 162   2                                      ((struct key_handle *)handle)->index != k.index ||
- 163   2                                      ((struct key_handle *)handle)->entropy[0] != k.entropy[0] ||
- 164   2                                      ((struct key_handle *)handle)->entropy[1] != k.entropy[1] ||
- 165   2                                      ((struct key_handle *)handle)->entropy[2] != k.entropy[2]
- 166   2                      )
- 167   2                      {
- 168   3                              return -1;
- 169   3                      }
- 170   2              }
- 171   1      
- 172   1              memmove(dest, res.buf, 64);
- 173   1      
- 174   1              return 0;
-C51 COMPILER V9.53.0.0   U2F_ATECC                                                         03/28/2016 20:18:26 PAGE 4   
+ 127          
+ 128          void u2f_sha256_update(uint8_t * buf, uint8_t len)
+ 129          {
+ 130   1              uint8_t i = 0;
+ 131   1              while(len--)
+ 132   1              {
+ 133   2                      shabuf[shaoffset++] = *buf++;
+ 134   2                      if (shaoffset == 64)
+ 135   2                      {
+ 136   3                              atecc_send_recv(ATECC_CMD_SHA,
+ 137   3                                              ATECC_SHA_UPDATE, 64,shabuf,64,
+ 138   3                                              appdata.tmp, sizeof(appdata.tmp), NULL);
+ 139   3                              shaoffset = 0;
+ 140   3                      }
+ 141   2              }
+ 142   1      }
+ 143          
+ 144          
+ 145          void u2f_sha256_finish()
+ 146          {
+ 147   1              atecc_send_recv(ATECC_CMD_SHA,
+ 148   1                              ATECC_SHA_END, shaoffset,shabuf,shaoffset,
+ 149   1                              shabuf, sizeof(shabuf), &res_digest);
+ 150   1      }
+ 151          
+ 152          
+ 153          int8_t u2f_ecdsa_sign(uint8_t * dest, uint8_t * handle)
+ 154          {
+ 155   1              struct atecc_response res;
+ 156   1              struct key_handle k;
+ 157   1              uint16_t keyslot = (uint16_t)((struct key_handle *)handle)->index;
+ 158   1              if (keyslot > U2F_NUM_KEYS)
+ 159   1              {
+ 160   2                      return -1;
+ 161   2              }
+ 162   1              if (keyslot == 0)
+ 163   1              {
+ 164   2                      keyslot = U2F_ATTESTATION_KEY_SLOT;
+ 165   2              }
+ 166   1              else
+ 167   1              {
+ 168   2                      keyslot--;
+ 169   2              }
+ 170   1      
+ 171   1              atecc_send_recv(ATECC_CMD_SIGN,
+ 172   1                              ATECC_SIGN_EXTERNAL, keyslot, NULL, 0,
+ 173   1                              appdata.tmp, sizeof(appdata.tmp), &res);
+ 174   1      
+C51 COMPILER V9.53.0.0   U2F_ATECC                                                         03/29/2016 00:06:39 PAGE 4   
 
- 175   1      }
- 176          
- 177          // bad if this gets interrupted
- 178          int8_t u2f_new_keypair(uint8_t * handle, uint8_t * pubkey)
- 179          {
- 180   1              struct atecc_response res;
- 181   1              struct key_handle k;
- 182   1              uint8_t keyslot = key_store.num_issued;
- 183   1              if (keyslot > U2F_NUM_KEYS-1)
- 184   1              {
- 185   2                      return -1;
- 186   2              }
- 187   1      
- 188   1              atecc_send_recv(ATECC_CMD_GENKEY,
- 189   1                              ATECC_GENKEY_PRIVATE, keyslot, NULL, 0,
- 190   1                              appdata.tmp, sizeof(appdata.tmp), &res);
+ 175   1              if (keyslot != U2F_ATTESTATION_KEY_SLOT)
+ 176   1              {
+ 177   2                      eeprom_read(U2F_KEY_ADDR(keyslot), (uint8_t* )&k, U2F_KEY_HANDLE_SIZE);
+ 178   2      
+ 179   2                      if (
+ 180   2                                      ((struct key_handle *)handle)->index != k.index ||
+ 181   2                                      ((struct key_handle *)handle)->entropy[0] != k.entropy[0] ||
+ 182   2                                      ((struct key_handle *)handle)->entropy[1] != k.entropy[1] ||
+ 183   2                                      ((struct key_handle *)handle)->entropy[2] != k.entropy[2]
+ 184   2                      )
+ 185   2                      {
+ 186   3                              return -1;
+ 187   3                      }
+ 188   2              }
+ 189   1      
+ 190   1              memmove(dest, res.buf, 64);
  191   1      
- 192   1              memmove(pubkey, res.buf, 64);
- 193   1      
- 194   1              eeprom_read(U2F_KEY_ADDR(keyslot), (uint8_t* )&k, U2F_KEY_HANDLE_SIZE);
- 195   1              if (k.index-1 != keyslot)
- 196   1              {
- 197   2      
- 198   2                      k.index = keyslot;
- 199   2                      set_app_error(ERROR_BAD_KEY_STORE);
- 200   2              }
- 201   1              memmove(handle, &k, U2F_KEY_HANDLE_SIZE);
- 202   1              key_store.num_issued++;
- 203   1              flush_key_store();
- 204   1      
- 205   1              return 0;
- 206   1      }
- 207          
- 208          int8_t u2f_load_key(uint8_t * handle, uint8_t len)
- 209          {
- 210   1              struct key_handle k;
- 211   1              uint8_t keyslot = handle[0]-1;
- 212   1              if (keyslot >= U2F_NUM_KEYS)
- 213   1              {
- 214   2                      return -1;
- 215   2              }
- 216   1              eeprom_read(U2F_KEY_ADDR(keyslot), (uint8_t* )&k, U2F_KEY_HANDLE_SIZE);
- 217   1      
- 218   1              if (
- 219   1                              handle[0] != k.index ||
- 220   1                              ((struct key_handle *)handle)->entropy[0] != k.entropy[0] ||
- 221   1                              ((struct key_handle *)handle)->entropy[1] != k.entropy[1] ||
- 222   1                              ((struct key_handle *)handle)->entropy[2] != k.entropy[2]
- 223   1              )
- 224   1              {
- 225   2                      return -1;
- 226   2              }
- 227   1              return 0;
- 228   1      }
-*** WARNING C280 IN LINE 208 OF /home/pp/apps/u2f-zero/firmware/src/u2f-atecc.c: 'len': unreferenced local variable
- 229          
- 230          uint32_t u2f_count()
- 231          {
- 232   1              struct atecc_response res;
- 233   1              atecc_send_recv(ATECC_CMD_COUNTER,
- 234   1                              ATECC_COUNTER_INC, ATECC_COUNTER0,NULL,0,
- 235   1                              appdata.tmp, sizeof(appdata.tmp), &res);
- 236   1              return le32toh(*(uint32_t*)res.buf);
-C51 COMPILER V9.53.0.0   U2F_ATECC                                                         03/28/2016 20:18:26 PAGE 5   
+ 192   1              return 0;
+ 193   1      }
+ 194          
+ 195          // bad if this gets interrupted
+ 196          int8_t u2f_new_keypair(uint8_t * handle, uint8_t * pubkey)
+ 197          {
+ 198   1              struct atecc_response res;
+ 199   1              struct key_handle k;
+ 200   1              uint8_t keyslot = key_store.num_issued;
+ 201   1              if (keyslot > U2F_NUM_KEYS-1)
+ 202   1              {
+ 203   2                      return -1;
+ 204   2              }
+ 205   1      
+ 206   1              atecc_send_recv(ATECC_CMD_GENKEY,
+ 207   1                              ATECC_GENKEY_PRIVATE, keyslot, NULL, 0,
+ 208   1                              appdata.tmp, sizeof(appdata.tmp), &res);
+ 209   1      
+ 210   1              memmove(pubkey, res.buf, 64);
+ 211   1      
+ 212   1              eeprom_read(U2F_KEY_ADDR(keyslot), (uint8_t* )&k, U2F_KEY_HANDLE_SIZE);
+ 213   1              if (k.index-1 != keyslot)
+ 214   1              {
+ 215   2      
+ 216   2                      k.index = keyslot;
+ 217   2                      set_app_error(ERROR_BAD_KEY_STORE);
+ 218   2              }
+ 219   1              memmove(handle, &k, U2F_KEY_HANDLE_SIZE);
+ 220   1              key_store.num_issued++;
+ 221   1              flush_key_store();
+ 222   1      
+ 223   1              return 0;
+ 224   1      }
+ 225          
+ 226          int8_t u2f_load_key(uint8_t * handle, uint8_t len)
+ 227          {
+ 228   1              struct key_handle k;
+ 229   1              uint8_t keyslot = handle[0]-1;
+ 230   1              if (keyslot >= U2F_NUM_KEYS)
+ 231   1              {
+ 232   2                      return -1;
+ 233   2              }
+ 234   1              eeprom_read(U2F_KEY_ADDR(keyslot), (uint8_t* )&k, U2F_KEY_HANDLE_SIZE);
+ 235   1      
+ 236   1              if (
+ 237   1                              handle[0] != k.index ||
+C51 COMPILER V9.53.0.0   U2F_ATECC                                                         03/29/2016 00:06:39 PAGE 5   
 
- 237   1      }
- 238          
- 239          code char __attest[] =
- 240          // {{{
- 241          "\x30\x82\x01\x5a\x30\x82\x01\x00\x02\x01\x01\x30\x0a\x06\x08\x2a\x86\x48\xce\x3d"
- 242          "\x04\x03\x02\x30\x39\x31\x0b\x30\x09\x06\x03\x55\x04\x06\x13\x02\x56\x41\x31\x14"
- 243          "\x30\x12\x06\x03\x55\x04\x0a\x13\x0b\x43\x6f\x6e\x6f\x72\x43\x6f\x20\x4c\x4c\x43"
- 244          "\x31\x14\x30\x12\x06\x03\x55\x04\x03\x13\x0b\x75\x32\x66\x7a\x65\x72\x6f\x2e\x63"
- 245          "\x6f\x6d\x30\x1e\x17\x0d\x31\x36\x30\x33\x32\x39\x30\x30\x31\x37\x30\x35\x5a\x17"
- 246          "\x0d\x32\x32\x30\x33\x32\x38\x30\x30\x31\x37\x30\x35\x5a\x30\x39\x31\x0b\x30\x09"
- 247          "\x06\x03\x55\x04\x06\x13\x02\x56\x41\x31\x14\x30\x12\x06\x03\x55\x04\x0a\x13\x0b"
- 248          "\x43\x6f\x6e\x6f\x72\x43\x6f\x20\x4c\x4c\x43\x31\x14\x30\x12\x06\x03\x55\x04\x03"
- 249          "\x13\x0b\x75\x32\x66\x7a\x65\x72\x6f\x2e\x63\x6f\x6d\x30\x59\x30\x13\x06\x07\x2a"
- 250          "\x86\x48\xce\x3d\x02\x01\x06\x08\x2a\x86\x48\xce\x3d\x03\x01\x07\x03\x42\x00\x04"
- 251          "\x49\xc0\x88\x08\xf6\xff\xe0\x1f\xa3\xe0\x28\x28\xfb\x22\x1b\x20\xc0\xa4\xa3\x95"
- 252          "\xba\xdc\xeb\xcf\xbd\x27\x45\xaa\xa5\x2f\x1f\x19\x6c\xfa\xe0\x0d\xdd\xc0\xef\x5d"
- 253          "\x1e\xc1\x4d\x4b\x9a\x74\xb4\x30\x81\xfa\x93\x39\x0d\xc9\x35\xbd\xea\xce\x6a\x9b"
- 254          "\x53\xa3\x3e\xbc\x30\x0a\x06\x08\x2a\x86\x48\xce\x3d\x04\x03\x02\x03\x48\x00\x30"
- 255          "\x45\x02\x21\x00\xb4\xc1\xbc\x9c\x5c\x90\xab\xbf\x34\x29\x40\xf7\xe9\x4f\xb2\x4e"
- 256          "\x74\x4b\x0a\x0d\x5c\x71\x0d\x7c\xd3\xa7\x9a\x13\x2d\xca\x2d\x10\x02\x20\x3f\x4c"
- 257          "\x60\x70\x15\x2a\xc0\x1a\xc3\xad\xa3\x4b\x13\x24\x1c\x8d\x78\xa4\xcb\x34\xa7\xbc"
- 258          "\x21\xe2\xdf\x20\x4f\xb1\x85\x92\xdc\x6a"
- 259          
- 260          // }}}
- 261          ;
- 262          uint8_t * u2f_get_attestation_cert()
- 263          {
- 264   1              return __attest;
- 265   1      }
- 266          
- 267          
- 268          uint16_t u2f_attestation_cert_size()
- 269          {
- 270   1              return sizeof(__attest)-1;
- 271   1      }
- 272          
- 273          void set_response_length(uint16_t len)
- 274          {
- 275   1              u2f_hid_set_len(len);
- 276   1      }
+ 238   1                              ((struct key_handle *)handle)->entropy[0] != k.entropy[0] ||
+ 239   1                              ((struct key_handle *)handle)->entropy[1] != k.entropy[1] ||
+ 240   1                              ((struct key_handle *)handle)->entropy[2] != k.entropy[2]
+ 241   1              )
+ 242   1              {
+ 243   2                      return -1;
+ 244   2              }
+ 245   1              return 0;
+ 246   1      }
+*** WARNING C280 IN LINE 226 OF /home/pp/apps/u2f-zero/firmware/src/u2f-atecc.c: 'len': unreferenced local variable
+ 247          
+ 248          uint32_t u2f_count()
+ 249          {
+ 250   1              struct atecc_response res;
+ 251   1              atecc_send_recv(ATECC_CMD_COUNTER,
+ 252   1                              ATECC_COUNTER_INC, ATECC_COUNTER0,NULL,0,
+ 253   1                              appdata.tmp, sizeof(appdata.tmp), &res);
+ 254   1              return le32toh(*(uint32_t*)res.buf);
+ 255   1      }
+ 256          
+ 257          code char __attest[] =
+ 258          // {{{
+ 259          "\x30\x82\x01\x5a\x30\x82\x01\x00\x02\x01\x01\x30\x0a\x06\x08\x2a\x86\x48\xce\x3d"
+ 260          "\x04\x03\x02\x30\x39\x31\x0b\x30\x09\x06\x03\x55\x04\x06\x13\x02\x56\x41\x31\x14"
+ 261          "\x30\x12\x06\x03\x55\x04\x0a\x13\x0b\x43\x6f\x6e\x6f\x72\x43\x6f\x20\x4c\x4c\x43"
+ 262          "\x31\x14\x30\x12\x06\x03\x55\x04\x03\x13\x0b\x75\x32\x66\x7a\x65\x72\x6f\x2e\x63"
+ 263          "\x6f\x6d\x30\x1e\x17\x0d\x31\x36\x30\x33\x32\x39\x30\x34\x30\x36\x33\x35\x5a\x17"
+ 264          "\x0d\x32\x32\x30\x33\x32\x38\x30\x34\x30\x36\x33\x35\x5a\x30\x39\x31\x0b\x30\x09"
+ 265          "\x06\x03\x55\x04\x06\x13\x02\x56\x41\x31\x14\x30\x12\x06\x03\x55\x04\x0a\x13\x0b"
+ 266          "\x43\x6f\x6e\x6f\x72\x43\x6f\x20\x4c\x4c\x43\x31\x14\x30\x12\x06\x03\x55\x04\x03"
+ 267          "\x13\x0b\x75\x32\x66\x7a\x65\x72\x6f\x2e\x63\x6f\x6d\x30\x59\x30\x13\x06\x07\x2a"
+ 268          "\x86\x48\xce\x3d\x02\x01\x06\x08\x2a\x86\x48\xce\x3d\x03\x01\x07\x03\x42\x00\x04"
+ 269          "\xa6\x03\x66\x51\x15\xdc\xeb\xf5\xb8\xdb\x32\xe7\x66\x5e\xf6\x6a\x39\xbc\x15\x37"
+ 270          "\x8c\x65\x5f\xeb\xd4\x8b\xa9\x51\xee\x61\x02\xc2\xc8\x32\x1e\x73\xb2\x7d\xe8\x09"
+ 271          "\x79\xda\xf9\xd1\x42\x48\xe8\x1f\x0b\x43\xae\x63\x99\xf2\x52\x83\x81\x5f\x87\x74"
+ 272          "\x79\x17\x84\x1f\x30\x0a\x06\x08\x2a\x86\x48\xce\x3d\x04\x03\x02\x03\x48\x00\x30"
+ 273          "\x45\x02\x21\x00\x8b\xb7\xfa\xa2\x02\xb7\x24\xa3\x8d\xca\xab\x74\x44\xc3\x4c\xdc"
+ 274          "\x80\x3a\xa5\x67\xdb\x36\xa1\x41\xda\xd6\xf3\x94\x38\x4c\xb6\xbd\x02\x20\x1f\x33"
+ 275          "\x7e\xa3\x46\xf4\x77\x75\xe9\xe5\x4a\xe5\x92\x18\x4a\x11\xc0\x0b\x3c\x13\xa3\x61"
+ 276          "\x68\x68\xae\x90\xbc\x01\xdd\x32\x8d\xe0"
  277          
- 278          #endif
+ 278          // }}}
+ 279          ;
+ 280          uint8_t * u2f_get_attestation_cert()
+ 281          {
+ 282   1              return __attest;
+ 283   1      }
+ 284          
+ 285          
+ 286          uint16_t u2f_attestation_cert_size()
+ 287          {
+ 288   1              return sizeof(__attest)-1;
+ 289   1      }
+ 290          
+ 291          void set_response_length(uint16_t len)
+ 292          {
+ 293   1              u2f_hid_set_len(len);
+ 294   1      }
+ 295          
+ 296          #endif
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   1082    ----
-   CONSTANT SIZE    =    370    ----
-   XDATA SIZE       =    147      54
+C51 COMPILER V9.53.0.0   U2F_ATECC                                                         03/29/2016 00:06:39 PAGE 6   
+
+   CODE SIZE        =   1164    ----
+   CONSTANT SIZE    =    351    ----
+   XDATA SIZE       =    147      58
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----    ----

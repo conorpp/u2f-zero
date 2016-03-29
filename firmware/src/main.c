@@ -42,25 +42,13 @@ void set_app_u2f_hid_msg(struct u2f_hid_msg * msg )
 }
 
 
-//void dump_eeprom()
-//{
-//	// 0xF800 - 0xFB7F
-//	uint16_t i = 0xF800;
-//	uint8_t eep;
-//	for (; i <= 0xF800 + 4 * 16; i++)
-//	{
-//		eeprom_read(i,&eep,1);
-//		u2f_putb(eep);
-//		u2f_prints(" ");
-//	}
-//	u2f_prints("\r\n");
-//}
-
-int8_t test_app()
+void rgb(uint8_t r, uint8_t g, uint8_t b)
 {
-	//u2f_printl("count: ",1,u2f_count());
-	return 0;
+	LED_B(b);
+	LED_G(g);
+	LED_R(r);
 }
+
 
 #define ms_since(ms,num) (((uint16_t)get_ms() - (ms)) >= num ? (1|(ms=(uint16_t)get_ms())):0)
 
@@ -68,13 +56,12 @@ int8_t test_app()
 
 int16_t main(void) {
 
-	data uint8_t i = 0;
-	data uint16_t last_ms = get_ms();
-	data uint16_t ms_heart;
-	data uint16_t ms_wink;
-	data uint8_t winks = 0;
-	uint8_t leds = 0;
-	uint16_t button = 0;
+	uint16_t ms_heart;
+	uint16_t ms_wink;
+	uint16_t ms_grad;
+	uint8_t winks = 0;
+	uint8_t grad_dir = 0;
+	uint8_t light = 0;
 
 	enter_DefaultMode_from_RESET();
 	init(&appdata);
@@ -96,22 +83,38 @@ int16_t main(void) {
 		if (ms_since(ms_heart,500))
 		{
 			u2f_printl("ms ", 1, get_ms());
-			button = U2F_BUTTON;
-			u2f_printx("button: ",1,button);
-			LED_G = !LED_G;
-			test_app();
 		}
 
 
 		if (!USBD_EpIsBusy(EP1OUT) && !USBD_EpIsBusy(EP1IN) && appdata.state != APP_HID_MSG)
 		{
 			USBD_Read(EP1OUT, hidmsgbuf, sizeof(hidmsgbuf), true);
-			// u2f_prints("read added\r\n");
 		}
 
 		switch(appdata.state)
 		{
 			case APP_NOTHING:
+				if (ms_since(ms_grad, 10))
+				{
+					if (light == 90)
+					{
+						grad_dir = 0;
+					}
+					else if (light == 0)
+					{
+						grad_dir = 1;
+					}
+					if (grad_dir)
+						if (U2F_BUTTON_IS_PRESSED())
+							rgb(0,0,light++);
+						else
+							rgb(0,light++,0);
+					else
+						if (U2F_BUTTON_IS_PRESSED())
+							rgb(0,0,light--);
+						else
+							rgb(0,light--,0);
+				}
 				break;
 			case APP_HID_MSG:
 #ifndef ATECC_SETUP_DEVICE
@@ -123,16 +126,17 @@ int16_t main(void) {
 					appdata.state = APP_NOTHING;
 				break;
 			case APP_WINK:
-				LED_B = 0;
+				rgb(0,0,150);
+				light = 150;
 				ms_wink = get_ms();
 				appdata.state = _APP_WINK;
 				break;
 			case _APP_WINK:
-				LED_G = 1;
-				LED_R = 1;
+
 				if (ms_since(ms_wink,150))
 				{
-					LED_B = !LED_B;
+					rgb(0,0,light);
+					light = light == 0 ? 150 : 0;
 					winks++;
 				}
 				if (winks == 5)
@@ -147,6 +151,7 @@ int16_t main(void) {
 		{
 			u2f_printb("error: ", 1, appdata.error);
 			appdata.error = 0;
+			rgb(200,0,0);
 		}
 
 

@@ -37,6 +37,10 @@ extern void enter_DefaultMode_from_RESET(void) {
 	TIMER16_2_enter_DefaultMode_from_RESET();
 	TIMER16_3_enter_DefaultMode_from_RESET();
 	TIMER_SETUP_0_enter_DefaultMode_from_RESET();
+	PCA_0_enter_DefaultMode_from_RESET();
+	PCACH_0_enter_DefaultMode_from_RESET();
+	PCACH_1_enter_DefaultMode_from_RESET();
+	PCACH_2_enter_DefaultMode_from_RESET();
 	SMBUS_0_enter_DefaultMode_from_RESET();
 	UART_0_enter_DefaultMode_from_RESET();
 	INTERRUPT_0_enter_DefaultMode_from_RESET();
@@ -162,9 +166,9 @@ extern void PORTS_0_enter_DefaultMode_from_RESET(void) {
 	 //     crossbar.)
 	 // B1 (Port 0 Bit 1 Skip) = NOT_SKIPPED (P0.1 pin is not skipped by the
 	 //     crossbar.)
-	 // B2 (Port 0 Bit 2 Skip) = NOT_SKIPPED (P0.2 pin is not skipped by the
+	 // B2 (Port 0 Bit 2 Skip) = SKIPPED (P0.2 pin is skipped by the
 	 //     crossbar.)
-	 // B3 (Port 0 Bit 3 Skip) = NOT_SKIPPED (P0.3 pin is not skipped by the
+	 // B3 (Port 0 Bit 3 Skip) = SKIPPED (P0.3 pin is skipped by the
 	 //     crossbar.)
 	 // B4 (Port 0 Bit 4 Skip) = NOT_SKIPPED (P0.4 pin is not skipped by the
 	 //     crossbar.)
@@ -176,9 +180,9 @@ extern void PORTS_0_enter_DefaultMode_from_RESET(void) {
 	 //     crossbar.)
 	 */
 	P0SKIP = P0SKIP_B0__NOT_SKIPPED | P0SKIP_B1__NOT_SKIPPED
-			| P0SKIP_B2__NOT_SKIPPED | P0SKIP_B3__NOT_SKIPPED
-			| P0SKIP_B4__NOT_SKIPPED | P0SKIP_B5__NOT_SKIPPED
-			| P0SKIP_B6__NOT_SKIPPED | P0SKIP_B7__NOT_SKIPPED;
+			| P0SKIP_B2__SKIPPED | P0SKIP_B3__SKIPPED | P0SKIP_B4__NOT_SKIPPED
+			| P0SKIP_B5__NOT_SKIPPED | P0SKIP_B6__NOT_SKIPPED
+			| P0SKIP_B7__NOT_SKIPPED;
 	// [P0SKIP - Port 0 Skip]$
 
 	// $[P0MASK - Port 0 Mask]
@@ -412,6 +416,17 @@ extern void PBCFG_0_enter_DefaultMode_from_RESET(void) {
 	// [XBR0 - Port I/O Crossbar 0]$
 
 	// $[XBR1 - Port I/O Crossbar 1]
+	/*
+	 // PCA0ME (PCA Module I/O Enable) = CEX0_CEX1_CEX2 (CEX0, CEX1, CEX2
+	 //     routed to Port pins.)
+	 // ECIE (PCA0 External Counter Input Enable) = DISABLED (ECI unavailable
+	 //     at Port pin.)
+	 // T0E (T0 Enable) = DISABLED (T0 unavailable at Port pin.)
+	 // T1E (T1 Enable) = DISABLED (T1 unavailable at Port pin.)
+	 // T2E (T2 Enable) = DISABLED (T2 unavailable at Port pin.)
+	 */
+	XBR1 = XBR1_PCA0ME__CEX0_CEX1_CEX2 | XBR1_ECIE__DISABLED
+			| XBR1_T0E__DISABLED | XBR1_T1E__DISABLED | XBR1_T2E__DISABLED;
 	// [XBR1 - Port I/O Crossbar 1]$
 
 }
@@ -779,6 +794,180 @@ extern void USBLIB_0_enter_DefaultMode_from_RESET(void) {
 	// $[USBD Init]
 	USBD_Init (&initstruct);
 	// [USBD Init]$
+
+}
+
+extern void PCA_0_enter_DefaultMode_from_RESET(void) {
+	// $[PCA Off]
+	PCA0CN0_CR = PCA0CN0_CR__STOP;
+	// [PCA Off]$
+
+	// $[PCA0MD - PCA Mode]
+	// [PCA0MD - PCA Mode]$
+
+	// $[PCA0CENT - PCA Center Alignment Enable]
+	/*
+	 // CEX0CEN (CEX0 Center Alignment Enable) = CENTER (Center-aligned.)
+	 // CEX1CEN (CEX1 Center Alignment Enable) = CENTER (Center-aligned.)
+	 // CEX2CEN (CEX2 Center Alignment Enable) = CENTER (Center-aligned.)
+	 */
+	PCA0CENT = PCA0CENT_CEX0CEN__CENTER | PCA0CENT_CEX1CEN__CENTER
+			| PCA0CENT_CEX2CEN__CENTER;
+	// [PCA0CENT - PCA Center Alignment Enable]$
+
+	// $[PCA0CLR - PCA Comparator Clear Control]
+	// [PCA0CLR - PCA Comparator Clear Control]$
+
+	// $[PCA0L - PCA Counter/Timer Low Byte]
+	// [PCA0L - PCA Counter/Timer Low Byte]$
+
+	// $[PCA0H - PCA Counter/Timer High Byte]
+	// [PCA0H - PCA Counter/Timer High Byte]$
+
+	// $[PCA0POL - PCA Output Polarity]
+	// [PCA0POL - PCA Output Polarity]$
+
+	// $[PCA0PWM - PCA PWM Configuration]
+	// [PCA0PWM - PCA PWM Configuration]$
+
+	// $[PCA On]
+	PCA0CN0_CR = PCA0CN0_CR__RUN;
+	// [PCA On]$
+
+}
+
+extern void PCACH_0_enter_DefaultMode_from_RESET(void) {
+	// $[PCA0 Settings Save]
+	// Select Capture/Compare register)
+	PCA0PWM &= ~PCA0PWM_ARSEL__BMASK;
+	// [PCA0 Settings Save]$
+
+	// $[PCA0CPM0 - PCA Channel 0 Capture/Compare Mode]
+	/*
+	 // CAPN (Channel 0 Capture Negative Function Enable) = DISABLED (Disable
+	 //     negative edge capture.)
+	 // ECCF (Channel 0 Capture/Compare Flag Interrupt Enable) = DISABLED
+	 //     (Disable CCF0 interrupts.)
+	 // MAT (Channel 0 Match Function Enable) = DISABLED (Disable match
+	 //     function.)
+	 // PWM16 (Channel 0 16-bit Pulse Width Modulation Enable) = 8_BIT (8 to
+	 //     11-bit PWM selected.)
+	 // CAPP (Channel 0 Capture Positive Function Enable) = DISABLED (Disable
+	 //     positive edge capture.)
+	 // ECOM (Channel 0 Comparator Function Enable) = ENABLED (Enable
+	 //     comparator function.)
+	 // PWM (Channel 0 Pulse Width Modulation Mode Enable) = ENABLED (Enable
+	 //     PWM function.)
+	 // TOG (Channel 0 Toggle Function Enable) = DISABLED (Disable toggle
+	 //     function.)
+	 */
+	PCA0CPM0 = PCA0CPM0_CAPN__DISABLED | PCA0CPM0_ECCF__DISABLED
+			| PCA0CPM0_MAT__DISABLED | PCA0CPM0_PWM16__8_BIT
+			| PCA0CPM0_CAPP__DISABLED | PCA0CPM0_ECOM__ENABLED
+			| PCA0CPM0_PWM__ENABLED | PCA0CPM0_TOG__DISABLED;
+	// [PCA0CPM0 - PCA Channel 0 Capture/Compare Mode]$
+
+	// $[PCA0CPL0 - PCA Channel 0 Capture Module Low Byte]
+	// [PCA0CPL0 - PCA Channel 0 Capture Module Low Byte]$
+
+	// $[PCA0CPH0 - PCA Channel 0 Capture Module High Byte]
+	// [PCA0CPH0 - PCA Channel 0 Capture Module High Byte]$
+
+	// $[Auto-reload]
+	// [Auto-reload]$
+
+	// $[PCA0 Settings Restore]
+	// [PCA0 Settings Restore]$
+
+}
+
+extern void PCACH_1_enter_DefaultMode_from_RESET(void) {
+	// $[PCA0 Settings Save]
+	// Select Capture/Compare register)
+	PCA0PWM &= ~PCA0PWM_ARSEL__BMASK;
+	// [PCA0 Settings Save]$
+
+	// $[PCA0CPM1 - PCA Channel 1 Capture/Compare Mode]
+	/*
+	 // CAPN (Channel 1 Capture Negative Function Enable) = DISABLED (Disable
+	 //     negative edge capture.)
+	 // ECCF (Channel 1 Capture/Compare Flag Interrupt Enable) = DISABLED
+	 //     (Disable CCF1 interrupts.)
+	 // MAT (Channel 1 Match Function Enable) = DISABLED (Disable match
+	 //     function.)
+	 // PWM16 (Channel 1 16-bit Pulse Width Modulation Enable) = 8_BIT (8 to
+	 //     11-bit PWM selected.)
+	 // CAPP (Channel 1 Capture Positive Function Enable) = DISABLED (Disable
+	 //     positive edge capture.)
+	 // ECOM (Channel 1 Comparator Function Enable) = ENABLED (Enable
+	 //     comparator function.)
+	 // PWM (Channel 1 Pulse Width Modulation Mode Enable) = ENABLED (Enable
+	 //     PWM function.)
+	 // TOG (Channel 1 Toggle Function Enable) = DISABLED (Disable toggle
+	 //     function.)
+	 */
+	PCA0CPM1 = PCA0CPM1_CAPN__DISABLED | PCA0CPM1_ECCF__DISABLED
+			| PCA0CPM1_MAT__DISABLED | PCA0CPM1_PWM16__8_BIT
+			| PCA0CPM1_CAPP__DISABLED | PCA0CPM1_ECOM__ENABLED
+			| PCA0CPM1_PWM__ENABLED | PCA0CPM1_TOG__DISABLED;
+	// [PCA0CPM1 - PCA Channel 1 Capture/Compare Mode]$
+
+	// $[PCA0CPL1 - PCA Channel 1 Capture Module Low Byte]
+	// [PCA0CPL1 - PCA Channel 1 Capture Module Low Byte]$
+
+	// $[PCA0CPH1 - PCA Channel 1 Capture Module High Byte]
+	// [PCA0CPH1 - PCA Channel 1 Capture Module High Byte]$
+
+	// $[Auto-reload]
+	// [Auto-reload]$
+
+	// $[PCA0 Settings Restore]
+	// [PCA0 Settings Restore]$
+
+}
+
+extern void PCACH_2_enter_DefaultMode_from_RESET(void) {
+	// $[PCA0 Settings Save]
+	// Select Capture/Compare register)
+	PCA0PWM &= ~PCA0PWM_ARSEL__BMASK;
+	// [PCA0 Settings Save]$
+
+	// $[PCA0CPM2 - PCA Channel 2 Capture/Compare Mode]
+	/*
+	 // CAPN (Channel 2 Capture Negative Function Enable) = DISABLED (Disable
+	 //     negative edge capture.)
+	 // ECCF (Channel 2 Capture/Compare Flag Interrupt Enable) = DISABLED
+	 //     (Disable CCF2 interrupts.)
+	 // MAT (Channel 2 Match Function Enable) = DISABLED (Disable match
+	 //     function.)
+	 // PWM16 (Channel 2 16-bit Pulse Width Modulation Enable) = 8_BIT (8 to
+	 //     11-bit PWM selected.)
+	 // CAPP (Channel 2 Capture Positive Function Enable) = DISABLED (Disable
+	 //     positive edge capture.)
+	 // ECOM (Channel 2 Comparator Function Enable) = ENABLED (Enable
+	 //     comparator function.)
+	 // PWM (Channel 2 Pulse Width Modulation Mode Enable) = ENABLED (Enable
+	 //     PWM function.)
+	 // TOG (Channel 2 Toggle Function Enable) = DISABLED (Disable toggle
+	 //     function.)
+	 */
+	PCA0CPM2 = PCA0CPM2_CAPN__DISABLED | PCA0CPM2_ECCF__DISABLED
+			| PCA0CPM2_MAT__DISABLED | PCA0CPM2_PWM16__8_BIT
+			| PCA0CPM2_CAPP__DISABLED | PCA0CPM2_ECOM__ENABLED
+			| PCA0CPM2_PWM__ENABLED | PCA0CPM2_TOG__DISABLED;
+	// [PCA0CPM2 - PCA Channel 2 Capture/Compare Mode]$
+
+	// $[PCA0CPL2 - PCA Channel 2 Capture Module Low Byte]
+	// [PCA0CPL2 - PCA Channel 2 Capture Module Low Byte]$
+
+	// $[PCA0CPH2 - PCA Channel 2 Capture Module High Byte]
+	// [PCA0CPH2 - PCA Channel 2 Capture Module High Byte]$
+
+	// $[Auto-reload]
+	// [Auto-reload]$
+
+	// $[PCA0 Settings Restore]
+	// [PCA0 Settings Restore]$
 
 }
 

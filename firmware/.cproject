@@ -116,7 +116,6 @@
 								<option id="com.silabs.ide.si8051.keil.compiler.category.includes.paths.1968864987" name="Include paths (INCDIR(...))" superClass="com.silabs.ide.si8051.keil.compiler.category.includes.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc/config}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/inc&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/tinyprintf&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/tests&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${StudioSdkPath}/Device/shared/si8051Base&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${StudioSdkPath}/Device/EFM8UB1&quot;"/>
@@ -136,8 +135,8 @@
 								<option id="com.silabs.ide.si8051.keil.assembler.category.includes.paths.158046198" name="Include paths (INCDIR(...))" superClass="com.silabs.ide.si8051.keil.assembler.category.includes.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc/config}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/inc&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/tinyprintf&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/tests&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/tinyprintf&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${StudioSdkPath}/Device/shared/si8051Base&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${StudioSdkPath}/Device/EFM8UB1&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${StudioSdkPath}/Device/EFM8UB1/inc&quot;"/>
@@ -163,7 +162,7 @@
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 		</cconfiguration>
 	</storageModule>
-	<storageModule moduleId="com.silabs.ide.project.core" project.generation="17" projectCommon.buildArtifactType="EXE" projectCommon.kitId="com.silabs.kit.si8051.efm8ub1_slstk2000a" projectCommon.partId="com.silabs.mcu.si8051.efm8ub1_g.efm8ub10f16g" projectCommon.sdkId="com.silabs.sdk.si8051.sls:3.0.0"/>
+	<storageModule moduleId="com.silabs.ide.project.core" project.generation="70" projectCommon.buildArtifactType="EXE" projectCommon.kitId="com.silabs.kit.si8051.efm8ub1_slstk2000a" projectCommon.partId="com.silabs.mcu.si8051.efm8ub1_g.efm8ub10f16g" projectCommon.sdkId="com.silabs.sdk.si8051.sls:3.0.0"/>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 		<project id="u2f-firmware.com.silabs.ide.project.core.cdt.cdtMbsProjectType.801504117" name="SLS CDT Project" projectType="com.silabs.ide.project.core.cdt.cdtMbsProjectType"/>
 	</storageModule>

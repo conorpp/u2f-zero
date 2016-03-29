@@ -29,7 +29,7 @@ SI_INTERRUPT (TIMER2_ISR, TIMER2_IRQn)
 #define SMB_TX (SMB_WRITE)
 
 struct smb_interrupt_interface SMB;
-volatile uint8_t SMB_FLAGS;
+data volatile uint8_t SMB_FLAGS;
 
 static void update_from_packet_length()
 {
@@ -63,10 +63,9 @@ static void restart_bus()
 	SMB.errors = 0;
 }
 
-uint8_t count = 0;
 SI_INTERRUPT (SMBUS0_ISR, SMBUS0_IRQn)
 {
-	uint8_t bus = SMB0CN0 & SMB_STATE_MASK;
+	data uint8_t bus = SMB0CN0 & SMB_STATE_MASK;
 	if (SMB0CN0_ARBLOST != 0)
 	{
 		goto fail;
@@ -76,12 +75,10 @@ SI_INTERRUPT (SMBUS0_ISR, SMBUS0_IRQn)
 	{
 		case SMB_STATUS_START:
 			SMB0DAT = SMB.addr | (SMB_FLAGS & SMB_READ);
-			count = 0;
 			SMB0CN0_STA = 0;
 			break;
 
 		case SMB_STATUS_MTX:
-			count++;
 			if (!SMB0CN0_ACK)
 			{
 				// NACK

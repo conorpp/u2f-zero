@@ -32,7 +32,7 @@ struct smb_interrupt_interface
 };
 
 extern struct smb_interrupt_interface SMB;
-extern volatile uint8_t SMB_FLAGS;
+extern data volatile uint8_t SMB_FLAGS;
 
 #define SMB_MAX_ERRORS 15
 #define SMB_ERRORS_EXCEEDED(inter) ((inter)->errors > SMB_MAX_ERRORS)

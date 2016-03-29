@@ -1,4 +1,4 @@
-C51 COMPILER V9.53.0.0   TESTS                                                             03/28/2016 20:18:25 PAGE 1   
+C51 COMPILER V9.53.0.0   TESTS                                                             03/29/2016 00:06:38 PAGE 1   
 
 
 C51 COMPILER V9.53.0.0, COMPILATION OF MODULE TESTS
@@ -6,12 +6,11 @@ OBJECT MODULE PLACED IN .\tests/tests.OBJ
 COMPILER INVOKED BY: Z:\home\pp\SimplicityStudio_v3\developer\toolchains\keil_8051\9.53\BIN\C51.exe /home/pp/apps/u2f-ze
                     -ro/firmware/tests/tests.c OMF2 LARGE DEBUG OBJECTEXTEND ROM(LARGE) WARNINGLEVEL(2) FLOATFUZZY(3) OPTIMIZE(9,SIZE) INTVEC
                     -TOR(0X0000) INTPROMOTE INCDIR(/home/pp/apps/u2f-zero/firmware/inc/config;/home/pp/apps/u2f-zero/firmware/inc;/home/pp/ap
-                    -ps/u2f-zero/firmware/tinyprintf;/home/pp/apps/u2f-zero/firmware/tests;/home/pp/SimplicityStudio_v3/developer/sdks/si8051
-                    -/v3//Device/shared/si8051Base;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1;/home/pp/SimplicityS
-                    -tudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Lib/efm8_us
-                    -b/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1/peripheral_driver/inc;/home/pp/SimplicityStu
-                    -dio_v3/developer/sdks/si8051/v3//Lib/efm8_assert) REGFILE(u2f-firmware.ORC) PRINT(.\tests/tests.lst) COND PAGEWIDTH(120)
-                    - PAGELENGTH(65) OBJECT(.\tests/tests.OBJ)
+                    -ps/u2f-zero/firmware/tests;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/shared/si8051Base;/home/pp/Simp
+                    -licityStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/E
+                    -FM8UB1/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Lib/efm8_usb/inc;/home/pp/SimplicityStudio_v3/develope
+                    -r/sdks/si8051/v3//Device/EFM8UB1/peripheral_driver/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Lib/efm8_a
+                    -ssert) REGFILE(u2f-firmware.ORC) PRINT(.\tests/tests.lst) COND PAGEWIDTH(120) PAGELENGTH(65) OBJECT(.\tests/tests.OBJ)
 
 line level    source
 
@@ -63,9 +62,9 @@ line level    source
                       dump_hex(buf,len);
               
                       do{
-C51 COMPILER V9.53.0.0   TESTS                                                             03/28/2016 20:18:25 PAGE 2   
-
                               atecc_send(ATECC_CMD_SHA,
+C51 COMPILER V9.53.0.0   TESTS                                                             03/29/2016 00:06:38 PAGE 2   
+
                                               ATECC_SHA_END,
                                               sizeof(pw)-65,pw+64,sizeof(pw)-65);
                       }while((len = atecc_recv(buf,sizeof(buf))) < 0);
@@ -128,9 +127,9 @@ line level    source
                       if (atecc_write_eeprom(ATECC_EEPROM_SLOT(0), ATECC_EEPROM_SLOT_OFFSET(0), &slotconfig, ATECC_EEPROM_SLOT_
              -SIZE) != 0)
                       {
-C51 COMPILER V9.53.0.0   TESTS                                                             03/28/2016 20:18:25 PAGE 3   
-
                               return -1;
+C51 COMPILER V9.53.0.0   TESTS                                                             03/29/2016 00:06:38 PAGE 3   
+
                       }
               
                       slotconfig.writeconfig = 0x3;
@@ -193,9 +192,9 @@ line level    source
                       if (*(uint16_t*)(res.buf ) != 0x3300 || *(uint16_t*)(res.buf+2) != 0x2f00)
                       {
                               return -1;
-C51 COMPILER V9.53.0.0   TESTS                                                             03/28/2016 20:18:25 PAGE 4   
-
                       }
+C51 COMPILER V9.53.0.0   TESTS                                                             03/29/2016 00:06:38 PAGE 4   
+
               
                       return 0;
               }
@@ -258,9 +257,9 @@ line level    source
               
                       eeprom_read(0xFBFF,&secbyte,1);
               
-C51 COMPILER V9.53.0.0   TESTS                                                             03/28/2016 20:18:25 PAGE 5   
-
                       u2f_printb("security_byte: ",1,secbyte);
+C51 COMPILER V9.53.0.0   TESTS                                                             03/29/2016 00:06:38 PAGE 5   
+
               
                       if (secbyte == 0xff)
                       {
@@ -323,9 +322,9 @@ line level    source
                       if (rc == 0)
                               PRINT("--- EEPROM TEST SUCCESS ---\r\n");
                       else
-C51 COMPILER V9.53.0.0   TESTS                                                             03/28/2016 20:18:25 PAGE 6   
-
                               PRINT("--- EEPROM TEST FAILED ---\r\n");
+C51 COMPILER V9.53.0.0   TESTS                                                             03/29/2016 00:06:38 PAGE 6   
+
               #endif
               
               #ifdef TEST_KEY_SIGNING

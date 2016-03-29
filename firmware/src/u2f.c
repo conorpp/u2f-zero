@@ -101,6 +101,12 @@ static int16_t u2f_authenticate(struct u2f_authenticate_request * req, uint8_t c
 		return U2F_SW_CONDITIONS_NOT_SATISFIED;
 	}
 
+	if (u2f_get_user_feedback())
+	{
+		u2f_hid_set_len(2);
+		return U2F_SW_CONDITIONS_NOT_SATISFIED;
+	}
+
 	count = u2f_count();
 
     u2f_sha256_start();
@@ -135,7 +141,7 @@ static int16_t u2f_register(struct u2f_register_request * req)
 
     const uint16_t attest_size = u2f_attestation_cert_size();
 
-    if (u2f_get_user_feedback() != 0)
+    if (u2f_get_user_feedback())
     {
         return U2F_SW_CONDITIONS_NOT_SATISFIED;
     }

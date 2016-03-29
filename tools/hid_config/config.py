@@ -1,11 +1,10 @@
+#!/usr/bin/env python
 #
 #   Configures U2F Zero ATECC device if the token is
 #   running the setup build.
 #
-#   Saves generated public key (r,s) to "pubkey.hex"
+#   Saves generated public key (r,s) to specified filename in ascii hex
 #
-
-
 import hid
 import time,sys,array,binascii
 
@@ -16,6 +15,9 @@ class commands:
     U2F_CONFIG_LOCK = 0x83
     U2F_CONFIG_GENKEY = 0x84
 
+if len(sys.argv) != 2:
+    print 'usage: %s <public-key-output>' % sys.argv[0]
+    sys.exit(1)
 
 def open_u2f():
     h = hid.device()
@@ -100,7 +102,7 @@ data = array.array('B',data).tostring()
 data = binascii.hexlify(data)
 print 'generated key:'
 print data
-open('pubkey.hex','w+').write(data)
+open(sys.argv[1],'w+').write(data)
 
 
 print 'Done'

@@ -1,0 +1,146 @@
+C51 COMPILER V9.53.0.0   I2C                                                               03/28/2016 20:18:26 PAGE 1   
+
+
+C51 COMPILER V9.53.0.0, COMPILATION OF MODULE I2C
+OBJECT MODULE PLACED IN .\src/i2c.OBJ
+COMPILER INVOKED BY: Z:\home\pp\SimplicityStudio_v3\developer\toolchains\keil_8051\9.53\BIN\C51.exe /home/pp/apps/u2f-ze
+                    -ro/firmware/src/i2c.c OMF2 LARGE DEBUG OBJECTEXTEND ROM(LARGE) WARNINGLEVEL(2) FLOATFUZZY(3) OPTIMIZE(9,SIZE) INTVECTOR(
+                    -0X0000) INTPROMOTE INCDIR(/home/pp/apps/u2f-zero/firmware/inc/config;/home/pp/apps/u2f-zero/firmware/inc;/home/pp/apps/u
+                    -2f-zero/firmware/tinyprintf;/home/pp/apps/u2f-zero/firmware/tests;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3/
+                    -/Device/shared/si8051Base;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1;/home/pp/SimplicityStudi
+                    -o_v3/developer/sdks/si8051/v3//Device/EFM8UB1/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Lib/efm8_usb/in
+                    -c;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1/peripheral_driver/inc;/home/pp/SimplicityStudio_
+                    -v3/developer/sdks/si8051/v3//Lib/efm8_assert) REGFILE(u2f-firmware.ORC) PRINT(.\src/i2c.lst) COND PAGEWIDTH(120) PAGELEN
+                    -GTH(65) OBJECT(.\src/i2c.OBJ)
+
+line level    source
+
+   1          /*
+   2           * i2c.c
+   3           *
+   4           *  Created on: Feb 14, 2016
+   5           *      Author: Conor
+   6           */
+   7          #include <SI_EFM8UB1_Register_Enums.h>
+   8          #include <string.h>
+   9          #include <stdint.h>
+  10          
+  11          #include "i2c.h"
+  12          
+  13          #include "bsp.h"
+  14          #include "app.h"
+  15          
+  16          
+  17          static int8_t while_busy()
+  18          {
+  19   1              while(SMB_IS_BUSY())
+  20   1              {
+  21   2                      if (SMB_ERRORS_EXCEEDED(&SMB))
+  22   2                      {
+  23   3                              set_app_error(ERROR_I2C_ERRORS_EXCEEDED);
+  24   3                              return -1;
+  25   3                      }
+  26   2              }
+  27   1              return 0;
+  28   1      }
+  29          
+  30          uint8_t smb_read (uint8_t addr, uint8_t* dest, uint8_t count)
+  31          {
+  32   1              if (while_busy()) return -1;
+  33   1      
+  34   1              SMB_FLAGS = SMB_READ | SMB_BUSY| SMB.preflags;
+  35   1              SMB.preflags = 0;
+  36   1      
+  37   1              SMB.read_offset = 0;
+  38   1              SMB.addr = addr;
+  39   1              SMB.read_len = count;
+  40   1              SMB.read_buf = dest;
+  41   1              SMB0CN0_STA = 1;
+  42   1      
+  43   1              if (while_busy()) return -1;
+  44   1              return SMB.read_len;
+  45   1      }
+  46          
+  47          
+  48          void smb_write (uint8_t addr, uint8_t* buf, uint8_t len)
+C51 COMPILER V9.53.0.0   I2C                                                               03/28/2016 20:18:26 PAGE 2   
+
+  49          {
+  50   1              if (while_busy()) return;
+  51   1      
+  52   1         SMB_FLAGS = SMB_WRITE | SMB_BUSY | SMB.preflags;
+  53   1         SMB.preflags = 0;
+  54   1      
+  55   1         SMB.write_len = len;
+  56   1         SMB.write_buf = buf;
+  57   1         SMB.write_offset = 0;
+  58   1         SMB.addr = addr;
+  59   1      
+  60   1         SMB0CN0_STA = 1;
+  61   1         while_busy();
+  62   1      }
+  63          
+  64          void smb_set_ext_write( uint8_t* extbuf, uint8_t extlen)
+  65          {
+  66   1              while_busy();
+  67   1              SMB.write_ext_len = extlen;
+  68   1              SMB.write_ext_buf = extbuf;
+  69   1              SMB.write_ext_offset = 0;
+  70   1              SMB.preflags |= SMB_WRITE_EXT;
+  71   1      }
+  72          
+  73          void smb_init_crc()
+  74          {
+  75   1              while_busy();
+  76   1              SMB.crc = 0;
+  77   1              SMB.crc_offset = 0;
+  78   1              SMB.preflags |= SMB_COMPUTE_CRC;
+  79   1      }
+  80          
+  81          uint16_t feed_crc(uint16_t crc, uint8_t b)
+  82          {
+  83   1              crc ^= b;
+  84   1              crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
+  85   1              crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
+  86   1              crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
+  87   1              crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
+  88   1              crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
+  89   1              crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
+  90   1              crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
+  91   1              return crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
+  92   1      }
+  93          
+  94          uint16_t reverse_bits(uint16_t crc)
+  95          {
+  96   1              // efficient bit reversal for 16 bit int
+  97   1              crc = (((crc & 0xaaaa) >> 1) | ((crc & 0x5555) << 1));
+  98   1              crc = (((crc & 0xcccc) >> 2) | ((crc & 0x3333) << 2));
+  99   1              crc = (((crc & 0xf0f0) >> 4) | ((crc & 0x0f0f) << 4));
+ 100   1              return (((crc & 0xff00) >> 8) | ((crc & 0x00ff) << 8));
+ 101   1      }
+ 102          
+ 103          void smb_init()
+ 104          {
+ 105   1              memset(&SMB,0,sizeof(SMB));
+ 106   1              SMB_FLAGS = 0;
+ 107   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    548    ----
+C51 COMPILER V9.53.0.0   I2C                                                               03/28/2016 20:18:26 PAGE 3   
+
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----      14
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

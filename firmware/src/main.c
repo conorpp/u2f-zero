@@ -23,8 +23,10 @@ static void init(struct APP_DATA* ap)
 	u2f_hid_init();
 	smb_init();
 	atecc_idle();
+#ifndef ATECC_SETUP_DEVICE
 	eeprom_init();
 	u2f_init();
+#endif
 	U2F_BUTTON_VAL = 1;
 }
 

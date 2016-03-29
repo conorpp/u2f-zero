@@ -1,0 +1,943 @@
+C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      03/28/2016 20:17:26 PAGE 1   
+
+
+C51 COMPILER V9.53.0.0, COMPILATION OF MODULE EFM8_USBDCH9
+OBJECT MODULE PLACED IN .\lib/efm8_usb/src/efm8_usbdch9.OBJ
+COMPILER INVOKED BY: Z:\home\pp\SimplicityStudio_v3\developer\toolchains\keil_8051\9.53\BIN\C51.exe /home/pp/apps/u2f-ze
+                    -ro/firmware/lib/efm8_usb/src/efm8_usbdch9.c OMF2 LARGE DEBUG OBJECTEXTEND ROM(LARGE) WARNINGLEVEL(2) FLOATFUZZY(3) OPTIM
+                    -IZE(9,SIZE) INTVECTOR(0X0000) INTPROMOTE INCDIR(/home/pp/apps/u2f-zero/firmware/inc/config;/home/pp/apps/u2f-zero/firmwa
+                    -re/inc;/home/pp/apps/u2f-zero/firmware/tinyprintf;/home/pp/apps/u2f-zero/firmware/tests;/home/pp/SimplicityStudio_v3/dev
+                    -eloper/sdks/si8051/v3//Device/shared/si8051Base;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1;/h
+                    -ome/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si80
+                    -51/v3//Lib/efm8_usb/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1/peripheral_driver/inc;/hom
+                    -e/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Lib/efm8_assert) REGFILE(u2f-firmware.ORC) PRINT(.\lib/efm8_usb/src/e
+                    -fm8_usbdch9.lst) COND PAGEWIDTH(120) PAGELENGTH(65) OBJECT(.\lib/efm8_usb/src/efm8_usbdch9.OBJ)
+
+line level    source
+
+   1          /**************************************************************************//**
+   2           * Copyright (c) 2015 by Silicon Laboratories Inc. All rights reserved.
+   3           *
+   4           * http://developer.silabs.com/legal/version/v11/Silicon_Labs_Software_License_Agreement.txt
+   5           *****************************************************************************/
+   6          
+   7          #include "si_toolchain.h"
+   8          #include "efm8_usb.h"
+   9          #include <stdint.h>
+  10          #include <endian.h>
+  11          
+  12          // -----------------------------------------------------------------------------
+  13          // Function Prototypes
+  14          
+  15          static USB_Status_TypeDef ClearFeature(void);
+  16          static USB_Status_TypeDef GetConfiguration(void);
+  17          static USB_Status_TypeDef GetDescriptor(void);
+  18          static USB_Status_TypeDef GetInterface(void);
+  19          static USB_Status_TypeDef GetStatus(void);
+  20          static USB_Status_TypeDef SetAddress(void);
+  21          static USB_Status_TypeDef SetConfiguration(void);
+  22          static USB_Status_TypeDef SetFeature(void);
+  23          static USB_Status_TypeDef SetInterface(void);
+  24          static void USBD_ActivateAllEps(bool forceIdle);
+  25          static void EP0_Write(uint8_t *dat, uint16_t numBytes);
+  26          void SendEp0Stall(void);
+  27          
+  28          // -----------------------------------------------------------------------------
+  29          // Global Variables
+  30          
+  31          extern SI_SEGMENT_VARIABLE(myUsbDevice, USBD_Device_TypeDef, MEM_MODEL_SEG);
+  32          SI_SEGMENT_VARIABLE(txZero[2], uint8_t, SI_SEG_CODE);
+  33          
+  34          // -----------------------------------------------------------------------------
+  35          // Static Global Variables
+  36          
+  37          static uint16_t pStatus;
+  38          
+  39          // -----------------------------------------------------------------------------
+  40          // Chapter 9 Functions
+  41          
+  42          /***************************************************************************//**
+  43           * @brief       Processes Standard Request (Chapter 9 Command)
+  44           * @return      Status of request (type @ref USB_Status_TypeDef)
+  45           * @note        This function takes no parameters, but it uses the setup command
+  46           *              stored in @ref myUsbDevice.setup.
+  47           ******************************************************************************/
+  48          USB_Status_TypeDef USBDCH9_SetupCmd(void)
+C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      03/28/2016 20:17:26 PAGE 2   
+
+  49          {
+  50   1        USB_Status_TypeDef status = USB_STATUS_OK;
+  51   1      
+  52   1        switch (myUsbDevice.setup.bRequest)
+  53   1        {
+  54   2          case GET_STATUS:
+  55   2            status = GetStatus();
+  56   2            break;
+  57   2      
+  58   2          case CLEAR_FEATURE:
+  59   2            status = ClearFeature();
+  60   2            break;
+  61   2      
+  62   2          case SET_FEATURE:
+  63   2            status = SetFeature();
+  64   2            break;
+  65   2      
+  66   2          case SET_ADDRESS:
+  67   2            status = SetAddress();
+  68   2            break;
+  69   2      
+  70   2          case GET_DESCRIPTOR:
+  71   2            status = GetDescriptor();
+  72   2            break;
+  73   2      
+  74   2          case GET_CONFIGURATION:
+  75   2            status = GetConfiguration();
+  76   2            break;
+  77   2      
+  78   2          case SET_CONFIGURATION:
+  79   2            status = SetConfiguration();
+  80   2            break;
+  81   2      
+  82   2          case GET_INTERFACE:
+  83   2            status = GetInterface();
+  84   2            break;
+  85   2      
+  86   2          case SET_INTERFACE:
+  87   2            status = SetInterface();
+  88   2            break;
+  89   2      
+  90   2          default:
+  91   2            status = USB_STATUS_REQ_ERR;
+  92   2            break;
+  93   2        }
+  94   1      
+  95   1        // Reset index to 0 in case one of the above commands modified it
+  96   1        USB_SetIndex(0);
+  97   1      
+  98   1        // If the command resulted in an error, send a procedural stall
+  99   1        if (status == USB_STATUS_REQ_ERR)
+ 100   1        {
+ 101   2          SendEp0Stall();
+ 102   2        }
+ 103   1      
+ 104   1        return status;
+ 105   1      }
+ 106          
+ 107          /***************************************************************************//**
+ 108           * @brief       Clears the requested feature
+ 109           * @details     Supports CLEAR_FEATURE for Remote Wakeup and Endpoint Halt
+ 110           * @return      Status of request (type @ref USB_Status_TypeDef)
+ 111           * @note        This function takes no parameters, but it uses the setup command
+C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      03/28/2016 20:17:26 PAGE 3   
+
+ 112           *              stored in @ref myUsbDevice.setup.
+ 113           ******************************************************************************/
+ 114          static USB_Status_TypeDef ClearFeature(void)
+ 115          {
+ 116   1        USB_Status_TypeDef retVal = USB_STATUS_REQ_ERR;
+ 117   1      
+ 118   1        if (myUsbDevice.setup.wLength == 0)
+ 119   1        {
+ 120   2          switch (myUsbDevice.setup.bmRequestType.Recipient)
+ 121   2          {
+ 122   3        #if SLAB_USB_REMOTE_WAKEUP_ENABLED
+                    case USB_SETUP_RECIPIENT_DEVICE:
+                      if ((myUsbDevice.setup.wIndex == 0)
+                          && (myUsbDevice.setup.wValue == USB_FEATURE_DEVICE_REMOTE_WAKEUP)
+                          && (myUsbDevice.state >= USBD_STATE_ADDRESSED))
+                      {
+                        // Remote wakeup feature clear
+                        myUsbDevice.remoteWakeupEnabled = false;
+                        retVal = USB_STATUS_OK;
+                      }
+                      break;
+                #endif // SLAB_USB_REMOTE_WAKEUP_ENABLED
+ 134   3            case USB_SETUP_RECIPIENT_ENDPOINT:
+ 135   3              if (myUsbDevice.setup.wValue == USB_FEATURE_ENDPOINT_HALT)
+ 136   3              {
+ 137   4                // Device does not support halting endpoint 0, but do not return
+ 138   4                // an error as this is a valid request
+ 139   4                if (((myUsbDevice.setup.wIndex & ~USB_EP_DIR_IN) == 0)
+ 140   4                    && (myUsbDevice.state >= USBD_STATE_ADDRESSED))
+ 141   4                {
+ 142   5                  retVal = USB_STATUS_OK;
+ 143   5                }
+ 144   4                else if (((myUsbDevice.setup.wIndex & ~USB_SETUP_DIR_D2H) < SLAB_USB_NUM_EPS_USED)
+ 145   4                         && (myUsbDevice.state == USBD_STATE_CONFIGURED))
+ 146   4                {
+ 147   5                  retVal = USB_STATUS_OK;
+ 148   5                  USB_SetIndex((myUsbDevice.setup.wIndex & 0xFF) & ~USB_SETUP_DIR_D2H);
+ 149   5      
+ 150   5      #if (SLAB_USB_EP1IN_USED || SLAB_USB_EP2IN_USED || SLAB_USB_EP3IN_USED)
+ 151   5                  if ((myUsbDevice.setup.wIndex & 0xFF) & USB_EP_DIR_IN)
+ 152   5                  {
+ 153   6                    USB_EpnInEndStallAndClearDataToggle();
+ 154   6                  }
+ 155   5      #endif
+ 156   5      #if (SLAB_USB_EP1OUT_USED || SLAB_USB_EP2OUT_USED || SLAB_USB_EP3OUT_USED)
+ 157   5                  if (((myUsbDevice.setup.wIndex & 0xFF) & USB_EP_DIR_IN) == 0)
+ 158   5                  {
+ 159   6                    USB_EpnOutEndStallAndClearDataToggle();
+ 160   6                  }
+ 161   5      #endif
+ 162   5      
+ 163   5                  switch (myUsbDevice.setup.wIndex & 0xFF)
+ 164   5                  {
+ 165   6      #if SLAB_USB_EP1OUT_USED
+ 166   6                    case (USB_EP_DIR_OUT | 1):
+ 167   6                      if (myUsbDevice.ep1out.state != D_EP_RECEIVING)
+ 168   6                      {
+ 169   7                        myUsbDevice.ep1out.state = D_EP_IDLE;
+ 170   7                      }
+ 171   6                      break;
+ 172   6      #endif
+ 173   6      #if SLAB_USB_EP2OUT_USED
+                            case (USB_EP_DIR_OUT | 2):
+C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      03/28/2016 20:17:26 PAGE 4   
+
+                              if (myUsbDevice.ep2out.state != D_EP_RECEIVING)
+                              {
+                                myUsbDevice.ep2out.state = D_EP_IDLE;
+                              }
+                              break;
+              #endif
+ 181   6      #if SLAB_USB_EP3OUT_USED
+                            case (USB_EP_DIR_OUT | 3):
+                              if (myUsbDevice.ep3out.state != D_EP_RECEIVING)
+                              {
+                                myUsbDevice.ep3out.state = D_EP_IDLE;
+                              }
+                              break;
+              #endif
+ 189   6      #if SLAB_USB_EP1IN_USED
+ 190   6                    case (USB_EP_DIR_IN | 1):
+ 191   6                      if (myUsbDevice.ep1in.state != D_EP_TRANSMITTING)
+ 192   6                      {
+ 193   7                        myUsbDevice.ep1in.state = D_EP_IDLE;
+ 194   7                      }
+ 195   6                      break;
+ 196   6      #endif
+ 197   6      #if SLAB_USB_EP2IN_USED
+                            case (USB_EP_DIR_IN | 2):
+                              if (myUsbDevice.ep2in.state != D_EP_TRANSMITTING)
+                              {
+                                myUsbDevice.ep2in.state = D_EP_IDLE;
+                              }
+                              break;
+              #endif
+ 205   6      #if SLAB_USB_EP3IN_USED
+                            case (USB_EP_DIR_IN | 3):
+                              if (myUsbDevice.ep3in.state != D_EP_TRANSMITTING)
+                              {
+                                myUsbDevice.ep3in.state = D_EP_IDLE;
+                              }
+                              break;
+              #endif
+ 213   6                  }
+ 214   5                }
+ 215   4              }
+ 216   3          }
+ 217   2        }
+ 218   1        return retVal;
+ 219   1      }
+ 220          
+ 221          /***************************************************************************//**
+ 222           * @brief       Gets the current configuration value
+ 223           * @details     Zero means the device is not configured, a non-zero value
+ 224           *              is the configuration value of the configured device.
+ 225           * @return      Status of request (type @ref USB_Status_TypeDef)
+ 226           * @note        This function takes no parameters, but it uses the setup command
+ 227           *              stored in @ref myUsbDevice.setup.
+ 228           ******************************************************************************/
+ 229          static USB_Status_TypeDef GetConfiguration(void)
+ 230          {
+ 231   1        USB_Status_TypeDef retVal = USB_STATUS_REQ_ERR;
+ 232   1      
+ 233   1        if ((myUsbDevice.setup.wIndex == 0)
+ 234   1            && (myUsbDevice.setup.wValue == 0)
+ 235   1            && (myUsbDevice.setup.wLength == 1)
+ 236   1            && (myUsbDevice.setup.bmRequestType.Direction == USB_SETUP_DIR_IN)
+ 237   1            && (myUsbDevice.setup.bmRequestType.Recipient == USB_SETUP_RECIPIENT_DEVICE))
+C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      03/28/2016 20:17:26 PAGE 5   
+
+ 238   1        {
+ 239   2          if (myUsbDevice.state == USBD_STATE_ADDRESSED)
+ 240   2          {
+ 241   3            EP0_Write(txZero, 1);
+ 242   3            retVal = USB_STATUS_OK;
+ 243   3          }
+ 244   2          else if (myUsbDevice.state == USBD_STATE_CONFIGURED)
+ 245   2          {
+ 246   3            EP0_Write(&myUsbDevice.configurationValue, 1);
+ 247   3            retVal = USB_STATUS_OK;
+ 248   3          }
+ 249   2        }
+ 250   1        return retVal;
+ 251   1      }
+ 252          
+ 253          /***************************************************************************//**
+ 254           * @brief       Sends the requested USB Descriptor
+ 255           * @details     Supports single or multiple languages (configured by
+ 256           *              @ref SLAB_USB_NUM_LANGUAGES).
+ 257           * @return      Status of request (type @ref USB_Status_TypeDef)
+ 258           * @note        This function takes no parameters, but it uses the setup command
+ 259           *              stored in @ref myUsbDevice.setup.
+ 260           ******************************************************************************/
+ 261          static USB_Status_TypeDef GetDescriptor(void)
+ 262          {
+ 263   1      #if (SLAB_USB_NUM_LANGUAGES > 1)
+                bool langSupported;
+                uint8_t lang;
+              #endif
+ 267   1      
+ 268   1        uint8_t index;
+ 269   1        uint16_t length = 0;
+ 270   1        uint8_t *dat;
+ 271   1        USB_Status_TypeDef retVal = USB_STATUS_REQ_ERR;
+ 272   1      
+ 273   1        if (*((uint8_t *)&myUsbDevice.setup.bmRequestType) ==
+ 274   1            (USB_SETUP_DIR_D2H | USB_SETUP_TYPE_STANDARD | USB_SETUP_RECIPIENT_DEVICE))
+ 275   1        {
+ 276   2          index = myUsbDevice.setup.wValue & 0xFF;
+ 277   2      
+ 278   2          switch (myUsbDevice.setup.wValue >> 8)
+ 279   2          {
+ 280   3            case USB_DEVICE_DESCRIPTOR:
+ 281   3              if (index != 0)
+ 282   3              {
+ 283   4                break;
+ 284   4              }
+ 285   3              dat = (uint8_t *)myUsbDevice.deviceDescriptor;
+ 286   3              length = myUsbDevice.deviceDescriptor->bLength;
+ 287   3              break;
+ 288   3      
+ 289   3            case USB_CONFIG_DESCRIPTOR:
+ 290   3              if (index != 0)
+ 291   3              {
+ 292   4                break;
+ 293   4              }
+ 294   3              dat = (uint8_t *)myUsbDevice.configDescriptor;
+ 295   3              length = le16toh(myUsbDevice.configDescriptor->wTotalLength);
+ 296   3              break;
+ 297   3      
+ 298   3            case USB_STRING_DESCRIPTOR:
+ 299   3        #if (SLAB_USB_NUM_LANGUAGES == 1)
+ 300   3      
+C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      03/28/2016 20:17:26 PAGE 6   
+
+ 301   3              dat = (uint8_t *)myUsbDevice.stringDescriptors[index];
+ 302   3      
+ 303   3              // Index 0 is the language string. If SLAB_USB_NUM_LANGUAGES == 1, we
+ 304   3              // know the length will be 4 and the format will be UTF16LE.
+ 305   3              if (index == 0)
+ 306   3              {
+ 307   4                length = 4;
+ 308   4                myUsbDevice.ep0String.encoding.type = USB_STRING_DESCRIPTOR_UTF16LE;
+ 309   4              }
+ 310   3              // Otherwise, verify the language is correct (either the value set as
+ 311   3              // SLAB_USB_LANGUAGE in usbconfig.h, or 0).
+ 312   3              else if ((myUsbDevice.setup.wIndex == 0) || (myUsbDevice.setup.wIndex == SLAB_USB_LANGUAGE))
+ 313   3              {
+ 314   4                // Verify the index is valid
+ 315   4                if (index < myUsbDevice.numberOfStrings)
+ 316   4                {
+ 317   5                  length = *(dat + USB_STRING_DESCRIPTOR_LENGTH);
+ 318   5                  myUsbDevice.ep0String.encoding.type = *(dat + USB_STRING_DESCRIPTOR_ENCODING);
+ 319   5                  dat += USB_STRING_DESCRIPTOR_LENGTH;
+ 320   5                  myUsbDevice.ep0String.encoding.init = true;
+ 321   5                }
+ 322   4              }
+ 323   3        #elif (SLAB_USB_NUM_LANGUAGES > 1)
+              
+                      langSupported = false;
+              
+                      // Index 0 is the language.
+                      if (index == 0)
+                      {
+                        dat = ((uint8_t *)myUsbDevice.stringDescriptors->languageArray[0][index]);
+                        length = *((uint8_t *)dat);
+                        myUsbDevice.ep0String.encoding.type = USB_STRING_DESCRIPTOR_UTF16LE;
+                      }
+                      else
+                      {
+                        // Otherwise, verify the language is one of the supported languages or 0.
+                        for (lang = 0; lang < SLAB_USB_NUM_LANGUAGES; lang++)
+                        {
+                          if ((myUsbDevice.stringDescriptors->languageIDs[lang] == myUsbDevice.setup.wIndex)
+                              || (myUsbDevice.stringDescriptors->languageIDs[lang] == 0))
+                          {
+                            langSupported = true;
+                            break;
+                          }
+                        }
+                        if ((langSupported == true) && (index < myUsbDevice.numberOfStrings))
+                        {
+                          dat = ((uint8_t *)myUsbDevice.stringDescriptors->languageArray[lang][index]);
+                          length = *(dat + USB_STRING_DESCRIPTOR_LENGTH);
+                          myUsbDevice.ep0String.encoding.type = *(dat + USB_STRING_DESCRIPTOR_ENCODING);
+                          dat += USB_STRING_DESCRIPTOR_LENGTH;
+              
+                          if (myUsbDevice.ep0String.encoding.type == USB_STRING_DESCRIPTOR_UTF16LE_PACKED)
+                          {
+                            myUsbDevice.ep0String.encoding.init = true;
+                          }
+                          else
+                          {
+                            myUsbDevice.ep0String.encoding.init = false;
+                          }
+                        }
+                      }
+                #endif // ( SLAB_USB_NUM_LANGUAGES == 1 )
+C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      03/28/2016 20:17:26 PAGE 7   
+
+ 364   3          }
+ 365   2      
+ 366   2          // If there is a descriptor to send, get the proper length, then call
+ 367   2          // EP0_Write() to send.
+ 368   2          if (length)
+ 369   2          {
+ 370   3            if (length > myUsbDevice.setup.wLength)
+ 371   3            {
+ 372   4              length = myUsbDevice.setup.wLength;
+ 373   4            }
+ 374   3      
+ 375   3            EP0_Write(dat, length);
+ 376   3      
+ 377   3            retVal = USB_STATUS_OK;
+ 378   3          }
+ 379   2        }
+ 380   1      
+ 381   1        return retVal;
+ 382   1      }
+ 383          
+ 384          /***************************************************************************//**
+ 385           * @brief       Sends the current interface alternate setting
+ 386           * @details     Sends 0x0000 if alternate interfaces are not supported.
+ 387           * @return      Status of request (type @ref USB_Status_TypeDef)
+ 388           * @note        This function takes no parameters, but it uses the setup command
+ 389           *              stored in @ref myUsbDevice.setup.
+ 390           ******************************************************************************/
+ 391          static USB_Status_TypeDef GetInterface(void)
+ 392          {
+ 393   1        uint16_t interface = myUsbDevice.setup.wIndex;
+ 394   1        USB_Status_TypeDef retVal = USB_STATUS_REQ_ERR;
+ 395   1      
+ 396   1        if ((interface < SLAB_USB_NUM_INTERFACES)
+ 397   1            && (myUsbDevice.setup.wLength == 1)
+ 398   1            && (myUsbDevice.setup.wValue == 0)
+ 399   1            && (*((uint8_t *)&myUsbDevice.setup.bmRequestType) ==
+ 400   1                (USB_SETUP_DIR_D2H | USB_SETUP_TYPE_STANDARD | USB_SETUP_RECIPIENT_INTERFACE)))
+ 401   1        {
+ 402   2          if (myUsbDevice.state == USBD_STATE_CONFIGURED)
+ 403   2          {
+ 404   3      #if (SLAB_USB_SUPPORT_ALT_INTERFACES)
+                    // Return the alternate setting for the specified interface
+                    EP0_Write(&myUsbDevice.interfaceAltSetting[interface], 1);
+              #else
+ 408   3            // Alternate interfaces are not supported, so return 0x0000.
+ 409   3            EP0_Write(&txZero, 1);
+ 410   3      #endif
+ 411   3            retVal = USB_STATUS_OK;
+ 412   3          }
+ 413   2        }
+ 414   1        return retVal;
+ 415   1      }
+ 416          
+ 417          /***************************************************************************//**
+ 418           * @brief       Sends the requested Remote Wakeup, Self-Powered, or
+ 419           *              Endpoint Status
+ 420           * @return      Status of request (type @ref USB_Status_TypeDef)
+ 421           * @note        This function takes no parameters, but it uses the setup command
+ 422           *              stored in @ref myUsbDevice.setup.
+ 423           ******************************************************************************/
+ 424          static USB_Status_TypeDef GetStatus(void)
+ 425          {
+ 426   1        USB_Status_TypeDef retVal = USB_STATUS_REQ_ERR;
+C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      03/28/2016 20:17:26 PAGE 8   
+
+ 427   1      
+ 428   1        if ((myUsbDevice.setup.wLength == 2)
+ 429   1            && (myUsbDevice.setup.wValue == 0)
+ 430   1            && (myUsbDevice.setup.bmRequestType.Direction == USB_SETUP_DIR_IN)
+ 431   1            && (myUsbDevice.state >= USBD_STATE_ADDRESSED))
+ 432   1        {
+ 433   2          pStatus = htole16(0);         // Default return value is 0x0000
+ 434   2      
+ 435   2          switch (myUsbDevice.setup.bmRequestType.Recipient)
+ 436   2          {
+ 437   3            case USB_SETUP_RECIPIENT_DEVICE:
+ 438   3              if (myUsbDevice.setup.wIndex == 0)
+ 439   3              {
+ 440   4        #if SLAB_USB_REMOTE_WAKEUP_ENABLED
+                        // Remote wakeup feature status
+                        if (myUsbDevice.remoteWakeupEnabled)
+                        {
+                          pStatus |= htole16(REMOTE_WAKEUP_ENABLED);
+                        }
+                #endif // SLAB_USB_REMOTE_WAKEUP_ENABLED
+ 447   4      
+ 448   4        #if SLAB_USB_IS_SELF_POWERED_CB
+ 449   4                // Current self/bus power status
+ 450   4                if (USBD_IsSelfPoweredCb())
+ 451   4                {
+ 452   5                  pStatus |= htole16(DEVICE_IS_SELFPOWERED);
+ 453   5                }
+ 454   4        #elif (SLAB_USB_BUS_POWERED == 0)
+                        pStatus |= htole16(DEVICE_IS_SELFPOWERED);
+                #endif // SLAB_USB_IS_SELF_POWERED_CB
+ 457   4      
+ 458   4                retVal = USB_STATUS_OK;
+ 459   4              }
+ 460   3              break;
+ 461   3      
+ 462   3            case USB_SETUP_RECIPIENT_INTERFACE:
+ 463   3              if (myUsbDevice.setup.wIndex < SLAB_USB_NUM_INTERFACES)
+ 464   3              {
+ 465   4                retVal = USB_STATUS_OK;
+ 466   4              }
+ 467   3              break;
+ 468   3      
+ 469   3      
+ 470   3            case USB_SETUP_RECIPIENT_ENDPOINT:
+ 471   3              // Device does not support halting endpoint 0, but do not give
+ 472   3              // an error as this is a valid request
+ 473   3              if (((myUsbDevice.setup.wIndex & ~USB_EP_DIR_IN) == 0)
+ 474   3                  && (myUsbDevice.state == USBD_STATE_ADDRESSED))
+ 475   3              {
+ 476   4                retVal = USB_STATUS_OK;
+ 477   4              }
+ 478   3              else if (myUsbDevice.state == USBD_STATE_CONFIGURED)
+ 479   3              {
+ 480   4                switch (myUsbDevice.setup.wIndex & 0xFF)
+ 481   4                {
+ 482   5        #if SLAB_USB_EP1OUT_USED
+ 483   5                  case (USB_EP_DIR_OUT | 1):
+ 484   5                    if (myUsbDevice.ep1out.state == D_EP_HALT)
+ 485   5                    {
+ 486   6                      pStatus = htole16(1);
+ 487   6                    }
+ 488   5                    retVal = USB_STATUS_OK;
+ 489   5                    break;
+C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      03/28/2016 20:17:26 PAGE 9   
+
+ 490   5        #endif
+ 491   5        #if SLAB_USB_EP2OUT_USED
+                          case (USB_EP_DIR_OUT | 2):
+                            if (myUsbDevice.ep2out.state == D_EP_HALT)
+                            {
+                              pStatus = htole16(1);
+                            }
+                            retVal = USB_STATUS_OK;
+                            break;
+                #endif
+ 500   5        #if SLAB_USB_EP3OUT_USED
+                          case (USB_EP_DIR_OUT | 3):
+                            if (myUsbDevice.ep3out.state == D_EP_HALT)
+                            {
+                              pStatus = htole16(1);
+                            }
+                            retVal = USB_STATUS_OK;
+                            break;
+                #endif
+ 509   5        #if SLAB_USB_EP1IN_USED
+ 510   5                  case (USB_EP_DIR_IN | 1):
+ 511   5                    if (myUsbDevice.ep1in.state == D_EP_HALT)
+ 512   5                    {
+ 513   6                      pStatus = htole16(1);
+ 514   6                    }
+ 515   5                    retVal = USB_STATUS_OK;
+ 516   5                    break;
+ 517   5        #endif
+ 518   5        #if SLAB_USB_EP2IN_USED
+                          case (USB_EP_DIR_IN | 2):
+                            if (myUsbDevice.ep2in.state == D_EP_HALT)
+                            {
+                              pStatus = htole16(1);
+                            }
+                            retVal = USB_STATUS_OK;
+                            break;
+                #endif
+ 527   5        #if SLAB_USB_EP3IN_USED
+                          case (USB_EP_DIR_IN | 3):
+                            if (myUsbDevice.ep3in.state == D_EP_HALT)
+                            {
+                              pStatus = htole16(1);
+                            }
+                            retVal = USB_STATUS_OK;
+                            break;
+                #endif
+ 536   5                }
+ 537   4              }
+ 538   3              break;
+ 539   3          }
+ 540   2      
+ 541   2          // If the command was valid, send the requested status.
+ 542   2          if (retVal == USB_STATUS_OK)
+ 543   2          {
+ 544   3            EP0_Write((uint8_t *)&pStatus, 2);
+ 545   3          }
+ 546   2        }
+ 547   1      
+ 548   1        return retVal;
+ 549   1      }
+ 550          
+ 551          /***************************************************************************//**
+ 552           * @brief       Sets the Address
+C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      03/28/2016 20:17:26 PAGE 10  
+
+ 553           * @return      Status of request (type @ref USB_Status_TypeDef)
+ 554           * @note        This function takes no parameters, but it uses the setup command
+ 555           *              stored in @ref myUsbDevice.setup.
+ 556           ******************************************************************************/
+ 557          static USB_Status_TypeDef SetAddress(void)
+ 558          {
+ 559   1        USB_Status_TypeDef retVal = USB_STATUS_REQ_ERR;
+ 560   1      
+ 561   1        if ((myUsbDevice.setup.wValue < 128)
+ 562   1            && (myUsbDevice.setup.wLength == 0)
+ 563   1            && (myUsbDevice.setup.bmRequestType.Recipient == USB_SETUP_RECIPIENT_DEVICE)
+ 564   1            && (myUsbDevice.setup.wIndex == 0))
+ 565   1        {
+ 566   2          // If the device is in the Default state and the address is non-zero, put
+ 567   2          // the device in the Addressed state.
+ 568   2          if (myUsbDevice.state == USBD_STATE_DEFAULT)
+ 569   2          {
+ 570   3            if (myUsbDevice.setup.wValue != 0)
+ 571   3            {
+ 572   4              USBD_SetUsbState(USBD_STATE_ADDRESSED);
+ 573   4            }
+ 574   3            retVal = USB_STATUS_OK;
+ 575   3          }
+ 576   2          // If the device is already addressed and the address is zero, put the
+ 577   2          // device in the Default state.
+ 578   2          else if (myUsbDevice.state == USBD_STATE_ADDRESSED)
+ 579   2          {
+ 580   3            if (myUsbDevice.setup.wValue == 0)
+ 581   3            {
+ 582   4              USBD_SetUsbState(USBD_STATE_DEFAULT);
+ 583   4            }
+ 584   3            retVal = USB_STATUS_OK;
+ 585   3          }
+ 586   2      
+ 587   2          // Set the new address if the request was valid.
+ 588   2          if (retVal == USB_STATUS_OK)
+ 589   2          {
+ 590   3            USB_SetAddress(myUsbDevice.setup.wValue);
+ 591   3          }
+ 592   2        }
+ 593   1      
+ 594   1        return retVal;
+ 595   1      }
+ 596          
+ 597          /***************************************************************************//**
+ 598           * @brief       Sets the Configuration
+ 599           * @return      Status of request (type @ref USB_Status_TypeDef)
+ 600           * @note        This function takes no parameters, but it uses the setup command
+ 601           *              stored in @ref myUsbDevice.setup.
+ 602           ******************************************************************************/
+ 603          static USB_Status_TypeDef SetConfiguration(void)
+ 604          {
+ 605   1        USB_Status_TypeDef retVal = USB_STATUS_REQ_ERR;
+ 606   1      
+ 607   1        if (((myUsbDevice.setup.wValue >> 8) == 0)
+ 608   1            && (myUsbDevice.setup.bmRequestType.Recipient == USB_SETUP_RECIPIENT_DEVICE)
+ 609   1            && (myUsbDevice.setup.wLength == 0)
+ 610   1            && (myUsbDevice.setup.wIndex == 0))
+ 611   1        {
+ 612   2          // If the device is in the Addressed state and a valid Configuration value
+ 613   2          // was sent, enter the Configured state.
+ 614   2          if (myUsbDevice.state == USBD_STATE_ADDRESSED)
+ 615   2          {
+C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      03/28/2016 20:17:26 PAGE 11  
+
+ 616   3            if ((myUsbDevice.setup.wValue == 0)
+ 617   3                || (myUsbDevice.setup.wValue == myUsbDevice.configDescriptor->bConfigurationValue))
+ 618   3            {
+ 619   4              myUsbDevice.configurationValue = myUsbDevice.setup.wValue;
+ 620   4              if (myUsbDevice.setup.wValue == myUsbDevice.configDescriptor->bConfigurationValue)
+ 621   4              {
+ 622   5                USBD_ActivateAllEps(true);
+ 623   5                USBD_SetUsbState(USBD_STATE_CONFIGURED);
+ 624   5              }
+ 625   4              retVal = USB_STATUS_OK;
+ 626   4            }
+ 627   3          }
+ 628   2          // If the device is in the Configured state and Configuration zero is sent,
+ 629   2          // abort all transfer and enter the Addressed state.
+ 630   2          else if (myUsbDevice.state == USBD_STATE_CONFIGURED)
+ 631   2          {
+ 632   3            if ((myUsbDevice.setup.wValue == 0)
+ 633   3                || (myUsbDevice.setup.wValue == myUsbDevice.configDescriptor->bConfigurationValue))
+ 634   3            {
+ 635   4              myUsbDevice.configurationValue = myUsbDevice.setup.wValue;
+ 636   4              if (myUsbDevice.setup.wValue == 0)
+ 637   4              {
+ 638   5                USBD_SetUsbState(USBD_STATE_ADDRESSED);
+ 639   5                USBD_AbortAllTransfers();
+ 640   5              }
+ 641   4              else
+ 642   4              {
+ 643   5                // Reenable device endpoints, will reset data toggles
+ 644   5                USBD_ActivateAllEps(false);
+ 645   5              }
+ 646   4              retVal = USB_STATUS_OK;
+ 647   4            }
+ 648   3          }
+ 649   2        }
+ 650   1      
+ 651   1        return retVal;
+ 652   1      }
+ 653          
+ 654          /***************************************************************************//**
+ 655           * @brief       Sets the Remote Wakeup or Endpoint Halt Feature
+ 656           * @return      Status of request (type @ref USB_Status_TypeDef)
+ 657           * @note        This function takes no parameters, but it uses the setup command
+ 658           *              stored in @ref myUsbDevice.setup.
+ 659           ******************************************************************************/
+ 660          static USB_Status_TypeDef SetFeature(void)
+ 661          {
+ 662   1        USB_Status_TypeDef retVal = USB_STATUS_REQ_ERR;
+ 663   1      
+ 664   1        if (myUsbDevice.setup.wLength == 0)
+ 665   1        {
+ 666   2          switch (myUsbDevice.setup.bmRequestType.Recipient)
+ 667   2          {
+ 668   3        #if SLAB_USB_REMOTE_WAKEUP_ENABLED
+                    case USB_SETUP_RECIPIENT_DEVICE:
+                      if ((myUsbDevice.setup.wIndex == 0)     // ITF no. 0
+                          && (myUsbDevice.setup.wValue == USB_FEATURE_DEVICE_REMOTE_WAKEUP)
+                          && (myUsbDevice.state == USBD_STATE_CONFIGURED))
+                      {
+                        myUsbDevice.remoteWakeupEnabled = true;
+                        retVal = USB_STATUS_OK;
+                      }
+                      break;
+                #endif // SLAB_USB_REMOTE_WAKEUP_ENABLED
+C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      03/28/2016 20:17:26 PAGE 12  
+
+ 679   3            case USB_SETUP_RECIPIENT_ENDPOINT:
+ 680   3              // Device does not support halting endpoint 0, but do not return
+ 681   3              // an error as this is a valid request
+ 682   3              if (((myUsbDevice.setup.wIndex & ~USB_EP_DIR_IN) == 0)
+ 683   3                  && (myUsbDevice.state >= USBD_STATE_ADDRESSED))
+ 684   3              {
+ 685   4                retVal = USB_STATUS_OK;
+ 686   4              }
+ 687   3              else if ((((myUsbDevice.setup.wIndex) & ~USB_SETUP_DIR_D2H) < SLAB_USB_NUM_EPS_USED)
+ 688   3                       && (myUsbDevice.setup.wValue == USB_FEATURE_ENDPOINT_HALT)
+ 689   3                       && (myUsbDevice.state == USBD_STATE_CONFIGURED))
+ 690   3              {
+ 691   4                retVal = USB_STATUS_OK;
+ 692   4                USB_SetIndex((myUsbDevice.setup.wIndex & 0xFF) & ~USB_SETUP_DIR_D2H);
+ 693   4      
+ 694   4                // Enable Stalls on the specified endpoint.
+ 695   4      #if (SLAB_USB_EP1IN_USED || SLAB_USB_EP2IN_USED || SLAB_USB_EP3IN_USED)
+ 696   4                if ((myUsbDevice.setup.wIndex & 0xFF) & USB_EP_DIR_IN)
+ 697   4                {
+ 698   5                  USB_EpnInStall();
+ 699   5                }
+ 700   4      #endif
+ 701   4      #if (SLAB_USB_EP1OUT_USED || SLAB_USB_EP2OUT_USED || SLAB_USB_EP3OUT_USED)
+ 702   4                if (((myUsbDevice.setup.wIndex & 0xFF) & USB_EP_DIR_IN) == 0)
+ 703   4                {
+ 704   5                  USB_EpnOutStall();
+ 705   5                }
+ 706   4      #endif
+ 707   4      
+ 708   4                // Put the specified endpoint in the Halted state.
+ 709   4                switch (myUsbDevice.setup.wIndex & 0xFF)
+ 710   4                {
+ 711   5        #if SLAB_USB_EP1OUT_USED
+ 712   5                  case (USB_EP_DIR_OUT | 1):
+ 713   5                    myUsbDevice.ep1out.state = D_EP_HALT;
+ 714   5                    break;
+ 715   5        #endif
+ 716   5        #if SLAB_USB_EP2OUT_USED
+                          case (USB_EP_DIR_OUT | 2):
+                            myUsbDevice.ep2out.state = D_EP_HALT;
+                            break;
+                #endif
+ 721   5        #if SLAB_USB_EP3OUT_USED
+                          case (USB_EP_DIR_OUT | 3):
+                            myUsbDevice.ep3out.state = D_EP_HALT;
+                            break;
+                #endif
+ 726   5        #if SLAB_USB_EP1IN_USED
+ 727   5                  case (USB_EP_DIR_IN | 1):
+ 728   5                    myUsbDevice.ep1in.state = D_EP_HALT;
+ 729   5                    break;
+ 730   5        #endif
+ 731   5        #if SLAB_USB_EP2IN_USED
+                          case (USB_EP_DIR_IN | 2):
+                            myUsbDevice.ep2in.state = D_EP_HALT;
+                            break;
+                #endif
+ 736   5        #if SLAB_USB_EP3IN_USED
+                          case (USB_EP_DIR_IN | 3):
+                            myUsbDevice.ep3in.state = D_EP_HALT;
+                            break;
+                #endif
+ 741   5                }
+C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      03/28/2016 20:17:26 PAGE 13  
+
+ 742   4              }
+ 743   3          }
+ 744   2        }
+ 745   1      
+ 746   1        return retVal;
+ 747   1      }
+ 748          
+ 749          /***************************************************************************//**
+ 750           * @brief       Sets the Interface and Alternate Interface (if supported)
+ 751           * @return      Status of request (type @ref USB_Status_TypeDef)
+ 752           * @note        This function takes no parameters, but it uses the setup command
+ 753           *              stored in @ref myUsbDevice.setup.
+ 754           ******************************************************************************/
+ 755          static USB_Status_TypeDef SetInterface(void)
+ 756          {
+ 757   1        USB_Status_TypeDef retVal = USB_STATUS_REQ_ERR;
+ 758   1        uint8_t interface = (uint8_t)myUsbDevice.setup.wIndex;
+ 759   1        uint8_t altSetting = (uint8_t)myUsbDevice.setup.wValue;
+ 760   1      
+ 761   1        if ((interface < SLAB_USB_NUM_INTERFACES)
+ 762   1            && (myUsbDevice.state == USBD_STATE_CONFIGURED)
+ 763   1            && (myUsbDevice.setup.wLength == 0)
+ 764   1      #if (SLAB_USB_SUPPORT_ALT_INTERFACES == 0)
+ 765   1            && (altSetting == 0)
+ 766   1      #endif
+ 767   1            && (myUsbDevice.setup.bmRequestType.Recipient == USB_SETUP_RECIPIENT_INTERFACE))
+ 768   1        {
+ 769   2      #if (SLAB_USB_SUPPORT_ALT_INTERFACES)
+                  if (USBD_SetInterfaceCb(interface, altSetting) == USB_STATUS_OK)
+                  {
+                    myUsbDevice.interfaceAltSetting[interface] = altSetting;
+                    retVal = USB_STATUS_OK;
+                  }
+              #else
+ 776   2      #if (SLAB_USB_NUM_INTERFACES == 1)
+ 777   2          // Reset data toggles on EP's
+ 778   2          USBD_ActivateAllEps(false);
+ 779   2      #endif // ( SLAB_USB_NUM_INTERFACES == 1 )
+ 780   2          retVal = USB_STATUS_OK;
+ 781   2      #endif // ( SLAB_USB_SUPPORT_ALT_INTERFACES )
+ 782   2        }
+ 783   1      
+ 784   1        return retVal;
+ 785   1      }
+ 786          
+ 787          // -----------------------------------------------------------------------------
+ 788          // Utility Functions
+ 789          
+ 790          /***************************************************************************//**
+ 791           * @brief       Enables all endpoints for data transfers
+ 792           * @return      Status of request (type @ref USB_Status_TypeDef)
+ 793           * @note        This function takes no parameters, but it uses the setup command
+ 794           *              stored in @ref myUsbDevice.setup.
+ 795           ******************************************************************************/
+ 796          static void USBD_ActivateAllEps(bool forceIdle)
+ 797          {
+ 798   1        if (forceIdle == true)
+ 799   1        {
+ 800   2      #if SLAB_USB_EP1IN_USED
+ 801   2          myUsbDevice.ep1in.state = D_EP_IDLE;
+ 802   2      #endif
+ 803   2      #if SLAB_USB_EP2IN_USED
+                  myUsbDevice.ep2in.state = D_EP_IDLE;
+C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      03/28/2016 20:17:26 PAGE 14  
+
+              #endif
+ 806   2      #if SLAB_USB_EP3IN_USED
+                  myUsbDevice.ep3in.state = D_EP_IDLE;
+              #endif
+ 809   2      #if SLAB_USB_EP1OUT_USED
+ 810   2          myUsbDevice.ep1out.state = D_EP_IDLE;
+ 811   2      #endif
+ 812   2      #if SLAB_USB_EP2OUT_USED
+                  myUsbDevice.ep2out.state = D_EP_IDLE;
+              #endif
+ 815   2      #if SLAB_USB_EP3OUT_USED
+                  myUsbDevice.ep3out.state = D_EP_IDLE;
+              #endif
+ 818   2        }
+ 819   1      
+ 820   1      #if SLAB_USB_EP1IN_USED
+ 821   1        USB_ActivateEp(1,                                                   // ep
+ 822   1                       SLAB_USB_EP1IN_MAX_PACKET_SIZE,                      // packetSize
+ 823   1                       1,                                                   // inDir
+ 824   1                       SLAB_USB_EP1OUT_USED,                                // splitMode
+ 825   1                       0);                                                  // isoMod
+ 826   1      #endif // SLAB_USB_EP1IN_USED
+ 827   1      #if SLAB_USB_EP2IN_USED
+                USB_ActivateEp(2,                                                   // ep
+                               SLAB_USB_EP2IN_MAX_PACKET_SIZE,                      // packetSize
+                               1,                                                   // inDir
+                               SLAB_USB_EP2OUT_USED,                                // splitMode
+                               0);                                                  // isoMod
+              #endif // SLAB_USB_EP2IN_USED
+ 834   1      #if SLAB_USB_EP3IN_USED
+                USB_ActivateEp(3,                                                   // ep
+                               SLAB_USB_EP3IN_MAX_PACKET_SIZE,                      // packetSize
+                               1,                                                   // inDir
+                               SLAB_USB_EP3OUT_USED,                                // splitMode
+                               (SLAB_USB_EP3IN_TRANSFER_TYPE == USB_EPTYPE_ISOC));  // isoMod
+              #endif // SLAB_USB_EP3IN_USED
+ 841   1      #if SLAB_USB_EP1OUT_USED
+ 842   1        USB_ActivateEp(1,                                                   // ep
+ 843   1                       SLAB_USB_EP1OUT_MAX_PACKET_SIZE,                     // packetSize
+ 844   1                       0,                                                   // inDir
+ 845   1                       SLAB_USB_EP1IN_USED,                                 // splitMode
+ 846   1                       0);                                                  // isoMod
+ 847   1      #endif // SLAB_USB_EP1OUT_USED
+ 848   1      #if SLAB_USB_EP2OUT_USED
+                USB_ActivateEp(2,                                                   // ep
+                               SLAB_USB_EP2OUT_MAX_PACKET_SIZE,                     // packetSize
+                               0,                                                   // inDir
+                               SLAB_USB_EP2IN_USED,                                 // splitMode
+                               0);                                                  // isoMod
+              #endif // SLAB_USB_EP2OUT_USED
+ 855   1      #if SLAB_USB_EP3OUT_USED
+                USB_ActivateEp(3,                                                   // ep
+                               SLAB_USB_EP3OUT_MAX_PACKET_SIZE,                     // packetSize
+                               0,                                                   // inDir
+                               SLAB_USB_EP3IN_USED,                                 // splitMode
+                               (SLAB_USB_EP3OUT_TRANSFER_TYPE == USB_EPTYPE_ISOC)); // isoMod
+              #endif // SLAB_USB_EP1OUT_USED
+ 862   1      }
+ 863          
+ 864          /***************************************************************************//**
+ 865           * @brief       Sets up an Endpoint 0 Write
+ 866           * @param       dat
+ 867           *              Data to transmit on Endpoint 0
+C51 COMPILER V9.53.0.0   EFM8_USBDCH9                                                      03/28/2016 20:17:26 PAGE 15  
+
+ 868           * @param       numBytes
+ 869           *              Number of bytes to transmit on Endpoint 0
+ 870           ******************************************************************************/
+ 871          static void EP0_Write(uint8_t *dat, uint16_t numBytes)
+ 872          {
+ 873   1        if (myUsbDevice.ep0.state == D_EP_IDLE)
+ 874   1        {
+ 875   2          myUsbDevice.ep0.buf = (uint8_t *)dat;
+ 876   2          myUsbDevice.ep0.remaining = numBytes;
+ 877   2          myUsbDevice.ep0.state = D_EP_TRANSMITTING;
+ 878   2          myUsbDevice.ep0.misc.c = 0;
+ 879   2        }
+ 880   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1576    ----
+   CONSTANT SIZE    =      2    ----
+   XDATA SIZE       =      2      11
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----       1
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

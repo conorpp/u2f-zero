@@ -1,0 +1,252 @@
+C51 COMPILER V9.53.0.0   INTERRUPTS                                                        03/28/2016 20:18:25 PAGE 1   
+
+
+C51 COMPILER V9.53.0.0, COMPILATION OF MODULE INTERRUPTS
+OBJECT MODULE PLACED IN .\src/Interrupts.OBJ
+COMPILER INVOKED BY: Z:\home\pp\SimplicityStudio_v3\developer\toolchains\keil_8051\9.53\BIN\C51.exe /home/pp/apps/u2f-ze
+                    -ro/firmware/src/Interrupts.c OMF2 LARGE DEBUG OBJECTEXTEND ROM(LARGE) WARNINGLEVEL(2) FLOATFUZZY(3) OPTIMIZE(9,SIZE) INT
+                    -VECTOR(0X0000) INTPROMOTE INCDIR(/home/pp/apps/u2f-zero/firmware/inc/config;/home/pp/apps/u2f-zero/firmware/inc;/home/pp
+                    -/apps/u2f-zero/firmware/tinyprintf;/home/pp/apps/u2f-zero/firmware/tests;/home/pp/SimplicityStudio_v3/developer/sdks/si8
+                    -051/v3//Device/shared/si8051Base;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1;/home/pp/Simplici
+                    -tyStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Lib/efm8
+                    -_usb/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1/peripheral_driver/inc;/home/pp/Simplicity
+                    -Studio_v3/developer/sdks/si8051/v3//Lib/efm8_assert) REGFILE(u2f-firmware.ORC) PRINT(.\src/Interrupts.lst) COND PAGEWIDT
+                    -H(120) PAGELENGTH(65) OBJECT(.\src/Interrupts.OBJ)
+
+line level    source
+
+   1          /*
+   2           * i2c.c
+   3           *
+   4           *      Author: Conor
+   5           */
+   6          #include <SI_EFM8UB1_Register_Enums.h>
+   7          #include <stdint.h>
+   8          #include "app.h"
+   9          #include "i2c.h"
+  10          
+  11          #include "bsp.h"
+  12          
+  13          uint32_t data _MS_ = 0;
+  14          
+  15          SI_INTERRUPT (TIMER2_ISR, TIMER2_IRQn)
+  16          {
+  17   1              TMR2CN0_TF2H = 0;
+  18   1              ++_MS_;
+  19   1      }
+  20          
+  21          #define SMB_STATUS_START                        0xE0
+  22          #define SMB_STATUS_MTX                          0xC0
+  23          #define SMB_STATUS_MRX                          0x80
+  24          #define SMB_STATE_MASK                          0xF0
+  25          
+  26          
+  27          #define SMB_TX_STATE_MASK (SMB_WRITE_EXT|SMB_WRITE)
+  28          #define SMB_TX_EXT (SMB_WRITE|SMB_WRITE_EXT)
+  29          #define SMB_TX (SMB_WRITE)
+  30          
+  31          struct smb_interrupt_interface SMB;
+  32          volatile uint8_t SMB_FLAGS;
+  33          
+  34          static void update_from_packet_length()
+  35          {
+  36   1              if (SMB.read_buf[0] <= SMB.read_len)
+  37   1              {
+  38   2                      SMB.read_len = SMB.read_buf[0];
+  39   2              }
+  40   1              else
+  41   1              {
+  42   2                      // truncated read
+  43   2                      SMB_FLAGS |= SMB_READ_TRUNC;
+  44   2              }
+  45   1      }
+  46          
+  47          static void _feed_crc(uint8_t b)
+  48          {
+C51 COMPILER V9.53.0.0   INTERRUPTS                                                        03/28/2016 20:18:25 PAGE 2   
+
+  49   1              if (SMB_HAS_CRC())
+  50   1              {
+  51   2                      SMB.crc = feed_crc(SMB.crc,b);
+  52   2              }
+  53   1      }
+  54          
+  55          static void restart_bus()
+  56          {
+  57   1              SMB0CF &= ~0x80;
+  58   1              SMB0CF |= 0x80;
+  59   1              SMB0CN0_STA = 0;
+  60   1              SMB0CN0_STO = 0;
+  61   1              SMB0CN0_ACK = 0;
+  62   1              SMB_BUSY_CLEAR();
+  63   1              SMB.errors = 0;
+  64   1      }
+  65          
+  66          uint8_t count = 0;
+  67          SI_INTERRUPT (SMBUS0_ISR, SMBUS0_IRQn)
+  68          {
+  69   1              uint8_t bus = SMB0CN0 & SMB_STATE_MASK;
+  70   1              if (SMB0CN0_ARBLOST != 0)
+  71   1              {
+  72   2                      goto fail;
+  73   2              }
+  74   1      
+  75   1              switch (bus)
+  76   1              {
+  77   2                      case SMB_STATUS_START:
+  78   2                              SMB0DAT = SMB.addr | (SMB_FLAGS & SMB_READ);
+  79   2                              count = 0;
+  80   2                              SMB0CN0_STA = 0;
+  81   2                              break;
+  82   2      
+  83   2                      case SMB_STATUS_MTX:
+  84   2                              count++;
+  85   2                              if (!SMB0CN0_ACK)
+  86   2                              {
+  87   3                                      // NACK
+  88   3                                      // end transaction
+  89   3                                      SMB0CN0_STO = 1;
+  90   3                                      SMB_FLAGS |= SMB_RECV_NACK;
+  91   3                                      SMB_BUSY_CLEAR();
+  92   3                              }
+  93   2                              else if (!SMB_WRITING())
+  94   2                              {
+  95   3                                      // do nothing and switch to receive mode
+  96   3                              }
+  97   2                              else if (SMB.write_offset < SMB.write_len)
+  98   2                              {
+  99   3                                      // start writing first buffer
+ 100   3                                      // dont crc first byte for atecc508a
+ 101   3                                      if (SMB.write_offset) _feed_crc(SMB.write_buf[SMB.write_offset]);
+ 102   3                                      SMB0DAT = SMB.write_buf[SMB.write_offset++];
+ 103   3      
+ 104   3                              }
+ 105   2                              else if(SMB_WRITING_EXT() && SMB.write_ext_offset < SMB.write_ext_len)
+ 106   2                              {
+ 107   3                                      // start writing second optional buffer
+ 108   3                                      _feed_crc(SMB.write_ext_buf[SMB.write_ext_offset]);
+ 109   3                                      SMB0DAT = SMB.write_ext_buf[SMB.write_ext_offset++];
+ 110   3                              }
+ 111   2                              else if (SMB_HAS_CRC())
+C51 COMPILER V9.53.0.0   INTERRUPTS                                                        03/28/2016 20:18:25 PAGE 3   
+
+ 112   2                              {
+ 113   3                                      // write optional CRC
+ 114   3                                      switch(SMB.crc_offset++)
+ 115   3                                      {
+ 116   4                                              case 0:
+ 117   4                                                      SMB.crc = reverse_bits(SMB.crc);
+ 118   4                                                      SMB0DAT = (uint8_t)SMB.crc;
+ 119   4                                                      break;
+ 120   4                                              case 1:
+ 121   4                                                      SMB0DAT = (uint8_t)(SMB.crc>>8);
+ 122   4                                                      SMB_CRC_CLEAR();
+ 123   4                                                      break;
+ 124   4                                      }
+ 125   3                              }
+ 126   2                              else
+ 127   2                              {
+ 128   3                                      // end transaction
+ 129   3                                      SMB0CN0_STO = 1;
+ 130   3                                      SMB_BUSY_CLEAR();
+ 131   3                                      SMB.errors = 0;
+ 132   3                              }
+ 133   2      
+ 134   2      
+ 135   2                              break;
+ 136   2      
+ 137   2                      case SMB_STATUS_MRX:
+ 138   2                              // read in buffer
+ 139   2      
+ 140   2                              if (SMB.read_offset < SMB.read_len)
+ 141   2                              {
+ 142   3                                      SMB.read_buf[SMB.read_offset] = SMB0DAT;
+ 143   3      
+ 144   3                                      // update with length from packet
+ 145   3                                      // warning this is device specific to atecc508a
+ 146   3                                      if (SMB.read_offset == 0)
+ 147   3                                      {
+ 148   4                                              update_from_packet_length();
+ 149   4                                      }
+ 150   3      
+ 151   3                                      if ((SMB.read_offset < (SMB.read_len - 2)) && SMB_HAS_CRC())
+ 152   3                                      {
+ 153   4                                              SMB.crc = feed_crc(SMB.crc, SMB.read_buf[SMB.read_offset]);
+ 154   4                                      }
+ 155   3      
+ 156   3                                      SMB.read_offset++;
+ 157   3                                      SMB0CN0_ACK = 1;
+ 158   3                              }
+ 159   2                              else
+ 160   2                              {
+ 161   3                                      // end transaction
+ 162   3                                      if (SMB_HAS_CRC())
+ 163   3                                      {
+ 164   4                                              SMB.crc = reverse_bits(SMB.crc);
+ 165   4                                      }
+ 166   3                                      SMB_BUSY_CLEAR();
+ 167   3                                      SMB0CN0_ACK = 0;
+ 168   3                                      SMB0CN0_STO = 1;
+ 169   3                                      SMB.errors = 0;
+ 170   3                              }
+ 171   2      
+ 172   2                              break;
+ 173   2      
+ 174   2                      default:
+C51 COMPILER V9.53.0.0   INTERRUPTS                                                        03/28/2016 20:18:25 PAGE 4   
+
+ 175   2                              goto fail;
+ 176   2                              break;
+ 177   2      
+ 178   2              }
+ 179   1      
+ 180   1      
+ 181   1              // interrupt flag
+ 182   1              SMB0CN0_SI = 0;
+ 183   1              return;
+ 184   1      
+ 185   1              fail:
+ 186   1                      u2f_printb("smbus fail ",1,bus);
+ 187   1                      restart_bus();
+ 188   1                      SMB0CN0_SI = 0;
+ 189   1      }
+ 190          
+ 191          //-----------------------------------------------------------------------------
+ 192          // TIMER3_ISR
+ 193          //-----------------------------------------------------------------------------
+ 194          //
+ 195          // TIMER3 ISR Content goes here. Remember to clear flag bits:
+ 196          // TMR3CN::TF3H (Timer # High Byte Overflow Flag)
+ 197          // TMR3CN::TF3L (Timer # Low Byte Overflow Flag)
+ 198          //
+ 199          //
+ 200          // A Timer3 interrupt indicates an SMBus SCL low timeout.
+ 201          // The SMBus is disabled and re-enabled here
+ 202          //
+ 203          //-----------------------------------------------------------------------------
+ 204          SI_INTERRUPT (TIMER3_ISR, TIMER3_IRQn)
+ 205          {
+ 206   1              restart_bus();
+ 207   1      }
+ 208          
+ 209          
+ 210          
+ 211          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    633    ----
+   CONSTANT SIZE    =     12    ----
+   XDATA SIZE       =     23       1
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      4    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

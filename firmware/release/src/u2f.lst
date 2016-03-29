@@ -1,0 +1,232 @@
+C51 COMPILER V9.53.0.0   U2F                                                               03/28/2016 20:18:26 PAGE 1   
+
+
+C51 COMPILER V9.53.0.0, COMPILATION OF MODULE U2F
+OBJECT MODULE PLACED IN .\src/u2f.OBJ
+COMPILER INVOKED BY: Z:\home\pp\SimplicityStudio_v3\developer\toolchains\keil_8051\9.53\BIN\C51.exe /home/pp/apps/u2f-ze
+                    -ro/firmware/src/u2f.c OMF2 LARGE DEBUG OBJECTEXTEND ROM(LARGE) WARNINGLEVEL(2) FLOATFUZZY(3) OPTIMIZE(9,SIZE) INTVECTOR(
+                    -0X0000) INTPROMOTE INCDIR(/home/pp/apps/u2f-zero/firmware/inc/config;/home/pp/apps/u2f-zero/firmware/inc;/home/pp/apps/u
+                    -2f-zero/firmware/tinyprintf;/home/pp/apps/u2f-zero/firmware/tests;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3/
+                    -/Device/shared/si8051Base;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1;/home/pp/SimplicityStudi
+                    -o_v3/developer/sdks/si8051/v3//Device/EFM8UB1/inc;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Lib/efm8_usb/in
+                    -c;/home/pp/SimplicityStudio_v3/developer/sdks/si8051/v3//Device/EFM8UB1/peripheral_driver/inc;/home/pp/SimplicityStudio_
+                    -v3/developer/sdks/si8051/v3//Lib/efm8_assert) REGFILE(u2f-firmware.ORC) PRINT(.\src/u2f.lst) COND PAGEWIDTH(120) PAGELEN
+                    -GTH(65) OBJECT(.\src/u2f.OBJ)
+
+line level    source
+
+   1          #include "app.h"
+   2          
+   3          
+   4          #ifndef U2F_DISABLE
+   5          
+   6          #include "bsp.h"
+   7          #include "u2f.h"
+   8          
+   9          #ifdef DEBUG_PC
+              #include <stdio.h>
+              #else
+  12          #define printf(x)
+  13          #endif
+  14          
+  15          // void u2f_response_writeback(uint8_t * buf, uint8_t len);
+  16          static int16_t u2f_register(struct u2f_register_request * req);
+  17          static int16_t u2f_version();
+  18          static int16_t u2f_authenticate(struct u2f_authenticate_request * req, uint8_t control);
+  19          
+  20          void u2f_request(struct u2f_request_apdu * req)
+  21          {
+  22   1          uint16_t * rcode = (uint16_t *)req;
+  23   1          u2f_response_start();
+  24   1          switch(req->ins)
+  25   1          {
+  26   2              case U2F_REGISTER:
+  27   2                      u2f_prints("U2F_REGISTER\r\n");
+  28   2                  *rcode = u2f_register((struct u2f_register_request*)req->payload);
+  29   2                  break;
+  30   2              case U2F_AUTHENTICATE:
+  31   2                      u2f_prints("U2F_AUTHENTICATE\r\n");
+  32   2                       *rcode = u2f_authenticate((struct u2f_authenticate_request*)req->payload, req->p1);
+  33   2                      break;
+  34   2              case U2F_VERSION:
+  35   2                      u2f_prints("U2F_VERSION\r\n");
+  36   2                      *rcode =u2f_version();
+  37   2                      break;
+  38   2              case U2F_VENDOR_FIRST:
+  39   2                      u2f_prints("U2F_VENDOR_FIRST\r\n");
+  40   2                      break;
+  41   2              case U2F_VENDOR_LAST:
+  42   2                      u2f_prints("U2F_VENDOR_LAST\r\n");
+  43   2                      break;
+  44   2              default:
+  45   2                      break;
+  46   2          }
+  47   1          u2f_response_writeback((uint8_t*)rcode,2);
+  48   1          u2f_response_flush();
+C51 COMPILER V9.53.0.0   U2F                                                               03/28/2016 20:18:26 PAGE 2   
+
+  49   1      }
+  50          
+  51          static uint8_t get_signature_length(uint8_t * sig)
+  52          {
+  53   1              return 0x46 + ((sig[32] & 0x80) == 0x80) + ((sig[0] & 0x80) == 0x80);
+  54   1      }
+  55          
+  56          static void dump_signature_der(uint8_t * sig)
+  57          {
+  58   1          uint8_t pad_s = (sig[32] & 0x80) == 0x80;
+  59   1          uint8_t pad_r = (sig[0] & 0x80) == 0x80;
+  60   1          uint8_t i[] = {0x30, 0x44};
+  61   1          i[1] += (pad_s + pad_r);
+  62   1      
+  63   1      
+  64   1          // DER encoded signature
+  65   1          // write der sequence
+  66   1          // has to be minimum distance and padded with 0x00 if MSB is a 1.
+  67   1          u2f_response_writeback(i,2);
+  68   1          i[1] = 0;
+  69   1      
+  70   1          // length of R value plus 0x00 pad if necessary
+  71   1          u2f_response_writeback("\x02",1);
+  72   1          i[0] = 0x20 + pad_r;
+  73   1          u2f_response_writeback(i,1 + pad_r);
+  74   1      
+  75   1          // R value
+  76   1          u2f_response_writeback(sig, 32);
+  77   1      
+  78   1          // length of S value plus 0x00 pad if necessary
+  79   1          u2f_response_writeback("\x02",1);
+  80   1          i[0] = 0x20 + pad_s;
+  81   1          u2f_response_writeback(i,1 + pad_s);
+  82   1      
+  83   1          // S value
+  84   1          u2f_response_writeback(sig+32, 32);
+  85   1      }
+  86          
+  87          
+  88          static int16_t u2f_authenticate(struct u2f_authenticate_request * req, uint8_t control)
+  89          {
+  90   1      
+  91   1              uint8_t up = 1;
+  92   1              uint32_t count;
+  93   1              if (u2f_load_key(req->kh, req->khl) != 0)
+  94   1              {
+  95   2                      u2f_hid_set_len(2);
+  96   2                      return U2F_SW_WRONG_DATA;
+  97   2              }
+  98   1              else if (control == U2F_AUTHENTICATE_CHECK)
+  99   1              {
+ 100   2                      u2f_hid_set_len(2);
+ 101   2                      return U2F_SW_CONDITIONS_NOT_SATISFIED;
+ 102   2              }
+ 103   1      
+ 104   1              count = u2f_count();
+ 105   1      
+ 106   1          u2f_sha256_start();
+ 107   1          u2f_sha256_update(req->app,32);
+ 108   1          u2f_sha256_update(&up,1);
+ 109   1          u2f_sha256_update(&count,4);
+*** WARNING C182 IN LINE 109 OF /home/pp/apps/u2f-zero/firmware/src/u2f.c: pointer to different objects
+ 110   1          u2f_sha256_update(req->chal,32);
+C51 COMPILER V9.53.0.0   U2F                                                               03/28/2016 20:18:26 PAGE 3   
+
+ 111   1      
+ 112   1          u2f_sha256_finish();
+ 113   1      
+ 114   1          if (u2f_ecdsa_sign((uint8_t*)req, req->kh) == -1)
+ 115   1              {
+ 116   2              return U2F_SW_WRONG_DATA;
+ 117   2              }
+ 118   1      
+ 119   1          u2f_hid_set_len(7 + get_signature_length((uint8_t*)req));
+ 120   1      
+ 121   1          u2f_response_writeback(&up,1);
+ 122   1          u2f_response_writeback(&count,4);
+*** WARNING C182 IN LINE 122 OF /home/pp/apps/u2f-zero/firmware/src/u2f.c: pointer to different objects
+ 123   1          dump_signature_der((uint8_t*)req);
+ 124   1      
+ 125   1              return U2F_SW_NO_ERROR;
+ 126   1      }
+ 127          
+ 128          static int16_t u2f_register(struct u2f_register_request * req)
+ 129          {
+ 130   1          uint8_t i[] = {0x0,U2F_EC_FMT_UNCOMPRESSED};
+ 131   1      
+ 132   1          uint8_t key_handle[U2F_KEY_HANDLE_SIZE];
+ 133   1          uint8_t pubkey[64];
+ 134   1      
+ 135   1      
+ 136   1          const uint16_t attest_size = u2f_attestation_cert_size();
+ 137   1      
+ 138   1          if (u2f_get_user_feedback() != 0)
+ 139   1          {
+ 140   2              return U2F_SW_CONDITIONS_NOT_SATISFIED;
+ 141   2          }
+ 142   1      
+ 143   1          if ( u2f_new_keypair(key_handle, pubkey) == -1)
+ 144   1          {
+ 145   2              return U2F_SW_CONDITIONS_NOT_SATISFIED;
+ 146   2          }
+ 147   1      
+ 148   1          u2f_sha256_start();
+ 149   1          u2f_sha256_update(i,1);
+ 150   1          u2f_sha256_update(req->app,32);
+ 151   1      
+ 152   1          u2f_sha256_update(req->chal,32);
+ 153   1      
+ 154   1          u2f_sha256_update(key_handle,U2F_KEY_HANDLE_SIZE);
+ 155   1          u2f_sha256_update(i+1,1);
+ 156   1          u2f_sha256_update(pubkey,64);
+ 157   1          u2f_sha256_finish();
+ 158   1          
+ 159   1          if (u2f_ecdsa_sign((uint8_t*)req, U2F_ATTESTATION_HANDLE) == -1)
+ 160   1              {
+ 161   2              return U2F_SW_WRONG_DATA;
+ 162   2              }
+ 163   1      
+ 164   1          u2f_hid_set_len(69 + get_signature_length((uint8_t*)req) + U2F_KEY_HANDLE_SIZE + u2f_attestation_cert_
+             -size());
+ 165   1          i[0] = 0x5;
+ 166   1          u2f_response_writeback(i,2);
+ 167   1          u2f_response_writeback(pubkey,64);
+ 168   1          i[0] = U2F_KEY_HANDLE_SIZE;
+ 169   1          u2f_response_writeback(i,1);
+ 170   1          u2f_response_writeback(key_handle,U2F_KEY_HANDLE_SIZE);
+ 171   1      
+C51 COMPILER V9.53.0.0   U2F                                                               03/28/2016 20:18:26 PAGE 4   
+
+ 172   1          u2f_response_writeback(u2f_get_attestation_cert(),u2f_attestation_cert_size());
+ 173   1      
+ 174   1          dump_signature_der((uint8_t*)req);
+ 175   1      
+ 176   1      
+ 177   1          return U2F_SW_NO_ERROR;
+ 178   1      }
+ 179          
+ 180          static int16_t u2f_version()
+ 181          {
+ 182   1              code const char version[] = "U2F_V2";
+ 183   1              u2f_hid_set_len(2 + sizeof(version)-1);
+ 184   1              u2f_response_writeback(version, sizeof(version)-1);
+ 185   1              return U2F_SW_NO_ERROR;
+ 186   1      }
+ 187          
+ 188          #endif
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    935    ----
+   CONSTANT SIZE    =    103    ----
+   XDATA SIZE       =   ----      97
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  2 WARNING(S),  0 ERROR(S)

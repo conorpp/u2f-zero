@@ -1,0 +1,67 @@
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Debug files
+*.dSYM/
+
+# kicad
+*.bak
+*-bak
+*_bak
+_saved*
+_autosave*
+gerbers/*
+
+# simplicity studio
+firmware/Keil*
+
+# vim
+*.swp
+
+# keys
+*.pem
+*.csr
+*.der
+
+# binaries
+hex2pubkey
+signcert
+
+#other 
+pubkey.c.txt
+*.lst
+*.obj
+*.OBJ
+*.__i
+*.__ia
+release/
+
+# hardware
+*.gbr
+gerbers/

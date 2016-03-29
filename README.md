@@ -55,6 +55,7 @@ I2C layer:
 * Wake the ATECC508A from suspension
 * Send the formatted command with CRC16.
 * Receive ATECC508A response and check for errors and verify received CRC16.
+* Put ATECC508A device into suspension
 * I2C I/O and CRC calculations are interrupt based and done byte by byte.
 
 ### Code organization

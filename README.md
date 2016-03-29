@@ -35,27 +35,27 @@ The program generally follows this execution flow:
 
 Main loop:
 
-    * Check if USB is busy and schedule a read if USB is free
-    * If USB interrupted with a read, pass the newly read message to HID layer
+* Check if USB is busy and schedule a read if USB is free
+* If USB interrupted with a read, pass the newly read message to HID layer
 
 HID layer:
-    * Read a HID packet passed to it
-    * Implement HID commands and sequencing as described in the
-    [U2F HID layer spec](https://fidoalliance.org/specs/fido-u2f-v1.0-nfc-bt-amendment-20150514/fido-u2f-hid-protocol.html)
-    * If the HID message contains a U2F packet, buffer it or pass complete U2F packet to the U2F layer
+* Read a HID packet passed to it
+* Implement HID commands and sequencing as described in the
+[U2F HID layer spec](https://fidoalliance.org/specs/fido-u2f-v1.0-nfc-bt-amendment-20150514/fido-u2f-hid-protocol.html)
+* If the HID message contains a U2F packet, buffer it or pass complete U2F packet to the U2F layer
 
 U2F layer:
-    * Read a U2F packet
-    * Implement authenticate and register commands as described in 
-    [U2F raw message spec](https://fidoalliance.org/specs/fido-u2f-v1.0-nfc-bt-amendment-20150514/fido-u2f-raw-message-formats.html)
-    * Handle any key generation, signatures, and atomic counting through I2C commands with ATECC508A
+* Read a U2F packet
+* Implement authenticate and register commands as described in 
+[U2F raw message spec](https://fidoalliance.org/specs/fido-u2f-v1.0-nfc-bt-amendment-20150514/fido-u2f-raw-message-formats.html)
+* Handle any key generation, signatures, and atomic counting through I2C commands with ATECC508A
 
 I2C layer:
-    * Receives a command and empty buffer for ATECC508A response
-    * Wake the ATECC508A from suspension
-    * Send the formatted command with CRC16.
-    * Receive ATECC508A response and check for errors and verify received CRC16.
-    * I2C I/O and CRC calculations are interrupt based and done byte by byte.
+* Receives a command and empty buffer for ATECC508A response
+* Wake the ATECC508A from suspension
+* Send the formatted command with CRC16.
+* Receive ATECC508A response and check for errors and verify received CRC16.
+* I2C I/O and CRC calculations are interrupt based and done byte by byte.
 
 ### Code organization
 
@@ -63,27 +63,27 @@ The HID and U2F layers are written to not be device specific and can
 easily be ported elsewhere.
 
 EFM8UB1 USB driver:
-    * descriptors.c
-    * descriptors.h
-    * callback.c
+* descriptors.c
+* descriptors.h
+* callback.c
 
 EFM8UB1 I2C driver:
-    * Interrupts.c
-    * i2c.c
-    * i2c.h
+* Interrupts.c
+* i2c.c
+* i2c.h
 
 ATECC508A I2C layer:
-    * atecc508a.c
-    * atecc508a.h
+* atecc508a.c
+* atecc508a.h
 
 HID layer:
-    * u2f_hid.c
-    * u2f_hid.h
+* u2f_hid.c
+* u2f_hid.h
 
 U2F layer:
-    * u2f.c
-    * u2f.h
-    * u2f-atecc.c   // device specific implementation
+* u2f.c
+* u2f.h
+* u2f-atecc.c   // device specific implementation
 
 ## Build a U2F Zero token yourself
 

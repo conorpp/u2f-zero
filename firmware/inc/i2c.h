@@ -13,7 +13,6 @@ struct smb_interrupt_interface
 	uint8_t addr;
 	uint16_t crc;
 	uint8_t crc_offset;
-	uint8_t errors;
 
 	uint8_t* write_buf;
 	uint8_t write_len;

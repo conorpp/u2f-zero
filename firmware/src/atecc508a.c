@@ -137,7 +137,7 @@ int8_t atecc_send_recv(uint8_t cmd, uint8_t p1, uint16_t p2,
 		{
 			return -1;
 		}
-		switch(appdata.error)
+		switch(get_app_error())
 		{
 			case ERROR_NOTHING:
 				delay_cmd(cmd);

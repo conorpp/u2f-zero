@@ -59,10 +59,8 @@ struct APP_DATA
 {
 	// must be at least 70 bytes
 	uint8_t tmp[70];
-	uint8_t state;
-	uint8_t error;
 
-	struct u2f_hid_msg * hid_msg;
+
 };
 
 #define U2F_CONFIG_GET_SERIAL_NUM		0x80
@@ -85,6 +83,12 @@ extern data struct APP_DATA appdata;
 
 void set_app_u2f_hid_msg(struct u2f_hid_msg * msg );
 void set_app_error(APP_ERROR_CODE ec);
+uint8_t get_app_error();
+
+uint8_t get_app_state();
+
+void set_app_state(APP_STATE s);
+
 void rgb(uint8_t r, uint8_t g, uint8_t b);
 
 // should be called after initializing eeprom

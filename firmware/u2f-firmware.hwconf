@@ -15,7 +15,7 @@
     <property object="CLOCK_0" propertyId="clock.clockselect.clocksourcedivider" value="SYSCLK / 1"/>
     <property object="CLOCK_0" propertyId="clock.clockselect.selectclocksource" value="Internal High Frequency Oscillator 1"/>
     <property object="CRC_0" propertyId="crc.crccontrol.enablecrcinitialization" value="Initialize"/>
-    <property object="CROSSBAR0" propertyId="xbar0.pca0.cex" value="CEX0 and CEX1"/>
+    <property object="CROSSBAR0" propertyId="xbar0.pca0.cex" value="CEX0, CEX1, and CEX2"/>
     <property object="CROSSBAR0" propertyId="xbar0.smbus0.clockdata" value="Enabled"/>
     <property object="CROSSBAR0" propertyId="xbar0.uart0.data" value="Enabled"/>
     <property object="DefaultMode" propertyId="mode.diagramLocation" value="100, 100"/>
@@ -41,8 +41,6 @@
     <property object="P1.0" propertyId="ports.settings.outputmode" value="Push-pull"/>
     <property object="PBCFG_0" propertyId="pbcfg.settings.enablecrossbar" value="Enabled"/>
     <property object="PCACH_0" propertyId="ABPeripheral.included" value="true"/>
-    <property object="PCACH_0" propertyId="pcach.pcachannel.capturecomparehighbyte" value="255"/>
-    <property object="PCACH_0" propertyId="pcach.pcachannel.capturecomparelowbyte" value="220"/>
     <property object="PCACH_0" propertyId="pcach.pcachannel.capturecompareregister" value="65500"/>
     <property object="PCACH_0" propertyId="pcach.pcachannel.clockdivider" value="100"/>
     <property object="PCACH_0" propertyId="pcach.pcachannelcapturecomparemode.enablechannelcomparatorfunction" value="Enabled"/>

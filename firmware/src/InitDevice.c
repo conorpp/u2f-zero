@@ -414,16 +414,16 @@ extern void PBCFG_0_enter_DefaultMode_from_RESET(void) {
 
 	// $[XBR1 - Port I/O Crossbar 1]
 	/*
-	 // PCA0ME (PCA Module I/O Enable) = CEX0_CEX1_CEX2 (CEX0, CEX1, CEX2
-	 //     routed to Port pins.)
+	 // PCA0ME (PCA Module I/O Enable) = CEX0_CEX1 (CEX0, CEX1 routed to Port
+	 //     pins.)
 	 // ECIE (PCA0 External Counter Input Enable) = DISABLED (ECI unavailable
 	 //     at Port pin.)
 	 // T0E (T0 Enable) = DISABLED (T0 unavailable at Port pin.)
 	 // T1E (T1 Enable) = DISABLED (T1 unavailable at Port pin.)
 	 // T2E (T2 Enable) = DISABLED (T2 unavailable at Port pin.)
 	 */
-	XBR1 = XBR1_PCA0ME__CEX0_CEX1_CEX2 | XBR1_ECIE__DISABLED
-			| XBR1_T0E__DISABLED | XBR1_T1E__DISABLED | XBR1_T2E__DISABLED;
+	XBR1 = XBR1_PCA0ME__CEX0_CEX1 | XBR1_ECIE__DISABLED | XBR1_T0E__DISABLED
+			| XBR1_T1E__DISABLED | XBR1_T2E__DISABLED;
 	// [XBR1 - Port I/O Crossbar 1]$
 
 }
@@ -803,13 +803,6 @@ extern void PCA_0_enter_DefaultMode_from_RESET(void) {
 	// [PCA0MD - PCA Mode]$
 
 	// $[PCA0CENT - PCA Center Alignment Enable]
-	/*
-	 // CEX0CEN (CEX0 Center Alignment Enable) = CENTER (Center-aligned.)
-	 // CEX1CEN (CEX1 Center Alignment Enable) = CENTER (Center-aligned.)
-	 // CEX2CEN (CEX2 Center Alignment Enable) = CENTER (Center-aligned.)
-	 */
-	PCA0CENT = PCA0CENT_CEX0CEN__CENTER | PCA0CENT_CEX1CEN__CENTER
-			| PCA0CENT_CEX2CEN__CENTER;
 	// [PCA0CENT - PCA Center Alignment Enable]$
 
 	// $[PCA0CLR - PCA Comparator Clear Control]

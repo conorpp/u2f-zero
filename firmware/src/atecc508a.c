@@ -280,6 +280,8 @@ static void atecc_write_otp(uint8_t * buf)
 
 void atecc_setup_init(uint8_t * buf)
 {
+	// 13s watchdog
+	WDTCN = 7;
 	if (!is_locked(buf))
 	{
 		u2f_prints("setting up config...\r\n");

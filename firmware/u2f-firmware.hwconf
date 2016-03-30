@@ -15,7 +15,7 @@
     <property object="CLOCK_0" propertyId="clock.clockselect.clocksourcedivider" value="SYSCLK / 1"/>
     <property object="CLOCK_0" propertyId="clock.clockselect.selectclocksource" value="Internal High Frequency Oscillator 1"/>
     <property object="CRC_0" propertyId="crc.crccontrol.enablecrcinitialization" value="Initialize"/>
-    <property object="CROSSBAR0" propertyId="xbar0.pca0.cex" value="CEX0, CEX1, and CEX2"/>
+    <property object="CROSSBAR0" propertyId="xbar0.pca0.cex" value="CEX0 and CEX1"/>
     <property object="CROSSBAR0" propertyId="xbar0.smbus0.clockdata" value="Enabled"/>
     <property object="CROSSBAR0" propertyId="xbar0.uart0.data" value="Enabled"/>
     <property object="DefaultMode" propertyId="mode.diagramLocation" value="100, 100"/>
@@ -45,7 +45,6 @@
     <property object="PCACH_0" propertyId="pcach.pcachannel.capturecomparelowbyte" value="220"/>
     <property object="PCACH_0" propertyId="pcach.pcachannel.capturecompareregister" value="65500"/>
     <property object="PCACH_0" propertyId="pcach.pcachannel.clockdivider" value="100"/>
-    <property object="PCACH_0" propertyId="pcach.pcachannel.pcaalignment" value="Center-aligned PWM"/>
     <property object="PCACH_0" propertyId="pcach.pcachannelcapturecomparemode.enablechannelcomparatorfunction" value="Enabled"/>
     <property object="PCACH_0" propertyId="pcach.pcachannelcapturecomparemode.enablechannelpulsewidthmodulationmoden" value="Enabled"/>
     <property object="PCACH_0" propertyId="pcach.pcacontrol.channelcapturecomparemode" value="Predefined 8~11-bit pulse modulator"/>
@@ -53,7 +52,6 @@
     <property object="PCACH_1" propertyId="pcach.pcachannel.capturecomparehighbyte" value="100"/>
     <property object="PCACH_1" propertyId="pcach.pcachannel.capturecompareregister" value="25600"/>
     <property object="PCACH_1" propertyId="pcach.pcachannel.clockdivider" value="100"/>
-    <property object="PCACH_1" propertyId="pcach.pcachannel.pcaalignment" value="Center-aligned PWM"/>
     <property object="PCACH_1" propertyId="pcach.pcachannelcapturecomparemode.enablechannelcomparatorfunction" value="Enabled"/>
     <property object="PCACH_1" propertyId="pcach.pcachannelcapturecomparemode.enablechannelpulsewidthmodulationmoden" value="Enabled"/>
     <property object="PCACH_1" propertyId="pcach.pcacontrol.channelcapturecomparemode" value="Predefined 8~11-bit pulse modulator"/>
@@ -61,7 +59,6 @@
     <property object="PCACH_2" propertyId="pcach.pcachannel.capturecomparehighbyte" value="100"/>
     <property object="PCACH_2" propertyId="pcach.pcachannel.capturecompareregister" value="25600"/>
     <property object="PCACH_2" propertyId="pcach.pcachannel.clockdivider" value="100"/>
-    <property object="PCACH_2" propertyId="pcach.pcachannel.pcaalignment" value="Center-aligned PWM"/>
     <property object="PCACH_2" propertyId="pcach.pcachannelcapturecomparemode.enablechannelcomparatorfunction" value="Enabled"/>
     <property object="PCACH_2" propertyId="pcach.pcachannelcapturecomparemode.enablechannelpulsewidthmodulationmoden" value="Enabled"/>
     <property object="PCACH_2" propertyId="pcach.pcacontrol.channelcapturecomparemode" value="Predefined 8~11-bit pulse modulator"/>
@@ -70,9 +67,6 @@
     <property object="PCA_0" propertyId="pca.pcacountertimerconfiguration.pcaclockfrequencyintegervalue" value="4000000.0"/>
     <property object="PCA_0" propertyId="pca.pcacountertimerconfiguration.pcaclockperiod" value="250.000 nS"/>
     <property object="PCA_0" propertyId="pca.pcacountertimerruncontrol.pcarun" value="Start"/>
-    <property object="PCA_0" propertyId="pca.pcapwmconfiguration.cex0centeralignmentenable" value="Center-aligned PWM"/>
-    <property object="PCA_0" propertyId="pca.pcapwmconfiguration.cex1centeralignmentenable" value="Center-aligned PWM"/>
-    <property object="PCA_0" propertyId="pca.pcapwmconfiguration.cex2centeralignmentenable" value="Center-aligned PWM"/>
     <property object="SMBUS_0" propertyId="ABPeripheral.included" value="true"/>
     <property object="SMBUS_0" propertyId="smbus.configuration.enablesmbus" value="Enabled"/>
     <property object="SMBUS_0" propertyId="smbus.configuration.enablesmbusfreetimeoutdetection" value="Enabled"/>

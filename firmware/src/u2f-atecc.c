@@ -68,6 +68,7 @@ void u2f_init()
 	// initialize key handles
 	if (key_store.num_keys != U2F_NUM_KEYS)
 	{
+		watchdog();
 		key_store.num_keys = U2F_NUM_KEYS;
 		key_store.valid_keys = 0;
 		key_store.num_issued = 0;
@@ -75,6 +76,7 @@ void u2f_init()
 
 		for (i=0; i < U2F_NUM_KEYS; i++)
 		{
+			watchdog();
 			atecc_send_recv(ATECC_CMD_RNG,ATECC_RNG_P1,ATECC_RNG_P2,
 							NULL, 0,
 							appdata.tmp,

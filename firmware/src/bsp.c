@@ -39,7 +39,8 @@ void putf(char c)
 	SBUF0 = c;
 	for (i=0; i<200; i++){}
 	for (i=0; i<200; i++){}
-	for (i=0; i<200; i++){}
+	for (i=0; i<190; i++){}
+	watchdog();
 }
 
 

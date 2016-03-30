@@ -44,8 +44,10 @@ SI_SBIT(U2F_BUTTON_VAL, SFR_P0, 3);
 	PCA0CPL2 = ((((uint8_t)(x))) << PCA0CPL2_PCA0CPL2__SHIFT);\
 	PCA0CPH2 = ((((uint8_t)(x))) << PCA0CPH2_PCA0CPH2__SHIFT)
 
+#define watchdog()	(WDTCN = 0xA5)
 
-void u2f_delay(int16_t ms);
+
+void u2f_delay(uint32_t ms);
 
 void usb_write(uint8_t* buf, uint8_t len);
 
@@ -54,11 +56,13 @@ void usb_write(uint8_t* buf, uint8_t len);
 #ifdef U2F_PRINT
 
 	void dump_hex(uint8_t* hex, uint8_t len);
-	void u2f_putb(uint8_t i);
-	void u2f_putd(int16_t i);
-	void u2f_putx(uint16_t i);
-	void u2f_putl(int32_t i);
-	void u2f_putlx(int32_t i);
+
+	void u2f_putd(uint32_t i);
+	void u2f_putx(uint32_t i);
+
+#define u2f_putb(x)	u2f_putx((uint8_t) (x))
+#define u2f_putl(x)	u2f_putd((uint32_t) (x))
+#define u2f_putlx(x)	u2f_putx((uint32_t) (x))
 
 	void u2f_prints(const char * str);
 	void u2f_printb(const char * tag, uint8_t c, ...);

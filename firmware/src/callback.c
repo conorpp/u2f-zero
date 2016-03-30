@@ -93,52 +93,7 @@ USB_Status_TypeDef USBD_SetupCmdCb(
 			break;
 		}
 	}
-	else if ((setup->bmRequestType.Type == USB_SETUP_TYPE_CLASS)
-	           && (setup->bmRequestType.Recipient == USB_SETUP_RECIPIENT_INTERFACE)
-	           && (setup->wIndex == HID_INTERFACE_INDEX))
-	  {
-	    // Implement the necessary HID class specific commands.
-	    switch (setup->bRequest)
-	    {
-	      case USB_HID_SET_REPORT:
-	    	  u2f_print_ev("output report\r\n");
-	        break;
 
-	      case USB_HID_GET_REPORT:
-
-	        break;
-
-	      case USB_HID_SET_IDLE:
-	        if (((setup->wValue & 0xFF) == 0)             // Report ID
-	            && (setup->wLength == 0)
-	            && (setup->bmRequestType.Direction != USB_SETUP_DIR_IN))
-	        {
-	          idleTimerSet(setup->wValue >> 8);
-	          retVal = USB_STATUS_OK;
-	        }
-	        else u2f_print_ev("unhandled USB_HID_SET_IDLE\r\n");
-	        break;
-
-	      case USB_HID_GET_IDLE:
-	        if ((setup->wValue == 0)                      // Report ID
-	            && (setup->wLength == 1)
-	            && (setup->bmRequestType.Direction == USB_SETUP_DIR_IN))
-	        {
-	          u2f_print_ev("get idle\r\n");
-	          tmpBuffer = idleGetRate();
-	          USBD_Write(EP0, &tmpBuffer, 1, false);
-	          retVal = USB_STATUS_OK;
-	        }
-	        else u2f_print_ev("unhandled USB_HID_GET_IDLE\r\n");
-	        break;
-	      default:
-	    	  u2f_print_ev("unhandled setup->bRequest\r\n");
-	    }
-	  }
-	  else
-	  {
-
-	  }
 
 	return retVal;
 }

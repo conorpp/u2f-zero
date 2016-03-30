@@ -14,22 +14,9 @@
 #include "app.h"
 
 
-static int8_t while_busy()
-{
-	while(SMB_IS_BUSY())
-	{
-		if (SMB_ERRORS_EXCEEDED(&SMB))
-		{
-			set_app_error(ERROR_I2C_ERRORS_EXCEEDED);
-			return -1;
-		}
-	}
-	return 0;
-}
-
 uint8_t smb_read (uint8_t addr, uint8_t* dest, uint8_t count)
 {
-	if (while_busy()) return -1;
+	while(SMB_IS_BUSY()){}
 
 	SMB_FLAGS = SMB_READ | SMB_BUSY| SMB.preflags;
 	SMB.preflags = 0;
@@ -40,14 +27,14 @@ uint8_t smb_read (uint8_t addr, uint8_t* dest, uint8_t count)
 	SMB.read_buf = dest;
 	SMB0CN0_STA = 1;
 
-	if (while_busy()) return -1;
+	while(SMB_IS_BUSY()){}
 	return SMB.read_len;
 }
 
 
 void smb_write (uint8_t addr, uint8_t* buf, uint8_t len)
 {
-	if (while_busy()) return;
+	while(SMB_IS_BUSY()){}
 
    SMB_FLAGS = SMB_WRITE | SMB_BUSY | SMB.preflags;
    SMB.preflags = 0;
@@ -58,12 +45,12 @@ void smb_write (uint8_t addr, uint8_t* buf, uint8_t len)
    SMB.addr = addr;
 
    SMB0CN0_STA = 1;
-   while_busy();
+   while(SMB_IS_BUSY()){}
 }
 
 void smb_set_ext_write( uint8_t* extbuf, uint8_t extlen)
 {
-	while_busy();
+	while(SMB_IS_BUSY()){}
 	SMB.write_ext_len = extlen;
 	SMB.write_ext_buf = extbuf;
 	SMB.write_ext_offset = 0;
@@ -72,7 +59,7 @@ void smb_set_ext_write( uint8_t* extbuf, uint8_t extlen)
 
 void smb_init_crc()
 {
-	while_busy();
+	while(SMB_IS_BUSY()){}
 	SMB.crc = 0;
 	SMB.crc_offset = 0;
 	SMB.preflags |= SMB_COMPUTE_CRC;

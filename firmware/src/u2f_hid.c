@@ -207,10 +207,6 @@ static void del_cid(uint32_t cid)
 	}
 }
 
-static int check_cid(uint32_t cid)
-{
-	return (get_cid(cid) != NULL);
-}
 
 static void stamp_error(uint32_t cid, uint8_t err)
 {
@@ -225,7 +221,6 @@ static void stamp_error(uint32_t cid, uint8_t err)
 	del_cid(cid);
 }
 
-// TODO double check if this is really needed
 static void start_buffering(struct u2f_hid_msg* req)
 {
 	_hid_in_session = 1;
@@ -238,7 +233,7 @@ static int buffer_request(struct u2f_hid_msg* req)
 {
 	if (hid_layer.bytes_buffered + U2FHID_CONT_PAYLOAD_SIZE > BUFFER_SIZE)
 	{
-		u2f_prints("buffer full\r\n");
+		set_app_error(ERROR_HID_BUFFER_FULL);
 		stamp_error(req->cid, ERR_OTHER);
 		return -1;
 	}
@@ -295,7 +290,6 @@ static void hid_u2f_parse(struct u2f_hid_msg* req)
 				u2f_prints("invalid len msg\r\n");
 				goto fail;
 			}
-			//u2f_prints("U2FHID_MSG\r\n");
 			// buffer 2 payloads (120 bytes) to get full U2F message
 			// assuming key handle is < 45 bytes
 			//		7 bytes for apdu header
@@ -338,12 +332,10 @@ static void hid_u2f_parse(struct u2f_hid_msg* req)
 			break;
 
 		case U2FHID_WINK:
-			//u2f_prints("U2F WINK\r\n");
 			if (U2FHID_LEN(req) != 0)
 			{
 				// this one is safe
 				stamp_error(hid_layer.current_cid, ERR_INVALID_LEN);
-				u2f_prints("invalid len wink but who cares\r\n");
 			}
 			u2f_hid_set_len(0);
 			u2f_hid_writeback(NULL, 0);
@@ -355,9 +347,8 @@ static void hid_u2f_parse(struct u2f_hid_msg* req)
 			//u2f_prints("U2F LOCK\r\n");
 			break;
 		default:
-			u2f_printb("invalid cmd: ", hid_layer.current_cmd);
+			set_app_error(ERROR_HID_INVALID_CMD);
 			stamp_error(hid_layer.current_cid, ERR_INVALID_CMD);
-			goto fail;
 	}
 
 	return;
@@ -428,7 +419,6 @@ void u2f_hid_request(struct u2f_hid_msg* req)
 				}
 				hid_layer.last_buffered = get_ms();
 				// TODO verify packets arrive in ascending order
-
 			}
 			else if (U2FHID_TIMEOUT(&hid_layer))
 			{
@@ -453,8 +443,6 @@ void u2f_hid_request(struct u2f_hid_msg* req)
 	}
 
 	hid_u2f_parse(req);
-
-
 	return;
 }
 

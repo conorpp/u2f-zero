@@ -57,9 +57,6 @@ extern void enter_DefaultMode_from_RESET(void) {
 extern void WDT_0_enter_DefaultMode_from_RESET(void) {
 	// $[WDTCN - Watchdog Timer Control]
 	SFRPAGE = 0x00;
-	//Disable Watchdog with key sequence
-	WDTCN = 0xDE; //First key
-	WDTCN = 0xAD; //Second key
 	// [WDTCN - Watchdog Timer Control]$
 
 }
@@ -868,9 +865,17 @@ extern void PCACH_0_enter_DefaultMode_from_RESET(void) {
 	// [PCA0CPM0 - PCA Channel 0 Capture/Compare Mode]$
 
 	// $[PCA0CPL0 - PCA Channel 0 Capture Module Low Byte]
+	/*
+	 // PCA0CPL0 (PCA Channel 0 Capture Module Low Byte) = 0xDC
+	 */
+	PCA0CPL0 = (0xDC << PCA0CPL0_PCA0CPL0__SHIFT);
 	// [PCA0CPL0 - PCA Channel 0 Capture Module Low Byte]$
 
 	// $[PCA0CPH0 - PCA Channel 0 Capture Module High Byte]
+	/*
+	 // PCA0CPH0 (PCA Channel 0 Capture Module High Byte) = 0xFF
+	 */
+	PCA0CPH0 = (0xFF << PCA0CPH0_PCA0CPH0__SHIFT);
 	// [PCA0CPH0 - PCA Channel 0 Capture Module High Byte]$
 
 	// $[Auto-reload]
@@ -916,6 +921,10 @@ extern void PCACH_1_enter_DefaultMode_from_RESET(void) {
 	// [PCA0CPL1 - PCA Channel 1 Capture Module Low Byte]$
 
 	// $[PCA0CPH1 - PCA Channel 1 Capture Module High Byte]
+	/*
+	 // PCA0CPH1 (PCA Channel 1 Capture Module High Byte) = 0x64
+	 */
+	PCA0CPH1 = (0x64 << PCA0CPH1_PCA0CPH1__SHIFT);
 	// [PCA0CPH1 - PCA Channel 1 Capture Module High Byte]$
 
 	// $[Auto-reload]
@@ -961,6 +970,10 @@ extern void PCACH_2_enter_DefaultMode_from_RESET(void) {
 	// [PCA0CPL2 - PCA Channel 2 Capture Module Low Byte]$
 
 	// $[PCA0CPH2 - PCA Channel 2 Capture Module High Byte]
+	/*
+	 // PCA0CPH2 (PCA Channel 2 Capture Module High Byte) = 0x64
+	 */
+	PCA0CPH2 = (0x64 << PCA0CPH2_PCA0CPH2__SHIFT);
 	// [PCA0CPH2 - PCA Channel 2 Capture Module High Byte]$
 
 	// $[Auto-reload]
@@ -968,6 +981,10 @@ extern void PCACH_2_enter_DefaultMode_from_RESET(void) {
 
 	// $[PCA0 Settings Restore]
 	// [PCA0 Settings Restore]$
+
+}
+
+extern void LFOSC_0_enter_DefaultMode_from_RESET(void) {
 
 }
 

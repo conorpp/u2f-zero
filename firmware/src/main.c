@@ -52,8 +52,6 @@ void rgb(uint8_t r, uint8_t g, uint8_t b)
 
 #define ms_since(ms,num) (((uint16_t)get_ms() - (ms)) >= num ? (1|(ms=(uint16_t)get_ms())):0)
 
-
-
 int16_t main(void) {
 
 	uint16_t ms_heart;
@@ -64,13 +62,16 @@ int16_t main(void) {
 	uint8_t light = 0;
 
 	enter_DefaultMode_from_RESET();
-	init(&appdata);
 
-	// STDIO library requires TI to print
-	SCON0_TI = 1;
+	// ~200 ms interval watchdog
+	WDTCN = 4;
+
+	watchdog();
+	init(&appdata);
 
 	// Enable interrupts
 	IE_EA = 1;
+	watchdog();
 
 	u2f_prints("U2F ZERO\r\n");
 
@@ -79,6 +80,7 @@ int16_t main(void) {
 
 
 	while (1) {
+		watchdog();
 
 		if (ms_since(ms_heart,500))
 		{

@@ -60,7 +60,6 @@ static void restart_bus()
 	SMB0CN0_STO = 0;
 	SMB0CN0_ACK = 0;
 	SMB_BUSY_CLEAR();
-	SMB.errors = 0;
 }
 
 SI_INTERRUPT (SMBUS0_ISR, SMBUS0_IRQn)
@@ -125,7 +124,6 @@ SI_INTERRUPT (SMBUS0_ISR, SMBUS0_IRQn)
 				// end transaction
 				SMB0CN0_STO = 1;
 				SMB_BUSY_CLEAR();
-				SMB.errors = 0;
 			}
 
 
@@ -163,7 +161,6 @@ SI_INTERRUPT (SMBUS0_ISR, SMBUS0_IRQn)
 				SMB_BUSY_CLEAR();
 				SMB0CN0_ACK = 0;
 				SMB0CN0_STO = 1;
-				SMB.errors = 0;
 			}
 
 			break;

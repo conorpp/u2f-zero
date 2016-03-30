@@ -24,6 +24,7 @@
     <property object="INTERRUPT_0" propertyId="interrupt.extendedinterruptenable1.enabletimer3interrupt" value="Enabled"/>
     <property object="INTERRUPT_0" propertyId="interrupt.interruptenable.enableallinterrupts" value="Enabled"/>
     <property object="INTERRUPT_0" propertyId="interrupt.interruptenable.enabletimer2interrupt" value="Enabled"/>
+    <property object="LFOSC_0" propertyId="lfosc.lowfrequencyoscillatorcontrol.enableinternallfoscillator" value="Enabled"/>
     <property object="P0.2" propertyId="ports.settings.iomode" value="Digital Push-Pull Output"/>
     <property object="P0.2" propertyId="ports.settings.outputmode" value="Push-pull"/>
     <property object="P0.2" propertyId="ports.settings.skip" value="Skipped"/>
@@ -40,6 +41,8 @@
     <property object="P1.0" propertyId="ports.settings.outputmode" value="Push-pull"/>
     <property object="PBCFG_0" propertyId="pbcfg.settings.enablecrossbar" value="Enabled"/>
     <property object="PCACH_0" propertyId="ABPeripheral.included" value="true"/>
+    <property object="PCACH_0" propertyId="pcach.pcachannel.capturecomparehighbyte" value="255"/>
+    <property object="PCACH_0" propertyId="pcach.pcachannel.capturecomparelowbyte" value="220"/>
     <property object="PCACH_0" propertyId="pcach.pcachannel.capturecompareregister" value="65500"/>
     <property object="PCACH_0" propertyId="pcach.pcachannel.clockdivider" value="100"/>
     <property object="PCACH_0" propertyId="pcach.pcachannel.pcaalignment" value="Center-aligned PWM"/>
@@ -47,6 +50,7 @@
     <property object="PCACH_0" propertyId="pcach.pcachannelcapturecomparemode.enablechannelpulsewidthmodulationmoden" value="Enabled"/>
     <property object="PCACH_0" propertyId="pcach.pcacontrol.channelcapturecomparemode" value="Predefined 8~11-bit pulse modulator"/>
     <property object="PCACH_1" propertyId="ABPeripheral.included" value="true"/>
+    <property object="PCACH_1" propertyId="pcach.pcachannel.capturecomparehighbyte" value="100"/>
     <property object="PCACH_1" propertyId="pcach.pcachannel.capturecompareregister" value="25600"/>
     <property object="PCACH_1" propertyId="pcach.pcachannel.clockdivider" value="100"/>
     <property object="PCACH_1" propertyId="pcach.pcachannel.pcaalignment" value="Center-aligned PWM"/>
@@ -54,6 +58,7 @@
     <property object="PCACH_1" propertyId="pcach.pcachannelcapturecomparemode.enablechannelpulsewidthmodulationmoden" value="Enabled"/>
     <property object="PCACH_1" propertyId="pcach.pcacontrol.channelcapturecomparemode" value="Predefined 8~11-bit pulse modulator"/>
     <property object="PCACH_2" propertyId="ABPeripheral.included" value="true"/>
+    <property object="PCACH_2" propertyId="pcach.pcachannel.capturecomparehighbyte" value="100"/>
     <property object="PCACH_2" propertyId="pcach.pcachannel.capturecompareregister" value="25600"/>
     <property object="PCACH_2" propertyId="pcach.pcachannel.clockdivider" value="100"/>
     <property object="PCACH_2" propertyId="pcach.pcachannel.pcaalignment" value="Center-aligned PWM"/>
@@ -139,7 +144,9 @@
     <property object="VREG_0" propertyId="ABPeripheral.included" value="true"/>
     <property object="VREG_0" propertyId="vreg.5vto33vldoregulatorldo1.regulatorbias" value="Disabled (Lowest power consumption)"/>
     <property object="WDT_0" propertyId="ABPeripheral.included" value="true"/>
-    <property object="WDT_0" propertyId="wdt.watchdogcontrol.wdtenable" value="Disable"/>
+    <property object="WDT_0" propertyId="wdt.watchdogcontrol.wdtinitialvalue" value="4"/>
+    <property object="WDT_0" propertyId="wdt.watchdogcontrol.wdtperiodactual" value="204.800 ms"/>
+    <property object="WDT_0" propertyId="wdt.watchdogcontrol.wdtperiodtargetms" value="200"/>
   </mode>
   <modeTransition>
     <property object="RESET &#x2192; DefaultMode" propertyId="modeTransition.target" value="DefaultMode"/>

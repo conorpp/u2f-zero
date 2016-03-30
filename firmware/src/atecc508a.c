@@ -38,20 +38,17 @@ int8_t atecc_send(uint8_t cmd, uint8_t p1, uint16_t p2,
 
 void atecc_idle()
 {
-	static data uint8_t params = 0x2;
-	smb_write( ATECC508A_ADDR, &params, sizeof(params));
+	smb_write( ATECC508A_ADDR, "\x02", 1);
 }
 
 void atecc_sleep()
 {
-	static data uint8_t params = 0x1;
-	smb_write( ATECC508A_ADDR, &params, sizeof(params));
+	smb_write( ATECC508A_ADDR, "\x01", 1);
 }
 
 void atecc_wake()
 {
-	static uint8_t params[] = {0,0};
-	smb_write( ATECC508A_ADDR, params, sizeof(params));
+	smb_write( ATECC508A_ADDR, "\0\0", 2);
 }
 
 #define PKT_CRC(buf, pkt_len) (htole16(*((uint16_t*)(buf+pkt_len-2))))
@@ -75,12 +72,14 @@ int8_t atecc_recv(uint8_t * buf, uint8_t buflen, struct atecc_response* res)
 	{
 		if (PKT_CRC(buf,pkt_len) != SMB.crc)
 		{
-			goto fail;
+			set_app_error(ERROR_I2C_CRC);
+			return -1;
 		}
 	}
 	else
 	{
-		goto fail;
+		set_app_error(ERROR_I2C_BAD_LEN);
+		return -1;
 	}
 
 	if (pkt_len == 4 && buf[1] != 0)
@@ -95,9 +94,6 @@ int8_t atecc_recv(uint8_t * buf, uint8_t buflen, struct atecc_response* res)
 		res->buf = buf+1;
 	}
 	return pkt_len;
-
-	fail:
-	return -1;
 }
 
 static void delay_cmd(uint8_t cmd)
@@ -111,11 +107,8 @@ static void delay_cmd(uint8_t cmd)
 		case ATECC_CMD_GENKEY:
 			d = 100;
 			break;
-		case ATECC_CMD_LOCK:
-			d = 32;
-			break;
 		default:
-			d = 26;
+			d = 32;
 			break;
 	}
 	u2f_delay(d);
@@ -142,7 +135,6 @@ int8_t atecc_send_recv(uint8_t cmd, uint8_t p1, uint16_t p2,
 		errors++;
 		if (errors > 5)
 		{
-			u2f_printb("fail recv ", 1,appdata.error);
 			return -1;
 		}
 		switch(appdata.error)
@@ -150,16 +142,9 @@ int8_t atecc_send_recv(uint8_t cmd, uint8_t p1, uint16_t p2,
 			case ERROR_NOTHING:
 				delay_cmd(cmd);
 				break;
-			case ERROR_ATECC_EXECUTION:
-				delay_cmd(cmd);
-			case ERROR_ATECC_PARSE:
-			case ERROR_ATECC_FAULT:
-			case ERROR_ATECC_WAKE:
-			case ERROR_ATECC_WATCHDOG:
-				goto resend;
-				break;
 			default:
-				u2f_delay(10);
+				u2f_delay(cmd);
+				goto resend;
 				break;
 		}
 

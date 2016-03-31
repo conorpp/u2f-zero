@@ -6,9 +6,9 @@
 
 #include "si_toolchain.h"
 #include "efm8_usb.h"
-#include "assert.h"
+//#include "assert.h"
 #include <stdint.h>
-
+#define SLAB_ASSERT(x)
 // -----------------------------------------------------------------------------
 // Global Variables
 

@@ -11,11 +11,16 @@
 #include "bsp.h"
 #include "app.h"
 #include "i2c.h"
+#include "custom.h"
 #include "u2f_hid.h"
 #include "u2f.h"
 #include "tests.h"
 
 data struct APP_DATA appdata;
+
+uint8_t error;
+uint8_t state;
+struct u2f_hid_msg * hid_msg;
 
 static void init(struct APP_DATA* ap)
 {
@@ -28,17 +33,34 @@ static void init(struct APP_DATA* ap)
 	u2f_init();
 #endif
 	U2F_BUTTON_VAL = 1;
+	state = APP_NOTHING;
+	error = ERROR_NOTHING;
 }
 
 void set_app_error(APP_ERROR_CODE ec)
 {
-	appdata.error = ec;
+	error = ec;
+}
+
+uint8_t get_app_error()
+{
+	return error;
+}
+
+uint8_t get_app_state()
+{
+	return state;
+}
+
+void set_app_state(APP_STATE s)
+{
+	state = s;
 }
 
 void set_app_u2f_hid_msg(struct u2f_hid_msg * msg )
 {
-	appdata.state = APP_HID_MSG;
-	appdata.hid_msg = msg;
+	state = APP_HID_MSG;
+	hid_msg = msg;
 }
 
 
@@ -50,9 +72,7 @@ void rgb(uint8_t r, uint8_t g, uint8_t b)
 }
 
 
-#define ms_since(ms,num) (((uint16_t)get_ms() - (ms)) >= num ? (1|(ms=(uint16_t)get_ms())):0)
-
-
+#define ms_since(ms,num) (((uint16_t)get_ms() - (ms)) >= num ? ((ms=(uint16_t)get_ms())):0)
 
 int16_t main(void) {
 
@@ -64,21 +84,28 @@ int16_t main(void) {
 	uint8_t light = 0;
 
 	enter_DefaultMode_from_RESET();
-	init(&appdata);
 
-	// STDIO library requires TI to print
-	SCON0_TI = 1;
+	// ~200 ms interval watchdog
+	WDTCN = 4;
+
+	watchdog();
+	init(&appdata);
 
 	// Enable interrupts
 	IE_EA = 1;
+	watchdog();
 
 	u2f_prints("U2F ZERO\r\n");
-
+	if (RSTSRC & RSTSRC_WDTRSF__SET)
+	{
+		error = ERROR_DAMN_WATCHDOG;
+	}
 	run_tests();
 	atecc_setup_init(appdata.tmp);
 
 
 	while (1) {
+		watchdog();
 
 		if (ms_since(ms_heart,500))
 		{
@@ -86,12 +113,12 @@ int16_t main(void) {
 		}
 
 
-		if (!USBD_EpIsBusy(EP1OUT) && !USBD_EpIsBusy(EP1IN) && appdata.state != APP_HID_MSG)
+		if (!USBD_EpIsBusy(EP1OUT) && !USBD_EpIsBusy(EP1IN) && state != APP_HID_MSG)
 		{
 			USBD_Read(EP1OUT, hidmsgbuf, sizeof(hidmsgbuf), true);
 		}
 
-		switch(appdata.state)
+		switch(state)
 		{
 			case APP_NOTHING:
 				if (ms_since(ms_grad, 10))
@@ -117,19 +144,23 @@ int16_t main(void) {
 				}
 				break;
 			case APP_HID_MSG:
-#ifndef ATECC_SETUP_DEVICE
-				u2f_hid_request(appdata.hid_msg);
-#else
-				atecc_setup_device((struct config_msg*)appdata.hid_msg);
-#endif
-				if (appdata.state == APP_HID_MSG)
-					appdata.state = APP_NOTHING;
+				if (custom_command(hid_msg))
+				{
+
+				}
+				else
+				{
+					u2f_hid_request(hid_msg);
+				}
+
+				if (state == APP_HID_MSG)
+					state = APP_NOTHING;
 				break;
 			case APP_WINK:
 				rgb(0,0,150);
 				light = 150;
 				ms_wink = get_ms();
-				appdata.state = _APP_WINK;
+				state = _APP_WINK;
 				break;
 			case _APP_WINK:
 
@@ -142,16 +173,20 @@ int16_t main(void) {
 				if (winks == 5)
 				{
 					winks = 0;
-					appdata.state = APP_NOTHING;
+					state = APP_NOTHING;
 				}
 				break;
 		}
 
-		if (appdata.error)
+		if (error)
 		{
-			u2f_printb("error: ", 1, appdata.error);
-			appdata.error = 0;
+			u2f_printb("error: ", 1, error);
+			error = 0;
 			rgb(200,0,0);
+			while(!ms_since(ms_heart,2000))
+			{
+				watchdog();
+			}
 		}
 
 

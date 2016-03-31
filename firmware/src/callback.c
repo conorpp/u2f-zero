@@ -66,28 +66,21 @@ USB_Status_TypeDef USBD_SetupCmdCb(
 
 		switch (setup->bRequest) {
 		case GET_DESCRIPTOR:
-			if ((setup->wValue >> 8) == USB_HID_REPORT_DESCRIPTOR) {
-				switch (setup->wIndex) {
-				case 0: // Interface 0
-					USBD_Write(EP0, ReportDescriptor0,
-							EFM8_MIN(sizeof(ReportDescriptor0), setup->wLength),
-							false);
-					retVal = USB_STATUS_OK;
-					break;
+			if (setup->wIndex == 0)
+			{
+				if ((setup->wValue >> 8) == USB_HID_REPORT_DESCRIPTOR) {
 
-				default: // Unhandled Interface
-					break;
-				}
-			} else if ((setup->wValue >> 8) == USB_HID_DESCRIPTOR) {
-				switch (setup->wIndex) {
-				case 0: // Interface 0
-					USBD_Write(EP0, (&configDesc[18]),
-							EFM8_MIN(USB_HID_DESCSIZE, setup->wLength), false);
-					retVal = USB_STATUS_OK;
-					break;
+						USBD_Write(EP0, ReportDescriptor0,
+								EFM8_MIN(sizeof(ReportDescriptor0), setup->wLength),
+								false);
+						retVal = USB_STATUS_OK;
 
-				default: // Unhandled Interface
-					break;
+				} else if ((setup->wValue >> 8) == USB_HID_DESCRIPTOR) {
+
+						USBD_Write(EP0, (&configDesc[18]),
+								EFM8_MIN(USB_HID_DESCSIZE, setup->wLength), false);
+						retVal = USB_STATUS_OK;
+
 				}
 			}
 			break;
@@ -100,23 +93,13 @@ USB_Status_TypeDef USBD_SetupCmdCb(
 	    // Implement the necessary HID class specific commands.
 	    switch (setup->bRequest)
 	    {
-	      case USB_HID_SET_REPORT:
-	    	  u2f_print_ev("output report\r\n");
-	        break;
-
-	      case USB_HID_GET_REPORT:
-
-	        break;
-
 	      case USB_HID_SET_IDLE:
 	        if (((setup->wValue & 0xFF) == 0)             // Report ID
 	            && (setup->wLength == 0)
 	            && (setup->bmRequestType.Direction != USB_SETUP_DIR_IN))
 	        {
-	          idleTimerSet(setup->wValue >> 8);
 	          retVal = USB_STATUS_OK;
 	        }
-	        else u2f_print_ev("unhandled USB_HID_SET_IDLE\r\n");
 	        break;
 
 	      case USB_HID_GET_IDLE:
@@ -124,20 +107,14 @@ USB_Status_TypeDef USBD_SetupCmdCb(
 	            && (setup->wLength == 1)
 	            && (setup->bmRequestType.Direction == USB_SETUP_DIR_IN))
 	        {
-	          u2f_print_ev("get idle\r\n");
-	          tmpBuffer = idleGetRate();
+	          tmpBuffer = 24;
 	          USBD_Write(EP0, &tmpBuffer, 1, false);
 	          retVal = USB_STATUS_OK;
 	        }
-	        else u2f_print_ev("unhandled USB_HID_GET_IDLE\r\n");
 	        break;
 	      default:
-	    	  u2f_print_ev("unhandled setup->bRequest\r\n");
+	    	  break;
 	    }
-	  }
-	  else
-	  {
-
 	  }
 
 	return retVal;
@@ -152,13 +129,11 @@ uint16_t USBD_XferCompleteCb(uint8_t epAddr, USB_Status_TypeDef status,
 
 	if (epAddr == EP1OUT)
 	{
-		dump_hex(hidmsgbuf, sizeof(hidmsgbuf));
+		// dump_hex(hidmsgbuf, sizeof(hidmsgbuf));
 
 		set_app_u2f_hid_msg((struct u2f_hid_msg *) hidmsgbuf );
 
 	}
-
-
 	return 0;
 }
 

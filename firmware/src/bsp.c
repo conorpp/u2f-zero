@@ -10,7 +10,7 @@
 #include "bsp.h"
 
 
-void u2f_delay(uint16_t ms) {
+void u2f_delay(uint32_t ms) {
 	uint32_t ms_now = get_ms();
 	while((get_ms() - ms_now) < ms)
 	{}
@@ -18,14 +18,13 @@ void u2f_delay(uint16_t ms) {
 
 void usb_write(uint8_t* buf, uint8_t len)
 {
-	int16_t ec;
 	uint8_t errors = 0;
-	while (USB_STATUS_OK != (ec=USBD_Write(EP1IN, buf, len, false)))
+	while (USB_STATUS_OK != (USBD_Write(EP1IN, buf, len, false)))
 	{
 		u2f_delay(2);
 		if (errors++ > 30)
 		{
-			u2f_printd("USB error",1, -ec);
+			set_app_error(ERROR_USB_WRITE);
 			break;
 		}
 	}
@@ -40,7 +39,8 @@ void putf(char c)
 	SBUF0 = c;
 	for (i=0; i<200; i++){}
 	for (i=0; i<200; i++){}
-	for (i=0; i<200; i++){}
+	for (i=0; i<190; i++){}
+	watchdog();
 }
 
 
@@ -66,95 +66,61 @@ void u2f_prints(char* d)
 	{
 		// UART0 output queue
 		putf(*d++);
-
 	}
 }
 
-static void int2str_reduce_10(char ** snum, uint32_t copy)
+static void int2str_reduce_n(char ** snum, uint32_t copy, uint8_t n)
 {
     do
     {
         *snum++;
-        copy /= 10;
+        copy /= n;
     }while(copy);
 }
 
-static void int2str_reduce_16(char ** snum, uint32_t copy)
-{
-    do
-    {
-        *snum++;
-        copy >>= 4;
-    }while(copy);
-}
 
 static const char * __digits = "0123456789abcdef";
 static char __int2str_buf[9];
 
-static void int2str_map_10(char ** snum, uint32_t i)
+static void int2str_map_n(char ** snum, uint32_t i, uint8_t n)
 {
     do
     {
-        *--*snum = __digits[i % 10];
-        i /= 10;
+        *--*snum = __digits[i % n];
+        i /= n;
     }while(i);
 }
 
-static void int2str_map_16(char ** snum, uint32_t i)
-{
-    do
-    {
-        *--*snum = __digits[i & 0xf];
-        i >>= 4;
-    }while(i);
-}
+#define dint2str(i)     __int2strn(i,10)
+#define xint2str(i)     __int2strn(i,16)
 
-#define dint2str(i)     __int2str10(i)
-#define xint2str(i)     __int2str16(i)
-
-char * __int2str10(int32_t i)
+char * __int2strn(int32_t i, uint8_t n)
 {
     char * snum = __int2str_buf;
     if (i<0) *snum++ = '-';
-    int2str_reduce_10(&snum, i);
+    int2str_reduce_n(&snum, i, n);
     *snum = '\0';
-    int2str_map_10(&snum, i);
+    int2str_map_n(&snum, i, n);
     return snum;
 }
 
-char * __int2str16(int32_t i)
-{
-    char * snum = __int2str_buf;
-    if (i<0) *snum++ = '-';
-    int2str_reduce_16(&snum, i);
-    *snum = '\0';
-    int2str_map_16(&snum, i);
-    return snum;
-}
-
-
-void u2f_putb(uint8_t i)
-{
-    u2f_prints(xint2str((uint32_t)i));
-}
-
-void u2f_putd(int16_t i)
+void u2f_putd(int32_t i)
 {
 	u2f_prints(dint2str((int32_t)i));
 }
 
-void u2f_putx(uint16_t i)
+void u2f_putx(int32_t i)
 {
 	u2f_prints(xint2str((int32_t)i));
 }
 
-void u2f_putl(int32_t i)
+static void put_space()
 {
-	u2f_prints(dint2str((int32_t)i));
+	u2f_prints(" ");
 }
-void u2f_putlx(int32_t i)
+static void put_line()
 {
-	u2f_prints(xint2str((int32_t)i));
+	u2f_prints("\r\n");
 }
 
 void u2f_printd(const char * tag, uint8_t c, ...)
@@ -165,9 +131,9 @@ void u2f_printd(const char * tag, uint8_t c, ...)
     while(c--)
     {
         u2f_putd(va_arg(args, int16_t));
-        u2f_prints(" ");
+
     }
-    u2f_prints("\r\n");
+    put_line();
     va_end(args);
 }
 
@@ -181,7 +147,7 @@ void u2f_printl(const char * tag, uint8_t c, ...)
         u2f_putl(va_arg(args, int32_t));
         u2f_prints(" ");
     }
-    u2f_prints("\r\n");
+    put_line();
     va_end(args);
 }
 
@@ -195,7 +161,7 @@ void u2f_printx(const char * tag, uint8_t c, ...)
         u2f_putx(va_arg(args, uint16_t));
         u2f_prints(" ");
     }
-    u2f_prints("\r\n");
+    put_line();
     va_end(args);
 }
 
@@ -207,9 +173,9 @@ void u2f_printb(const char * tag, uint8_t c, ...)
     while(c--)
     {
         u2f_putb(va_arg(args, uint8_t));
-        u2f_prints(" ");
+        put_space();
     }
-    u2f_prints("\r\n");
+    put_line();
     va_end(args);
 }
 
@@ -221,9 +187,9 @@ void u2f_printlx(const char * tag, uint8_t c, ...)
     while(c--)
     {
         u2f_putlx(va_arg(args, int32_t));
-        u2f_prints(" ");
+        put_space();
     }
-    u2f_prints("\r\n");
+    put_line();
     va_end(args);
 }
 

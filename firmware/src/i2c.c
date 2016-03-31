@@ -13,70 +13,55 @@
 #include "bsp.h"
 #include "app.h"
 
-
-static int8_t while_busy()
-{
-	while(SMB_IS_BUSY())
-	{
-		if (SMB_ERRORS_EXCEEDED(&SMB))
-		{
-			set_app_error(ERROR_I2C_ERRORS_EXCEEDED);
-			return -1;
-		}
-	}
-	return 0;
-}
+static void smb_init_crc();
 
 uint8_t smb_read (uint8_t addr, uint8_t* dest, uint8_t count)
 {
-	if (while_busy()) return -1;
+	while(SMB_IS_BUSY()){}
 
-	SMB_FLAGS = SMB_READ | SMB_BUSY| SMB.preflags;
-	SMB.preflags = 0;
+	SMB_crc = 0;
+	SMB_crc_offset = 0;
+	SMB_FLAGS = SMB_READ | SMB_BUSY | SMB_preflags;
+	SMB_preflags = 0;
 
-	SMB.read_offset = 0;
-	SMB.addr = addr;
-	SMB.read_len = count;
-	SMB.read_buf = dest;
+	SMB_read_offset = 0;
+	SMB_addr = addr;
+	SMB_read_len = count;
+	SMB_read_buf = dest;
 	SMB0CN0_STA = 1;
 
-	if (while_busy()) return -1;
-	return SMB.read_len;
+	while(SMB_IS_BUSY()){}
+	return SMB_read_len;
 }
 
 
 void smb_write (uint8_t addr, uint8_t* buf, uint8_t len)
 {
-	if (while_busy()) return;
+	while(SMB_IS_BUSY()){}
 
-   SMB_FLAGS = SMB_WRITE | SMB_BUSY | SMB.preflags;
-   SMB.preflags = 0;
+	SMB_crc = 0;
+	SMB_crc_offset = 0;
+	SMB_FLAGS = SMB_WRITE | SMB_BUSY | SMB_preflags;
+	SMB_preflags = 0;
 
-   SMB.write_len = len;
-   SMB.write_buf = buf;
-   SMB.write_offset = 0;
-   SMB.addr = addr;
+	SMB_write_len = len;
+	SMB_write_buf = buf;
+	SMB_write_offset = 0;
+	SMB_addr = addr;
 
-   SMB0CN0_STA = 1;
-   while_busy();
+	SMB0CN0_STA = 1;
+	while(SMB_IS_BUSY()){}
 }
 
 void smb_set_ext_write( uint8_t* extbuf, uint8_t extlen)
 {
-	while_busy();
-	SMB.write_ext_len = extlen;
-	SMB.write_ext_buf = extbuf;
-	SMB.write_ext_offset = 0;
-	SMB.preflags |= SMB_WRITE_EXT;
+	while(SMB_IS_BUSY()){}
+	SMB_write_ext_len = extlen;
+	SMB_write_ext_buf = extbuf;
+	SMB_write_ext_offset = 0;
+	SMB_preflags |= SMB_WRITE_EXT;
 }
 
-void smb_init_crc()
-{
-	while_busy();
-	SMB.crc = 0;
-	SMB.crc_offset = 0;
-	SMB.preflags |= SMB_COMPUTE_CRC;
-}
 
 uint16_t feed_crc(uint16_t crc, uint8_t b)
 {
@@ -102,6 +87,6 @@ uint16_t reverse_bits(uint16_t crc)
 
 void smb_init()
 {
-	memset(&SMB,0,sizeof(SMB));
+	// memset(&SMB,0,sizeof(SMB));
 	SMB_FLAGS = 0;
 }

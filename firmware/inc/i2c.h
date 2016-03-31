@@ -13,7 +13,6 @@ struct smb_interrupt_interface
 	uint8_t addr;
 	uint16_t crc;
 	uint8_t crc_offset;
-	uint8_t errors;
 
 	uint8_t* write_buf;
 	uint8_t write_len;
@@ -28,10 +27,23 @@ struct smb_interrupt_interface
 	uint8_t write_ext_offset;
 
 	uint8_t preflags;
-
 };
 
-extern struct smb_interrupt_interface SMB;
+extern data uint8_t SMB_addr;
+extern uint8_t * SMB_write_buf;
+extern data uint8_t SMB_write_len;
+extern data uint8_t SMB_write_offset;
+extern data uint8_t SMB_read_len;
+extern data uint8_t SMB_read_offset;
+extern uint8_t * SMB_read_buf;
+extern uint8_t * SMB_write_ext_buf;
+extern data uint8_t SMB_write_ext_len;
+extern data uint8_t SMB_write_ext_offset;
+extern uint8_t SMB_preflags;
+extern uint16_t SMB_crc;
+extern data uint8_t SMB_crc_offset;
+
+//extern struct smb_interrupt_interface SMB;
 extern data volatile uint8_t SMB_FLAGS;
 
 #define SMB_MAX_ERRORS 15
@@ -42,7 +54,6 @@ extern data volatile uint8_t SMB_FLAGS;
 #define SMB_BUSY			0x2
 #define SMB_WRITE_EXT		0x4
 #define SMB_READ_TRUNC		0x10
-#define SMB_COMPUTE_CRC		0x20
 #define SMB_RECV_NACK		0x40
 
 #define SMB_READING() 				((SMB_FLAGS & SMB_READ))
@@ -50,8 +61,6 @@ extern data volatile uint8_t SMB_FLAGS;
 #define SMB_WRITING_EXT() 			((SMB_FLAGS & SMB_WRITE_EXT))
 #define SMB_IS_BUSY() 				((SMB_FLAGS & SMB_BUSY))
 #define SMB_BUSY_CLEAR() 			(SMB_FLAGS &= ~SMB_BUSY)
-#define SMB_HAS_CRC() 				(SMB_FLAGS & SMB_COMPUTE_CRC)
-#define SMB_CRC_CLEAR() 			(SMB_FLAGS &= ~SMB_COMPUTE_CRC)
 #define SMB_WAS_NACKED() 			(SMB_FLAGS & SMB_RECV_NACK)
 
 void smb_init();
@@ -65,8 +74,6 @@ uint8_t smb_read (uint8_t addr, uint8_t* dest, uint8_t count);
 void smb_write (uint8_t addr, uint8_t* buf, uint8_t len);
 
 void smb_set_ext_write( uint8_t* extbuf, uint8_t extlen);
-
-void smb_init_crc();
 
 // reverse bits for a 16 bit int
 uint16_t reverse_bits(uint16_t crc);

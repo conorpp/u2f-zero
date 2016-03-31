@@ -3,9 +3,7 @@
 U2F Zero
 ========
 
-
-
-
+![](http://i.imgur.com/LpJVjvz.jpg)
 
 Overview
 =======
@@ -86,6 +84,27 @@ U2F layer:
 * u2f.h
 * u2f-atecc.c   // device specific implementation
 
+## Random number generation
+
+U2F Zero has a [true random number generator](https://en.wikipedia.org/wiki/Hardware_random_number_generator) 
+(TRNG).  It's used internally
+for key generation and signing but it's also exposed to the user for other use cases because
+a good source of entropy can be useful.
+
+Generate random numbers from the device:
+
+```bash
+cd tools/u2f_zero_client
+./client.py rng     # output randomness at about 1400 bytes/s
+```
+
+Update the seed with user supplied data:
+
+```bash
+cd tools/u2f_zero_client
+cat /dev/random | ./client.py seed     # update seed at about 410 bytes/s
+```
+
 ## Build a U2F Zero token yourself
 
 What's the point of an open source project if you can't build it yourself?
@@ -139,8 +158,8 @@ First open "app.h" and uncomment "ATECC_SETUP_DEVICE".  Now build and program th
 Now to check the device works, lock it, and get the public key used for attestation.
 
 ```bash
-cd tools/hid_config
-./config.py pubkey.hex
+cd tools/u2f_zero_client
+./client.py configure pubkey.hex
 ```
 
 The ECC public key X,Y values will be stored in hex in pubkey.hex if setup is successful.

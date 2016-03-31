@@ -92,14 +92,14 @@ a good source of entropy can be useful.
 
 Generate random numbers from the device:
 
-```python
+```bash
 cd tools/u2f_zero_client
 ./client.py rng     # output randomness at about 1400 bytes/s
 ```
 
 Update the seed with user supplied data:
 
-```python
+```bash
 cd tools/u2f_zero_client
 cat /dev/random | ./client.py seed     # update seed at about 410 bytes/s
 ```

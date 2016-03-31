@@ -18,7 +18,7 @@ class commands:
     U2F_CUSTOM_RNG = 0x21
     U2F_CUSTOM_SEED = 0x22
 
-if len(sys.argv) != 2:
+if len(sys.argv) not in [2,3]:
     print 'usage: %s <action> [<public-key-output>]' % sys.argv[0]
     print '     action: configure: setup the device configuration.  must specify pubkey output.'
     print '     action: rng: Continuously dump random numbers from the devices hardware TRNG.'

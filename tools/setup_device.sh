@@ -9,10 +9,10 @@ then
 
 fi
 
-export PATH=$PATH:gencert:hid_config:insert_key
+export PATH=$PATH:gencert:u2f_zero_client:insert_key
 
 # setup atecc
-config.py pubkey.hex
+client.py configure pubkey.hex
 
 # generate cert
 gencert.sh "$1" "$(cat pubkey.hex)" attest.der > pubkey.c.txt

@@ -86,7 +86,7 @@ U2F layer:
 
 ## Random number generation
 
-U2F Zero has a [cryptographically secure 
+The ATECC508A has a tamper resistent, [cryptographically secure 
 random number generator](https://en.wikipedia.org/wiki/Cryptographically_secure_pseudorandom_number_generator)
 (CSPRNG) that implements [CTR_DRBG](https://en.wikipedia.org/wiki/NIST_SP_800-90A).
 It's used internally for key generation and signing but it's also exposed to the user because

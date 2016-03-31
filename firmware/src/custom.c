@@ -1,0 +1,54 @@
+/*
+ * custom.c
+ *
+ *  Created on: Mar 30, 2016
+ *      Author: pp
+ */
+
+#include <stdint.h>
+#include "custom.h"
+#include "bsp.h"
+#include "atecc508a.h"
+
+uint8_t custom_command(struct u2f_hid_msg * msg)
+{
+	struct atecc_response res;
+	uint8_t ec;
+
+	if (msg->cid != U2FHID_BROADCAST) return 0;
+
+	switch(msg->pkt.init.cmd)
+	{
+		case U2F_CUSTOM_GET_RNG:
+			u2f_prints("U2F_CUSTOM_GET_RNG\r\n");
+			if (atecc_send_recv(ATECC_CMD_RNG,ATECC_RNG_P1,ATECC_RNG_P2,
+				NULL, 0,
+				appdata.tmp,
+				sizeof(appdata.tmp), &res) == 0 )
+			{
+				memmove(msg->pkt.init.payload, res.buf, 32);
+				U2FHID_SET_LEN(msg, 32);
+				usb_write((uint8_t*)msg, 64);
+			}
+			else
+			{
+				U2FHID_SET_LEN(msg, 0);
+				usb_write((uint8_t*)msg, 64);
+			}
+
+			break;
+		case U2F_CUSTOM_SEED_RNG:
+			u2f_prints("U2F_CUSTOM_SEED_RNG\r\n");
+			ec = atecc_send_recv(ATECC_CMD_NONCE,ATECC_NONCE_RNG_UPDATE,0,
+							msg->pkt.init.payload, 20,
+							appdata.tmp,
+							sizeof(appdata.tmp), &res);
+			U2FHID_SET_LEN(msg, 1);
+			msg->pkt.init.payload[0] = ec == 0 ? 1 : 0;
+			usb_write((uint8_t*)msg, 64);
+			break;
+		default:
+			return 0;
+	}
+	return 1;
+}

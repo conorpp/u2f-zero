@@ -129,7 +129,7 @@ uint16_t USBD_XferCompleteCb(uint8_t epAddr, USB_Status_TypeDef status,
 
 	if (epAddr == EP1OUT)
 	{
-		dump_hex(hidmsgbuf, sizeof(hidmsgbuf));
+		// dump_hex(hidmsgbuf, sizeof(hidmsgbuf));
 
 		set_app_u2f_hid_msg((struct u2f_hid_msg *) hidmsgbuf );
 

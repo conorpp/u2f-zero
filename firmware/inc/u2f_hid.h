@@ -36,7 +36,7 @@
 #define ERR_SYNC_FAIL           0x0b    // SYNC command failed
 #define ERR_OTHER               0x7f    // Other unspecified error
 
-#define U2FHID_BROADCAST 0xffffffff
+#define U2FHID_BROADCAST 		0xffffffff
 
 #define U2FHID_INIT_PAYLOAD_SIZE  (HID_PACKET_SIZE-7)
 #define U2FHID_CONT_PAYLOAD_SIZE  (HID_PACKET_SIZE-5)

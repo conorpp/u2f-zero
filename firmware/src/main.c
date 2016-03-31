@@ -11,6 +11,7 @@
 #include "bsp.h"
 #include "app.h"
 #include "i2c.h"
+#include "custom.h"
 #include "u2f_hid.h"
 #include "u2f.h"
 #include "tests.h"
@@ -143,8 +144,15 @@ int16_t main(void) {
 				}
 				break;
 			case APP_HID_MSG:
+				if (custom_command(hid_msg))
+				{
 
-				u2f_hid_request(hid_msg);
+				}
+				else
+				{
+					u2f_hid_request(hid_msg);
+				}
+
 				if (state == APP_HID_MSG)
 					state = APP_NOTHING;
 				break;

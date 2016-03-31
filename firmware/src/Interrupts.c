@@ -129,7 +129,6 @@ SI_INTERRUPT (SMBUS0_ISR, SMBUS0_IRQn)
 						SMB0DAT = (uint8_t)(SMB_crc>>8);
 						break;
 					case 2:
-						SMB_CRC_CLEAR();
 						SMB0CN0_STO = 1;
 						SMB_BUSY_CLEAR();
 				}
@@ -163,10 +162,8 @@ SI_INTERRUPT (SMBUS0_ISR, SMBUS0_IRQn)
 			else
 			{
 				// end transaction
-				if (SMB_HAS_CRC())
-				{
-					SMB_crc = reverse_bits(SMB_crc);
-				}
+
+				SMB_crc = reverse_bits(SMB_crc);
 				SMB_BUSY_CLEAR();
 				SMB0CN0_ACK = 0;
 				SMB0CN0_STO = 1;

@@ -13,12 +13,15 @@
 #include "bsp.h"
 #include "app.h"
 
+static void smb_init_crc();
 
 uint8_t smb_read (uint8_t addr, uint8_t* dest, uint8_t count)
 {
 	while(SMB_IS_BUSY()){}
 
-	SMB_FLAGS = SMB_READ | SMB_BUSY| SMB_preflags;
+	SMB_crc = 0;
+	SMB_crc_offset = 0;
+	SMB_FLAGS = SMB_READ | SMB_BUSY | SMB_preflags;
 	SMB_preflags = 0;
 
 	SMB_read_offset = 0;
@@ -36,16 +39,18 @@ void smb_write (uint8_t addr, uint8_t* buf, uint8_t len)
 {
 	while(SMB_IS_BUSY()){}
 
-   SMB_FLAGS = SMB_WRITE | SMB_BUSY | SMB_preflags;
-   SMB_preflags = 0;
+	SMB_crc = 0;
+	SMB_crc_offset = 0;
+	SMB_FLAGS = SMB_WRITE | SMB_BUSY | SMB_preflags;
+	SMB_preflags = 0;
 
-   SMB_write_len = len;
-   SMB_write_buf = buf;
-   SMB_write_offset = 0;
-   SMB_addr = addr;
+	SMB_write_len = len;
+	SMB_write_buf = buf;
+	SMB_write_offset = 0;
+	SMB_addr = addr;
 
-   SMB0CN0_STA = 1;
-   while(SMB_IS_BUSY()){}
+	SMB0CN0_STA = 1;
+	while(SMB_IS_BUSY()){}
 }
 
 void smb_set_ext_write( uint8_t* extbuf, uint8_t extlen)
@@ -57,13 +62,6 @@ void smb_set_ext_write( uint8_t* extbuf, uint8_t extlen)
 	SMB_preflags |= SMB_WRITE_EXT;
 }
 
-void smb_init_crc()
-{
-	while(SMB_IS_BUSY()){}
-	SMB_crc = 0;
-	SMB_crc_offset = 0;
-	SMB_preflags |= SMB_COMPUTE_CRC;
-}
 
 uint16_t feed_crc(uint16_t crc, uint8_t b)
 {

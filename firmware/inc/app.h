@@ -52,6 +52,7 @@ typedef enum
 	ERROR_I2C_BAD_LEN = 0x16,
 	ERROR_HID_BUFFER_FULL = 0x17,
 	ERROR_HID_INVALID_CMD = 0x18,
+	ERROR_DAMN_WATCHDOG = 0x19,
 }
 APP_ERROR_CODE;
 
@@ -104,12 +105,13 @@ void u2f_config_request();
 #define U2F_DISABLE
 #define u2f_init(x)
 #define u2f_hid_init(x)
-#define u2f_hid_request(x)
+#define u2f_hid_request(x)	atecc_setup_device((struct config_msg*)x)
 #define u2f_hid_set_len(x)
 #define u2f_hid_flush(x)
 #define u2f_hid_writeback(x)
 
 #else
+
 
 #define atecc_setup_device(x)
 #define atecc_setup_init(x)

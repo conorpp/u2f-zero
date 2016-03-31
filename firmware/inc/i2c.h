@@ -54,7 +54,6 @@ extern data volatile uint8_t SMB_FLAGS;
 #define SMB_BUSY			0x2
 #define SMB_WRITE_EXT		0x4
 #define SMB_READ_TRUNC		0x10
-#define SMB_COMPUTE_CRC		0x20
 #define SMB_RECV_NACK		0x40
 
 #define SMB_READING() 				((SMB_FLAGS & SMB_READ))
@@ -62,8 +61,6 @@ extern data volatile uint8_t SMB_FLAGS;
 #define SMB_WRITING_EXT() 			((SMB_FLAGS & SMB_WRITE_EXT))
 #define SMB_IS_BUSY() 				((SMB_FLAGS & SMB_BUSY))
 #define SMB_BUSY_CLEAR() 			(SMB_FLAGS &= ~SMB_BUSY)
-#define SMB_HAS_CRC() 				(SMB_FLAGS & SMB_COMPUTE_CRC)
-#define SMB_CRC_CLEAR() 			(SMB_FLAGS &= ~SMB_COMPUTE_CRC)
 #define SMB_WAS_NACKED() 			(SMB_FLAGS & SMB_RECV_NACK)
 
 void smb_init();
@@ -77,8 +74,6 @@ uint8_t smb_read (uint8_t addr, uint8_t* dest, uint8_t count);
 void smb_write (uint8_t addr, uint8_t* buf, uint8_t len);
 
 void smb_set_ext_write( uint8_t* extbuf, uint8_t extlen);
-
-void smb_init_crc();
 
 // reverse bits for a 16 bit int
 uint16_t reverse_bits(uint16_t crc);

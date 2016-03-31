@@ -26,7 +26,6 @@ int8_t atecc_send(uint8_t cmd, uint8_t p1, uint16_t p2,
 	params[4] = ((uint8_t*)&p2)[1];
 	params[5] = ((uint8_t* )&p2)[0];
 
-	smb_init_crc();
 	smb_set_ext_write(buf, len);
 	smb_write( ATECC508A_ADDR, params, sizeof(params));
 	if (SMB_WAS_NACKED())
@@ -56,7 +55,6 @@ void atecc_wake()
 int8_t atecc_recv(uint8_t * buf, uint8_t buflen, struct atecc_response* res)
 {
 	uint8_t pkt_len;
-	smb_init_crc();
 	pkt_len = smb_read( ATECC508A_ADDR,buf,buflen);
 	if (SMB_WAS_NACKED())
 	{

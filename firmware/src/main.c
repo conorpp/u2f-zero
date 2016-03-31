@@ -71,7 +71,7 @@ void rgb(uint8_t r, uint8_t g, uint8_t b)
 }
 
 
-#define ms_since(ms,num) (((uint16_t)get_ms() - (ms)) >= num ? (1|(ms=(uint16_t)get_ms())):0)
+#define ms_since(ms,num) (((uint16_t)get_ms() - (ms)) >= num ? ((ms=(uint16_t)get_ms())):0)
 
 int16_t main(void) {
 
@@ -97,7 +97,7 @@ int16_t main(void) {
 	u2f_prints("U2F ZERO\r\n");
 	if (RSTSRC & RSTSRC_WDTRSF__SET)
 	{
-		u2f_prints("damn watchdog\r\n");
+		error = ERROR_DAMN_WATCHDOG;
 	}
 	run_tests();
 	atecc_setup_init(appdata.tmp);
@@ -143,11 +143,8 @@ int16_t main(void) {
 				}
 				break;
 			case APP_HID_MSG:
-#ifndef ATECC_SETUP_DEVICE
+
 				u2f_hid_request(hid_msg);
-#else
-				atecc_setup_device((struct config_msg*)appdata.hid_msg);
-#endif
 				if (state == APP_HID_MSG)
 					state = APP_NOTHING;
 				break;
@@ -178,6 +175,10 @@ int16_t main(void) {
 			u2f_printb("error: ", 1, error);
 			error = 0;
 			rgb(200,0,0);
+			while(!ms_since(ms_heart,2000))
+			{
+				watchdog();
+			}
 		}
 
 

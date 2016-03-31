@@ -85,7 +85,8 @@ U2F layer:
 
 ## Random number generation
 
-U2F Zero has a hardware true random number generator (TRNG).  It's used internally
+U2F Zero has a [true random number generator](https://en.wikipedia.org/wiki/Hardware_random_number_generator) 
+(TRNG).  It's used internally
 for key generating and signing but it's also exposed to the user for other use cases because
 a good source of entropy can be useful.
 

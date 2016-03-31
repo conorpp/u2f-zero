@@ -24,6 +24,29 @@ The device also has an RGB LED for status indication and a button to receive use
 
 USB pins are exposed copper zones on the PCB.  A 2mm thick PCB is recommended for best fit but 1.6 mm will work as well.
 
+## Random number generation
+
+The ATECC508A has a tamper resistent, [cryptographically secure 
+random number generator](https://en.wikipedia.org/wiki/Cryptographically_secure_pseudorandom_number_generator)
+(CSPRNG) that implements [CTR_DRBG](https://en.wikipedia.org/wiki/NIST_SP_800-90A).
+It's used internally for key generation and signing but it's also exposed to the user because
+a good source of entropy can be useful.
+
+Generate random numbers from the device:
+
+```bash
+cd tools/u2f_zero_client
+./client.py rng     # output randomness at about 1400 bytes/s
+```
+
+Update the seed with user supplied data:
+
+```bash
+cd tools/u2f_zero_client
+cat /dev/random | ./client.py seed     # update seed at about 410 bytes/s
+```
+
+
 Firmware
 ========
 
@@ -84,27 +107,6 @@ U2F layer:
 * u2f.h
 * u2f-atecc.c   // device specific implementation
 
-## Random number generation
-
-The ATECC508A has a tamper resistent, [cryptographically secure 
-random number generator](https://en.wikipedia.org/wiki/Cryptographically_secure_pseudorandom_number_generator)
-(CSPRNG) that implements [CTR_DRBG](https://en.wikipedia.org/wiki/NIST_SP_800-90A).
-It's used internally for key generation and signing but it's also exposed to the user because
-a good source of entropy can be useful.
-
-Generate random numbers from the device:
-
-```bash
-cd tools/u2f_zero_client
-./client.py rng     # output randomness at about 1400 bytes/s
-```
-
-Update the seed with user supplied data:
-
-```bash
-cd tools/u2f_zero_client
-cat /dev/random | ./client.py seed     # update seed at about 410 bytes/s
-```
 
 ## Build a U2F Zero token yourself
 

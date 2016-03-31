@@ -28,14 +28,26 @@ SI_INTERRUPT (TIMER2_ISR, TIMER2_IRQn)
 #define SMB_TX_EXT (SMB_WRITE|SMB_WRITE_EXT)
 #define SMB_TX (SMB_WRITE)
 
-struct smb_interrupt_interface SMB;
-data volatile uint8_t SMB_FLAGS;
+data uint8_t SMB_addr = 0;
+uint8_t * SMB_write_buf = NULL;
+data uint8_t SMB_write_len = 0;
+data uint8_t SMB_write_offset = 0;
+data uint8_t SMB_read_len = 0;
+data uint8_t SMB_read_offset = 0;
+uint8_t * SMB_read_buf = NULL;
+uint8_t * SMB_write_ext_buf = NULL;
+data uint8_t  SMB_write_ext_len = 0;
+data uint8_t  SMB_write_ext_offset = 0;
+uint8_t SMB_preflags = 0;
+uint16_t  SMB_crc = 0;
+data uint8_t  SMB_crc_offset = 0;
+data volatile uint8_t SMB_FLAGS = 0;
 
 static void update_from_packet_length()
 {
-	if (SMB.read_buf[0] <= SMB.read_len)
+	if (SMB_read_buf[0] <= SMB_read_len)
 	{
-		SMB.read_len = SMB.read_buf[0];
+		SMB_read_len = SMB_read_buf[0];
 	}
 	else
 	{
@@ -46,10 +58,7 @@ static void update_from_packet_length()
 
 static void _feed_crc(uint8_t b)
 {
-	if (SMB_HAS_CRC())
-	{
-		SMB.crc = feed_crc(SMB.crc,b);
-	}
+	SMB_crc = feed_crc(SMB_crc,b);
 }
 
 static void restart_bus()
@@ -65,6 +74,7 @@ static void restart_bus()
 SI_INTERRUPT (SMBUS0_ISR, SMBUS0_IRQn)
 {
 	data uint8_t bus = SMB0CN0 & SMB_STATE_MASK;
+	data uint8_t c;
 	if (SMB0CN0_ARBLOST != 0)
 	{
 		goto fail;
@@ -73,7 +83,7 @@ SI_INTERRUPT (SMBUS0_ISR, SMBUS0_IRQn)
 	switch (bus)
 	{
 		case SMB_STATUS_START:
-			SMB0DAT = SMB.addr | (SMB_FLAGS & SMB_READ);
+			SMB0DAT = SMB_addr | (SMB_FLAGS & SMB_READ);
 			SMB0CN0_STA = 0;
 			break;
 
@@ -90,65 +100,64 @@ SI_INTERRUPT (SMBUS0_ISR, SMBUS0_IRQn)
 			{
 				// do nothing and switch to receive mode
 			}
-			else if (SMB.write_offset < SMB.write_len)
+			else if (SMB_write_offset < SMB_write_len)
 			{
 				// start writing first buffer
 				// dont crc first byte for atecc508a
-				if (SMB.write_offset) _feed_crc(SMB.write_buf[SMB.write_offset]);
-				SMB0DAT = SMB.write_buf[SMB.write_offset++];
+				c = SMB_write_buf[SMB_write_offset++];
+				if (SMB_write_offset > 1) _feed_crc(c);
+				SMB0DAT = c;
 
 			}
-			else if(SMB_WRITING_EXT() && SMB.write_ext_offset < SMB.write_ext_len)
+			else if(SMB_WRITING_EXT() && SMB_write_ext_offset < SMB_write_ext_len)
 			{
 				// start writing second optional buffer
-				_feed_crc(SMB.write_ext_buf[SMB.write_ext_offset]);
-				SMB0DAT = SMB.write_ext_buf[SMB.write_ext_offset++];
-			}
-			else if (SMB_HAS_CRC())
-			{
-				// write optional CRC
-				switch(SMB.crc_offset++)
-				{
-					case 0:
-						SMB.crc = reverse_bits(SMB.crc);
-						SMB0DAT = (uint8_t)SMB.crc;
-						break;
-					case 1:
-						SMB0DAT = (uint8_t)(SMB.crc>>8);
-						SMB_CRC_CLEAR();
-						break;
-				}
+				c = SMB_write_ext_buf[SMB_write_ext_offset++];
+				_feed_crc(c);
+				SMB0DAT = c;
 			}
 			else
 			{
-				// end transaction
-				SMB0CN0_STO = 1;
-				SMB_BUSY_CLEAR();
+				// write optional CRC
+				switch(SMB_crc_offset++)
+				{
+					case 0:
+						SMB_crc = reverse_bits(SMB_crc);
+						SMB0DAT = (uint8_t)SMB_crc;
+						break;
+					case 1:
+						SMB0DAT = (uint8_t)(SMB_crc>>8);
+						break;
+					case 2:
+						SMB_CRC_CLEAR();
+						SMB0CN0_STO = 1;
+						SMB_BUSY_CLEAR();
+				}
 			}
-
 
 			break;
 
 		case SMB_STATUS_MRX:
 			// read in buffer
 
-			if (SMB.read_offset < SMB.read_len)
+			if (SMB_read_offset < SMB_read_len)
 			{
-				SMB.read_buf[SMB.read_offset] = SMB0DAT;
+				c = SMB0DAT;
+				SMB_read_buf[SMB_read_offset] = c;
 
 				// update with length from packet
 				// warning this is device specific to atecc508a
-				if (SMB.read_offset == 0)
+				if (SMB_read_offset == 0)
 				{
 					update_from_packet_length();
 				}
 
-				if ((SMB.read_offset < (SMB.read_len - 2)) && SMB_HAS_CRC())
+				if ((SMB_read_offset < (SMB_read_len - 2)))
 				{
-					SMB.crc = feed_crc(SMB.crc, SMB.read_buf[SMB.read_offset]);
+					SMB_crc = feed_crc(SMB_crc, c);
 				}
 
-				SMB.read_offset++;
+				SMB_read_offset++;
 				SMB0CN0_ACK = 1;
 			}
 			else
@@ -156,7 +165,7 @@ SI_INTERRUPT (SMBUS0_ISR, SMBUS0_IRQn)
 				// end transaction
 				if (SMB_HAS_CRC())
 				{
-					SMB.crc = reverse_bits(SMB.crc);
+					SMB_crc = reverse_bits(SMB_crc);
 				}
 				SMB_BUSY_CLEAR();
 				SMB0CN0_ACK = 0;

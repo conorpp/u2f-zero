@@ -27,10 +27,23 @@ struct smb_interrupt_interface
 	uint8_t write_ext_offset;
 
 	uint8_t preflags;
-
 };
 
-extern struct smb_interrupt_interface SMB;
+extern data uint8_t SMB_addr;
+extern uint8_t * SMB_write_buf;
+extern data uint8_t SMB_write_len;
+extern data uint8_t SMB_write_offset;
+extern data uint8_t SMB_read_len;
+extern data uint8_t SMB_read_offset;
+extern uint8_t * SMB_read_buf;
+extern uint8_t * SMB_write_ext_buf;
+extern data uint8_t SMB_write_ext_len;
+extern data uint8_t SMB_write_ext_offset;
+extern uint8_t SMB_preflags;
+extern uint16_t SMB_crc;
+extern data uint8_t SMB_crc_offset;
+
+//extern struct smb_interrupt_interface SMB;
 extern data volatile uint8_t SMB_FLAGS;
 
 #define SMB_MAX_ERRORS 15

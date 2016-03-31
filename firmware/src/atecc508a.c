@@ -70,7 +70,7 @@ int8_t atecc_recv(uint8_t * buf, uint8_t buflen, struct atecc_response* res)
 
 	if (pkt_len <= buflen && pkt_len >= 4)
 	{
-		if (PKT_CRC(buf,pkt_len) != SMB.crc)
+		if (PKT_CRC(buf,pkt_len) != SMB_crc)
 		{
 			set_app_error(ERROR_I2C_CRC);
 			return -1;

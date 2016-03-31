@@ -59,8 +59,6 @@ struct APP_DATA
 {
 	// must be at least 70 bytes
 	uint8_t tmp[70];
-
-
 };
 
 #define U2F_CONFIG_GET_SERIAL_NUM		0x80

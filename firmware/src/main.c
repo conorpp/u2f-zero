@@ -95,7 +95,10 @@ int16_t main(void) {
 	watchdog();
 
 	u2f_prints("U2F ZERO\r\n");
-
+	if (RSTSRC & RSTSRC_WDTRSF__SET)
+	{
+		u2f_prints("damn watchdog\r\n");
+	}
 	run_tests();
 	atecc_setup_init(appdata.tmp);
 

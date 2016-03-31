@@ -210,14 +210,15 @@ static void del_cid(uint32_t cid)
 
 static void stamp_error(uint32_t cid, uint8_t err)
 {
-	struct u2f_hid_msg * res = (struct u2f_hid_msg *)_hid_pkt;
+	uint8_t errbuf[HID_PACKET_SIZE];
+	struct u2f_hid_msg * res = (struct u2f_hid_msg *)errbuf;
 	res->cid = cid;
 	res->pkt.init.cmd = U2FHID_ERROR;
 	res->pkt.init.payload[0] = err;
 	res->pkt.init.bcnth = 0;
 	res->pkt.init.bcntl = 1;
-	// TODO this is tramping on potential other response data
-	usb_write(_hid_pkt, HID_PACKET_SIZE);
+
+	usb_write(errbuf, HID_PACKET_SIZE);
 	del_cid(cid);
 }
 
@@ -285,7 +286,6 @@ static void hid_u2f_parse(struct u2f_hid_msg* req)
 
 			if (U2FHID_LEN(req) < 4)
 			{
-				// TODO bad
 				stamp_error(hid_layer.current_cid, ERR_INVALID_LEN);
 				u2f_prints("invalid len msg\r\n");
 				goto fail;
@@ -433,9 +433,7 @@ void u2f_hid_request(struct u2f_hid_msg* req)
 			else
 			{
 				// Current application may not be interrupted
-				// TODO this will be bad
 				stamp_error(req->cid, ERR_CHANNEL_BUSY);
-				//u2f_printlx("ERR_CHANNEL_BUSY ", 2, req->cid, hid_layer.current_cid);
 				return;
 			}
 			break;

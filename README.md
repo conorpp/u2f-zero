@@ -3,6 +3,7 @@
 U2F Zero
 ========
 
+![](http://i.imgur.com/LpJVjvz.jpg)
 
 Overview
 =======

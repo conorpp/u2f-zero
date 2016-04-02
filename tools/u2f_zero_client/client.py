@@ -17,12 +17,15 @@ class commands:
 
     U2F_CUSTOM_RNG = 0x21
     U2F_CUSTOM_SEED = 0x22
+    U2F_CUSTOM_WIPE = 0x23
 
 if len(sys.argv) not in [2,3]:
     print 'usage: %s <action> [<public-key-output>]' % sys.argv[0]
-    print '     action: configure: setup the device configuration.  must specify pubkey output.'
-    print '     action: rng: Continuously dump random numbers from the devices hardware TRNG.'
-    print '     action: seed: update the hardware TRNG seed with input from stdin'
+    print 'actions: '
+    print '     configure: setup the device configuration.  must specify pubkey output.'
+    print '     rng: Continuously dump random numbers from the devices hardware TRNG.'
+    print '     seed: update the hardware TRNG seed with input from stdin'
+    print '     wipe: wipe all registered keys on U2F Zero.  Must also press button 5 times.  Not reversible.'
     sys.exit(1)
 
 def open_u2f():
@@ -116,16 +119,18 @@ def do_configure(h,output):
 
 def do_rng(h):
     cmd = [0xff,0xff,0xff,0xff, commands.U2F_CUSTOM_RNG, 0,0]
-    # typically runs around 1400 bytes/s
+    # typically runs around 700 bytes/s
     while True:
         h.write(cmd)
         rng = h.read(64,1000)
-        if rng[6] != 32:
-            sys.stderr.write('error: device error')
+        if rng[4] != commands.U2F_CUSTOM_RNG:
+            sys.stderr.write('error: device error\n')
         else:
-            data = array.array('B',rng).tostring()
-            sys.stdout.write(data)
-    
+            if rng[6] != 32:
+                sys.stderr.write('error: device error\n')
+            else:
+                data = array.array('B',rng[6+1:6+1+32]).tostring()
+                sys.stdout.write(data)
 
 def do_seed(h):
     cmd = [0xff,0xff,0xff,0xff, commands.U2F_CUSTOM_SEED, 0,20]
@@ -139,9 +144,26 @@ def do_seed(h):
         h.write(cmd + buf)
         res = h.read(64, 1000)
         if res[7] != 1:
-            sys.stderr.write('error: device error')
+            sys.stderr.write('error: device error\n')
 
     h.close()
+
+def do_wipe(h):
+    cmd = [0xff,0xff,0xff,0xff, commands.U2F_CUSTOM_WIPE, 0,0]
+    h.write(cmd)
+    print 'Press U2F button until the LED is no longer red.'
+    res = None
+    while not res:
+        res = h.read(64, 10000)
+    if res[7] != 1:
+        print 'Wipe failed'
+    else:
+        print 'Wipe succeeded'
+        
+
+    h.close()
+
+
 
 if __name__ == '__main__':
     action = sys.argv[1].lower()
@@ -156,6 +178,8 @@ if __name__ == '__main__':
         do_rng(h)
     elif action == 'seed':
         do_seed(h)
+    elif action == 'wipe':
+        do_wipe(h)
     else:
         print 'error: invalid action: ', action
         h.close()

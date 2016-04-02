@@ -20,7 +20,6 @@ uint8_t custom_command(struct u2f_hid_msg * msg)
 	switch(msg->pkt.init.cmd)
 	{
 		case U2F_CUSTOM_GET_RNG:
-			u2f_prints("U2F_CUSTOM_GET_RNG\r\n");
 			if (atecc_send_recv(ATECC_CMD_RNG,ATECC_RNG_P1,ATECC_RNG_P2,
 				NULL, 0,
 				appdata.tmp,
@@ -38,7 +37,6 @@ uint8_t custom_command(struct u2f_hid_msg * msg)
 
 			break;
 		case U2F_CUSTOM_SEED_RNG:
-			u2f_prints("U2F_CUSTOM_SEED_RNG\r\n");
 			ec = atecc_send_recv(ATECC_CMD_NONCE,ATECC_NONCE_RNG_UPDATE,0,
 							msg->pkt.init.payload, 20,
 							appdata.tmp,
@@ -46,6 +44,14 @@ uint8_t custom_command(struct u2f_hid_msg * msg)
 			U2FHID_SET_LEN(msg, 1);
 			msg->pkt.init.payload[0] = ec == 0 ? 1 : 0;
 			usb_write((uint8_t*)msg, 64);
+			break;
+		case U2F_CUSTOM_WIPE_KEYS:
+
+			U2FHID_SET_LEN(msg, 1);
+			ec=u2f_wipe_keys();
+			msg->pkt.init.payload[0] = ec == 0 ? 1 : 0;
+			usb_write((uint8_t*)msg, 64);
+
 			break;
 		default:
 			return 0;

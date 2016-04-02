@@ -346,7 +346,7 @@ static void hid_u2f_parse(struct u2f_hid_msg* req)
 			u2f_hid_set_len(0);
 			u2f_hid_writeback(NULL, 0);
 			u2f_hid_flush();
-			set_app_state(APP_WINK);
+			app_wink(0,0,150);
 			break;
 		case U2FHID_LOCK:
 

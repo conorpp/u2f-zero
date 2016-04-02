@@ -20,6 +20,7 @@ data struct APP_DATA appdata;
 
 uint8_t error;
 uint8_t state;
+uint8_t winkr,winkb,winkg;
 struct u2f_hid_msg * hid_msg;
 
 static void init(struct APP_DATA* ap)
@@ -27,7 +28,7 @@ static void init(struct APP_DATA* ap)
 	memset(ap,0, sizeof(struct APP_DATA));
 	u2f_hid_init();
 	smb_init();
-	atecc_idle();
+	//atecc_idle();
 #ifndef ATECC_SETUP_DEVICE
 	eeprom_init();
 	u2f_init();
@@ -55,6 +56,14 @@ uint8_t get_app_state()
 void set_app_state(APP_STATE s)
 {
 	state = s;
+}
+
+void app_wink(uint8_t r, uint8_t g, uint8_t b)
+{
+	winkr = r;
+	winkb = g;
+	winkg = b;
+	set_app_state(APP_WINK);
 }
 
 void set_app_u2f_hid_msg(struct u2f_hid_msg * msg )
@@ -157,8 +166,8 @@ int16_t main(void) {
 					state = APP_NOTHING;
 				break;
 			case APP_WINK:
-				rgb(0,0,150);
-				light = 150;
+				rgb(winkr,winkg,winkb);
+				light = 1;
 				ms_wink = get_ms();
 				state = _APP_WINK;
 				break;
@@ -166,8 +175,16 @@ int16_t main(void) {
 
 				if (ms_since(ms_wink,150))
 				{
-					rgb(0,0,light);
-					light = light == 0 ? 150 : 0;
+					if (light)
+					{
+						light = 0;
+						rgb(winkr,winkg,winkb);
+					}
+					else
+					{
+						light = 1;
+						rgb(0,0,0);
+					}
 					winks++;
 				}
 				if (winks == 5)

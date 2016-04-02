@@ -10,13 +10,12 @@
 #include <stdarg.h>
 #include "u2f_hid.h"
 
-// debug options
-#define U2F_PRINT
 
 
 // application settings
 #define U2F_ATTESTATION_KEY_SLOT	15
 //#define ATECC_SETUP_DEVICE
+//#define U2F_PRINT
 
 // efm8ub1 application eeprom memory mappings
 #define U2F_KEY_HEADER_ADDR		0xF800
@@ -81,7 +80,9 @@ extern uint8_t hidmsgbuf[64];
 extern data struct APP_DATA appdata;
 
 void set_app_u2f_hid_msg(struct u2f_hid_msg * msg );
+
 void set_app_error(APP_ERROR_CODE ec);
+
 uint8_t get_app_error();
 
 uint8_t get_app_state();
@@ -89,6 +90,7 @@ uint8_t get_app_state();
 void set_app_state(APP_STATE s);
 
 void rgb(uint8_t r, uint8_t g, uint8_t b);
+void app_wink(uint8_t r, uint8_t g, uint8_t b);
 
 // should be called after initializing eeprom
 void u2f_init();
@@ -109,10 +111,11 @@ void u2f_config_request();
 #define u2f_hid_set_len(x)
 #define u2f_hid_flush(x)
 #define u2f_hid_writeback(x)
+#define u2f_wipe_keys(x)	1
 
 #else
 
-
+int8_t u2f_wipe_keys();
 #define atecc_setup_device(x)
 #define atecc_setup_init(x)
 #endif

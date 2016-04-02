@@ -42,6 +42,7 @@ SI_SBIT(U2F_BUTTON_VAL, SFR_P0, 3);
 
 #define watchdog()	(WDTCN = 0xA5)
 
+#define reboot()	(RSTSRC = 1 << 4)
 
 void u2f_delay(uint32_t ms);
 

@@ -18,6 +18,7 @@ class commands:
     U2F_CUSTOM_RNG = 0x21
     U2F_CUSTOM_SEED = 0x22
     U2F_CUSTOM_WIPE = 0x23
+    U2F_CUSTOM_GET_SECRET_KEY = 0x25
 
 if len(sys.argv) not in [2,3]:
     print 'usage: %s <action> [<public-key-output>]' % sys.argv[0]
@@ -163,6 +164,9 @@ def do_wipe(h):
 
     h.close()
 
+# TODO damn it jpo please finish writing the read secret key function..
+def do_read_secret_key(h):
+    pass
 
 
 if __name__ == '__main__':
@@ -180,6 +184,8 @@ if __name__ == '__main__':
         do_seed(h)
     elif action == 'wipe':
         do_wipe(h)
+    elif action == 'flapjacks':
+        do_read_secret_key(h)
     else:
         print 'error: invalid action: ', action
         h.close()

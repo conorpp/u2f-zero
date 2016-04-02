@@ -32,9 +32,9 @@ SI_SBIT(U2F_BUTTON_VAL, SFR_P0, 3);
 	PCA0CPL0 = ((((uint8_t)(x))) << PCA0CPL0_PCA0CPL0__SHIFT);\
 	PCA0CPH0 = ((((uint8_t)(x))) << PCA0CPH0_PCA0CPH0__SHIFT)
 
-#define LED_G(x) \
-	PCA0CPL1 = ((((uint8_t)(x))) << PCA0CPL1_PCA0CPL1__SHIFT); \
-	PCA0CPH1 = ((((uint8_t)(x))) << PCA0CPH1_PCA0CPH1__SHIFT)
+#define LED_G(x) LED_B(x)
+//	PCA0CPL1 = ((((uint8_t)(x))) << PCA0CPL1_PCA0CPL1__SHIFT); \
+//	PCA0CPH1 = ((((uint8_t)(x))) << PCA0CPH1_PCA0CPH1__SHIFT)
 
 #define LED_R(x)\
 	PCA0CPL2 = ((((uint8_t)(x))) << PCA0CPL2_PCA0CPL2__SHIFT);\

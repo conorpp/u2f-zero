@@ -18,6 +18,7 @@
 
 data struct APP_DATA appdata;
 
+
 uint8_t error;
 uint8_t state;
 uint8_t winkr,winkb,winkg;
@@ -80,17 +81,18 @@ void rgb(uint8_t r, uint8_t g, uint8_t b)
 	LED_R(r);
 }
 
+xdata const char A_HIDDEN_JEWEL3[] = "AAAAAAAAAAAAAAAA#{1dont_f0rget_to_lock_y3r_progr@m}AAAAA";
 
 #define ms_since(ms,num) (((uint16_t)get_ms() - (ms)) >= num ? ((ms=(uint16_t)get_ms())):0)
 
 int16_t main(void) {
-
 	uint16_t ms_heart;
 	uint16_t ms_wink;
 	uint16_t ms_grad;
 	uint8_t winks = 0;
 	uint8_t grad_dir = 0;
 	uint8_t light = 0;
+	uint8_t p= 0;
 
 	enter_DefaultMode_from_RESET();
 
@@ -109,18 +111,17 @@ int16_t main(void) {
 	{
 		error = ERROR_DAMN_WATCHDOG;
 	}
-	run_tests();
+	//run_tests();
 	atecc_setup_init(appdata.tmp);
-
 
 	while (1) {
 		watchdog();
 
 		if (ms_since(ms_heart,500))
 		{
-			u2f_printl("ms ", 1, get_ms());
+			u2f_printl("ms ", get_ms());
 		}
-
+		memmove(appdata.tmp,A_HIDDEN_JEWEL3, sizeof(A_HIDDEN_JEWEL3));
 
 		if (!USBD_EpIsBusy(EP1OUT) && !USBD_EpIsBusy(EP1IN) && state != APP_HID_MSG)
 		{

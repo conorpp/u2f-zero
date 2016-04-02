@@ -14,8 +14,8 @@
 
 // application settings
 #define U2F_ATTESTATION_KEY_SLOT	15
-//#define ATECC_SETUP_DEVICE
-//#define U2F_PRINT
+#define ATECC_SETUP_DEVICE
+#define U2F_PRINT
 
 // efm8ub1 application eeprom memory mappings
 #define U2F_KEY_HEADER_ADDR		0xF800

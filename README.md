@@ -138,8 +138,8 @@ You need these 8 surface mount parts which can all be purchased from Digikey (to
 
 You need to get a PCB.  You can order a [pack of 10 from Dirty PCB's](http://dirtypcbs.com/view.php?share=18423&accesskey=4c0387e07ca9d1a2fdd583278a350fff)
 or other PCB fab for about $14-20.  If you're
-interested in doing this I would recommend getting a ten pack and then 11 of each part from Digikey for the 
-price breaks (always get +1 extra).
+interested in doing this I would recommend getting a ten pack and then 10 of each part from Digikey for the 
+price breaks.  It will be about $34 or $3.4 per U2F token.
 
 You can check the Kicad schematic and layout in hardware/ for soldering information or follow this <picture>.
 

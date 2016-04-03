@@ -5,13 +5,14 @@
 #
 #   Saves generated public key (r,s) to specified filename in ascii hex
 #
+from __future__ import print_function
 import time,sys,array,binascii
 try:
     import hid
 except:
-    print 'python hidapi module is required'
-    print 'try running: '
-    print '     pip install hidapi'
+    print('python hidapi module is required')
+    print('try running: ')
+    print('     pip install hidapi')
     sys.exit(1)
 
 class commands:
@@ -26,26 +27,26 @@ class commands:
     U2F_CUSTOM_WIPE = 0x23
 
 if len(sys.argv) not in [2,3]:
-    print 'usage: %s <action> [<public-key-output>]' % sys.argv[0]
-    print 'actions: '
-    print '     configure: setup the device configuration.  must specify pubkey output.'
-    print '     rng: Continuously dump random numbers from the devices hardware TRNG.'
-    print '     seed: update the hardware TRNG seed with input from stdin'
-    print '     wipe: wipe all registered keys on U2F Zero.  Must also press button 5 times.  Not reversible.'
+    print( 'usage: %s <action> [<public-key-output>]' % sys.argv[0])
+    print( 'actions: ')
+    print( '     configure: setup the device configuration.  must specify pubkey output.')
+    print( '     rng: Continuously dump random numbers from the devices hardware TRNG.')
+    print( '     seed: update the hardware TRNG seed with input from stdin')
+    print( '     wipe: wipe all registered keys on U2F Zero.  Must also press button 5 times.  Not reversible.')
     sys.exit(1)
 
 def open_u2f():
     h = hid.device()
     try:
         h.open(0x10c4,0x8acf)
-    except IOError,ex:
-        print ex
-        print 'U2F Zero not found'
+    except IOError as ex:
+        print( ex)
+        print( 'U2F Zero not found')
         return None
     return h
 
 def die(msg):
-    print msg
+    print( msg)
     sys.exit(1)
 
 
@@ -84,7 +85,7 @@ def do_configure(h,output):
     h.write([commands.U2F_CONFIG_IS_BUILD])
     data = h.read(64,1000)
     if data[1] == 1:
-        print 'Device is configured.'
+        print( 'Device is configured.')
     else:
         die('Device not configured')
 
@@ -94,21 +95,21 @@ def do_configure(h,output):
     while True:
         data = h.read(64,1000)
         l = data[1]
-        print 'read %i bytes' % l
+        print( 'read %i bytes' % l)
         if data[0] == commands.U2F_CONFIG_GET_SERIAL_NUM:
             break
-    print data
+    print( data)
     config = array.array('B',data[2:2+l]).tostring() + config[l:]
-    print 'conf: ', binascii.hexlify(config)
+    print( 'conf: ', binascii.hexlify(config))
     time.sleep(0.250)
 
 
     crc = get_crc(config)
-    print 'crc is ', [hex(x) for x in crc]
+    print( 'crc is ', [hex(x) for x in crc])
     h.write([commands.U2F_CONFIG_LOCK] + crc)
     data = h.read(64,1000)
     if data[1] == 1:
-        print 'locked eeprom with crc ',crc
+        print( 'locked eeprom with crc ',crc)
     else:
         die('not locked')
 
@@ -118,10 +119,10 @@ def do_configure(h,output):
     data = h.read(64,1000)
     data = array.array('B',data).tostring()
     data = binascii.hexlify(data)
-    print 'generated key:'
-    print data
+    print( 'generated key:')
+    print( data)
     open(output,'w+').write(data)
-    print 'Done'
+    print( 'Done')
 
 def do_rng(h):
     cmd = [0xff,0xff,0xff,0xff, commands.U2F_CUSTOM_RNG, 0,0]
@@ -157,14 +158,14 @@ def do_seed(h):
 def do_wipe(h):
     cmd = [0xff,0xff,0xff,0xff, commands.U2F_CUSTOM_WIPE, 0,0]
     h.write(cmd)
-    print 'Press U2F button until the LED is no longer red.'
+    print( 'Press U2F button until the LED is no longer red.')
     res = None
     while not res:
         res = h.read(64, 10000)
     if res[7] != 1:
-        print 'Wipe failed'
+        print( 'Wipe failed')
     else:
-        print 'Wipe succeeded'
+        print( 'Wipe succeeded')
         
 
     h.close()
@@ -176,7 +177,7 @@ if __name__ == '__main__':
     h = open_u2f()
     if action == 'configure':
         if len(sys.argv) != 3:
-            print 'error: need output file'
+            print( 'error: need output file')
             h.close()
             sys.exit(1)
         do_configure(h, sys.argv[2])
@@ -187,7 +188,7 @@ if __name__ == '__main__':
     elif action == 'wipe':
         do_wipe(h)
     else:
-        print 'error: invalid action: ', action
+        print( 'error: invalid action: ', action)
         h.close()
         sys.exit(1)
     h.close()

@@ -5,11 +5,22 @@ U2F Zero
 
 ![](http://i.imgur.com/ZSk2AW3.jpg)
 
+* [Overview](#overview)
+* [Hardware](#hardware)
+* [Firmware](#firmware)
+  * [Program flow](#program-flow)
+  * [Code organization](#code-organization)
+* [Building one yourself](#build-a-u2f-zero-token-yourself)
+  * [Parts](#parts)
+  * [Flashing](#flashing)
+
+
 Overview
 =======
 
 U2F Zero is an affordable and physically secure two factor authentication token that implements
-the [U2F protocol](https://fidoalliance.org/specifications/overview/).
+the [U2F protocol](https://fidoalliance.org/specifications/overview/).  It's completely open source 
+and designed for other people to be able to build easily.  It consists of a small PCB and 8 surface mount parts.
 
 Hardware
 ========
@@ -108,19 +119,31 @@ U2F layer:
 * u2f-atecc.c   // device specific implementation
 
 
-## Build a U2F Zero token yourself
+Build a U2F Zero token yourself
+===============================
 
 What's the point of an open source project if you can't build it yourself?
 
-### Hardware
+## Parts
 
-You need the parts listed in this <BOM>.  You should be able to purchase all the surface mount parts from Digikey.
+You need these 8 surface mount parts which can all be purchased from Digikey (totals ~$3 per board):
 
-You can order the PCB's from Dirty PCB's using this <link>.
+* Microcontroller [EFM8UB10F16G-C-QFN20](http://www.digikey.com/product-detail/en/silicon-labs/EFM8UB10F16G-C-QFN20/336-3410-5-ND/5592438)
+* Secure element [ATECC508A](http://www.digikey.com/product-detail/en/ATECC508A-MAHDA-T/ATECC508A-MAHDA-TCT-ND/5213071)
+* [RGB LED](http://www.digikey.com/product-detail/en/LTST-C19HE1WT/160-2162-1-ND/4866310) for status indication.
+* 100 Ohm current limiting [resistor](http://www.digikey.com/product-detail/en/CRCW0603100RFKEA/541-100HCT-ND/1179695).
+* [Zener diode](http://www.digikey.com/product-detail/en/DF5A5.6JE,LM/DF5A5.6JELMCT-ND/5403466) for ESD protection.
+* [Push button](http://www.digikey.com/product-detail/en/e-switch/TL3305AF260QG/EG5353CT-ND/5816198) for user input.
+* [4.7 uF bypass capacitor](http://www.digikey.com/product-detail/en/CL10B475KQ8NQNC/1276-2087-1-ND/3890173) and [0.1 uF bypass capacitor](http://www.digikey.com/product-detail/en/CL05A104MP5NNNC/1276-1443-1-ND/3889529).
+
+You need to get a PCB.  You can order a [pack of 10 from Dirty PCB's](http://dirtypcbs.com/view.php?share=18423&accesskey=4c0387e07ca9d1a2fdd583278a350fff)
+or other PCB fab for about $14-20.  If you're
+interested in doing this I would recommend getting a ten pack and then 11 of each part from Digikey for the 
+price breaks (always get +1 extra).
 
 You can check the Kicad schematic and layout in hardware/ for soldering information or follow this <picture>.
 
-### Firmware
+## Flashing
 
 #### Prerequisites and dependencies
 

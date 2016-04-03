@@ -5,8 +5,14 @@
 #
 #   Saves generated public key (r,s) to specified filename in ascii hex
 #
-import hid
 import time,sys,array,binascii
+try:
+    import hid
+except:
+    print 'python hidapi module is required'
+    print 'try running: '
+    print '     pip install hidapi'
+    sys.exit(1)
 
 class commands:
     U2F_CONFIG_GET_SERIAL_NUM = 0x80

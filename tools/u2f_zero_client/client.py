@@ -12,6 +12,7 @@ try:
 except:
     print('python hidapi module is required')
     print('try running: ')
+    print('     apt-get install libusb-1.0-0-dev libudev-dev')
     print('     pip install hidapi')
     sys.exit(1)
 
@@ -29,10 +30,10 @@ class commands:
 if len(sys.argv) not in [2,3]:
     print( 'usage: %s <action> [<public-key-output>]' % sys.argv[0])
     print( 'actions: ')
-    print( '     configure: setup the device configuration.  must specify pubkey output.')
-    print( '     rng: Continuously dump random numbers from the devices hardware TRNG.')
-    print( '     seed: update the hardware TRNG seed with input from stdin')
-    print( '     wipe: wipe all registered keys on U2F Zero.  Must also press button 5 times.  Not reversible.')
+    print( '     configure:     setup the device configuration.  must specify pubkey output.')
+    print( '     rng:           Continuously dump random numbers from the devices hardware RNG.')
+    print( '     seed:          update the hardware RNG seed with input from stdin')
+    print( '     wipe:          wipe all registered keys on U2F Zero.  Must also press button 5 times.  Not reversible.')
     sys.exit(1)
 
 def open_u2f():
@@ -42,7 +43,7 @@ def open_u2f():
     except IOError as ex:
         print( ex)
         print( 'U2F Zero not found')
-        return None
+        sys.exit(1)
     return h
 
 def die(msg):

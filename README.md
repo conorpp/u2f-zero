@@ -148,7 +148,9 @@ or other PCB fab for about $14-20.  If you're
 interested in doing this I would recommend getting a ten pack and then 10 of each part from Digikey for the 
 price breaks.  It will be about $34 or $3.4 per U2F token.
 
-You can check the Kicad schematic and layout in hardware/ for soldering information or follow this <picture>.
+You can check the Kicad schematic and layout in hardware/ for soldering information or follow this image:
+
+![](http://i.imgur.com/0CIbSwG.jpg)
 
 ## Flashing
 

@@ -265,3 +265,17 @@ Connect ground of programmer cable to sit under the ground leg of the push butto
 <pic of ground connection>
 
 You should be able to detect the chip from Simplicity Studio and program it if everything is soldered correctly.
+
+### U2F Zero "Installation"
+
+It is a HID device so no drivers are needed.  It should work out of the box with OS X or Windows.  But it may only be accessible to root user at first on Linux.  Just add the following file `70-u2f.rules` and add the following entry:
+
+```
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="8acf", TAG+="uaccess"
+```
+
+Then restart udev
+
+```bash
+sudo udevadm trigger
+```

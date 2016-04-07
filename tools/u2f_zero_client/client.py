@@ -6,7 +6,7 @@
 #   Saves generated public key (r,s) to specified filename in ascii hex
 #
 from __future__ import print_function
-import time,sys,array,binascii
+import time,sys,array,binascii,signal
 try:
     import hid
 except:
@@ -142,7 +142,12 @@ def do_rng(h):
 
 def do_seed(h):
     cmd = [0xff,0xff,0xff,0xff, commands.U2F_CUSTOM_SEED, 0,20]
+    num = 0
     # typically runs around 414 bytes/s
+    def signal_handler(signal, frame):
+        print('seeded %i bytes' % num)
+        sys.exit(0)
+    signal.signal(signal.SIGINT, signal_handler)
     while True:
         # must be 20 bytes or less at a time
         c = sys.stdin.read(20)
@@ -153,6 +158,7 @@ def do_seed(h):
         res = h.read(64, 1000)
         if res[7] != 1:
             sys.stderr.write('error: device error\n')
+        num += len(c)
 
     h.close()
 

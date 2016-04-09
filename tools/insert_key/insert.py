@@ -1,8 +1,9 @@
 #!/usr/bin/env python
+from __future__ import print_function
 import sys,os
 
 if len(sys.argv) != 4:
-    print 'usage: %s <filename> <inserted file> <outputfile>' % sys.argv[0]
+    print('usage: %s <filename> <inserted file> <outputfile>' % sys.argv[0])
     sys.exit(1)
 
 f = open(sys.argv[1], 'rw')

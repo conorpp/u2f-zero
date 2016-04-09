@@ -19,13 +19,19 @@ class commands:
     U2F_CUSTOM_SEED = 0x22
     U2F_CUSTOM_WIPE = 0x23
 
-if len(sys.argv) not in [2,3]:
-    print 'usage: %s <action> [<public-key-output>]' % sys.argv[0]
+    U2F_CUSTOM_PULSE = 0x24
+    U2F_CUSTOM_IDLE_COLOR = 0x25
+    U2F_CUSTOM_IDLE_COLORP = 0x26
+
+if len(sys.argv) not in [2,3,4]:
+    print 'usage: %s <action> [<arguments>]' % sys.argv[0]
     print 'actions: '
-    print '     configure: setup the device configuration.  must specify pubkey output.'
+    print '     configure <output-file>: setup the device configuration.  must specify pubkey output.'
     print '     rng: Continuously dump random numbers from the devices hardware TRNG.'
     print '     seed: update the hardware TRNG seed with input from stdin'
     print '     wipe: wipe all registered keys on U2F Zero.  Must also press button 5 times.  Not reversible.'
+    print '     color <idle|button> <color>: Set the LED color when idle or when button is pressed.  Must be 6 digit hex code.'
+    print '     brightness <1-255>: Set the LED brightness between 1-255 (default 90).'
     sys.exit(1)
 
 def open_u2f():
@@ -163,6 +169,43 @@ def do_wipe(h):
 
     h.close()
 
+def hexcode2bytes(color):
+    h = [ord(x) for x in color.replace('#','').decode('hex')]
+    return h
+
+def set_idle_color(h,color):
+    cmd = [0xff,0xff,0xff,0xff, commands.U2F_CUSTOM_IDLE_COLOR, 0,4,0]
+    h.write(cmd + hexcode2bytes(color) + [0])
+    res = h.read(64, 10000)
+
+    if res[7] != 1:
+        print 'Set color failed'
+
+    h.close()
+
+def set_button_color(h,color):
+    cmd = [0xff,0xff,0xff,0xff, commands.U2F_CUSTOM_IDLE_COLORP, 0,4,0]
+    h.write(cmd + hexcode2bytes(color))
+    res = h.read(64, 10000)
+
+    if res[7] != 1:
+        print 'Set color failed'
+
+    h.close()
+
+def set_led_pulse(h,s):
+    cmd = [0xff,0xff,0xff,0xff, commands.U2F_CUSTOM_PULSE, 0,2]
+
+    ms = int(s)
+
+    h.write(cmd + [ms>>8,ms])
+
+    res = h.read(64, 10000)
+
+    if res[7] != 1:
+        print 'Set color failed'
+
+    h.close()
 
 
 if __name__ == '__main__':
@@ -180,6 +223,29 @@ if __name__ == '__main__':
         do_seed(h)
     elif action == 'wipe':
         do_wipe(h)
+    elif action == 'color':
+        if len(sys.argv) != 4:
+            print 'error: need <idle|button> and 6 digit hex code'
+            sys.exit(1)
+        color = sys.argv[3]
+        color = color.replace('#','')
+        if len(color) != 6:
+            print 'error: must be 6 digit hex code'
+            sys.exit(1)
+
+        if sys.argv[2].lower() == 'idle':
+            set_idle_color(h,color)
+        elif sys.argv[2].lower() == 'button':
+            set_button_color(h,color)
+        else:
+            print 'error: must select idle color or button color'
+            sys.exit(1)
+    elif action == 'pulse':
+        if len(sys.argv) != 3:
+            print 'error: need pulse pulse <0-255>'
+            sys.exit(1)
+        set_led_pulse(h,float(sys.argv[2]))
+ 
     else:
         print 'error: invalid action: ', action
         h.close()

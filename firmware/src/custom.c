@@ -53,6 +53,35 @@ uint8_t custom_command(struct u2f_hid_msg * msg)
 			usb_write((uint8_t*)msg, 64);
 
 			break;
+
+		case U2F_CUSTOM_IDLE_COLOR:
+
+			U2FHID_SET_LEN(msg, 1);
+			appconf.idle_color = *((uint32_t*)msg->pkt.init.payload);
+			flush_app_conf();
+			msg->pkt.init.payload[0] = 1;
+			usb_write((uint8_t*)msg, 64);
+
+			break;
+		case U2F_CUSTOM_IDLE_COLORP:
+
+			U2FHID_SET_LEN(msg, 1);
+			appconf.idle_color_prime = *((uint32_t*)msg->pkt.init.payload);
+			flush_app_conf();
+			msg->pkt.init.payload[0] = 1;
+			usb_write((uint8_t*)msg, 64);
+
+			break;
+		case U2F_CUSTOM_PULSE:
+
+			U2FHID_SET_LEN(msg, 1);
+			appconf.pulse_period = *((uint16_t*)msg->pkt.init.payload);
+			flush_app_conf();
+			msg->pkt.init.payload[0] = 1;
+			usb_write((uint8_t*)msg, 64);
+
+
+			break;
 		default:
 			return 0;
 	}

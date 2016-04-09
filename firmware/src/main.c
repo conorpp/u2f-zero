@@ -17,10 +17,11 @@
 #include "tests.h"
 
 data struct APP_DATA appdata;
+data struct APP_CONF appconf;
 
 uint8_t error;
 uint8_t state;
-uint8_t winkr,winkb,winkg;
+uint8_t winkc;
 struct u2f_hid_msg * hid_msg;
 
 static void init(struct APP_DATA* ap)
@@ -58,11 +59,15 @@ void set_app_state(APP_STATE s)
 	state = s;
 }
 
-void app_wink(uint8_t r, uint8_t g, uint8_t b)
+void flush_app_conf()
 {
-	winkr = r;
-	winkb = g;
-	winkg = b;
+	eeprom_erase(U2F_APP_CONFIG);
+	eeprom_write(U2F_APP_CONFIG, (uint8_t* )&appconf, sizeof(struct APP_CONF));
+}
+
+void app_wink(uint32_t c)
+{
+	winkc = c;
 	set_app_state(APP_WINK);
 }
 
@@ -72,12 +77,58 @@ void set_app_u2f_hid_msg(struct u2f_hid_msg * msg )
 	hid_msg = msg;
 }
 
+uint8_t * color_max;
+static uint8_t color[3];
+static uint32_t current_color;
+static uint8_t brightness = 90;
 
-void rgb(uint8_t r, uint8_t g, uint8_t b)
+
+void rgb(uint8_t * c)
 {
-	LED_B(b);
-	LED_G(g);
-	LED_R(r);
+
+	if (c[0])
+	{
+		PCA0CPM2 |= PCA0CPM2_PWM__ENABLED;
+		LED_R(c[0]);
+	}
+	else
+	{
+		PCA0CPM2 &= ~PCA0CPM2_PWM__ENABLED;
+	}
+
+	if (c[2])
+	{
+		PCA0CPM0 |= PCA0CPM0_PWM__ENABLED;
+		LED_B(c[2]);
+	}
+	else
+	{
+		PCA0CPM0 &= ~PCA0CPM0_PWM__ENABLED;
+	}
+
+	if (c[1])
+	{
+		PCA0CPM1 |= PCA0CPM1_PWM__ENABLED;
+		LED_G(c[1]);
+	}
+	else
+	{
+		PCA0CPM1 &= ~PCA0CPM1_PWM__ENABLED;
+	}
+
+}
+
+void rgb_hex(uint32_t c)
+{
+	color[0] = c;
+	color[1] = c>>8;
+	color[2] = c>>16;
+	current_color = c;
+	rgb(color);
+	color_max = color;
+	if (*color_max < color[1]) color_max++;
+	if (*color_max < color[2]) color_max = color + 2;
+	brightness = *color_max;
 }
 
 
@@ -88,9 +139,8 @@ int16_t main(void) {
 	uint16_t ms_heart;
 	uint16_t ms_wink;
 	uint16_t ms_grad;
-	uint8_t winks = 0;
-	uint8_t grad_dir = 0;
-	uint8_t light = 0;
+	uint8_t winks = 0, light;
+	int8_t grad_inc = 0;
 
 	enter_DefaultMode_from_RESET();
 
@@ -112,15 +162,17 @@ int16_t main(void) {
 	run_tests();
 	atecc_setup_init(appdata.tmp);
 
+	rgb_hex(appconf.idle_color);
 
 	while (1) {
 		watchdog();
+
+
 
 		if (ms_since(ms_heart,500))
 		{
 			u2f_printl("ms ", 1, get_ms());
 		}
-
 
 		if (!USBD_EpIsBusy(EP1OUT) && !USBD_EpIsBusy(EP1IN) && state != APP_HID_MSG)
 		{
@@ -130,26 +182,38 @@ int16_t main(void) {
 		switch(state)
 		{
 			case APP_NOTHING:
-				if (ms_since(ms_grad, 10))
+				if (ms_since(ms_grad, appconf.pulse_period))
 				{
-					if (light == 90)
+					if (U2F_BUTTON_IS_PRESSED())
 					{
-						grad_dir = 0;
+						if (appconf.idle_color_prime != current_color)
+						{
+							rgb_hex(appconf.idle_color_prime);
+
+						}
 					}
-					else if (light == 0)
-					{
-						grad_dir = 1;
-					}
-					if (grad_dir)
-						if (U2F_BUTTON_IS_PRESSED())
-							rgb(0,0,light++);
-						else
-							rgb(0,light++,0);
 					else
-						if (U2F_BUTTON_IS_PRESSED())
-							rgb(0,0,light--);
-						else
-							rgb(0,light--,0);
+					{
+						if (appconf.idle_color != current_color)
+						{
+							rgb_hex(appconf.idle_color);
+						}
+					}
+
+					if (*color_max >= brightness)
+					{
+						grad_inc = -1;
+					}
+					else if (*color_max == 0)
+					{
+						grad_inc = 1;
+					}
+					if (brightness != 0)
+					{
+						*color_max += grad_inc;
+					}
+					rgb(color);
+
 				}
 				break;
 			case APP_HID_MSG:
@@ -166,7 +230,7 @@ int16_t main(void) {
 					state = APP_NOTHING;
 				break;
 			case APP_WINK:
-				rgb(winkr,winkg,winkb);
+				rgb_hex(winkc);
 				light = 1;
 				ms_wink = get_ms();
 				state = _APP_WINK;
@@ -178,12 +242,12 @@ int16_t main(void) {
 					if (light)
 					{
 						light = 0;
-						rgb(winkr,winkg,winkb);
+						rgb_hex(winkc);
 					}
 					else
 					{
 						light = 1;
-						rgb(0,0,0);
+						rgb_hex(0);
 					}
 					winks++;
 				}
@@ -199,7 +263,7 @@ int16_t main(void) {
 		{
 			u2f_printb("error: ", 1, error);
 			error = 0;
-			rgb(200,0,0);
+			rgb_hex(U2F_DEFAULT_COLOR_ERROR);
 			while(!ms_since(ms_heart,2000))
 			{
 				watchdog();

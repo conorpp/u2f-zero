@@ -45,4 +45,4 @@ extern SI_SEGMENT_VARIABLE(initstruct, const USBD_Init_TypeDef, SI_SEG_CODE);
 }
 #endif
 
-#endif // __SILICON_LABS_DESCRIPTORS_H
+#endif

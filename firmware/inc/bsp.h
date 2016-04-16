@@ -22,23 +22,39 @@ extern SI_SEGMENT_VARIABLE(myUsbDevice, USBD_Device_TypeDef, MEM_MODEL_SEG);
 
 #define GetEp(epAddr)  (&myUsbDevice.ep0 + epAddr)
 
-SI_SBIT(U2F_BUTTON, SFR_P0, 2);
-SI_SBIT(U2F_BUTTON_VAL, SFR_P0, 3);
+SI_SBIT(U2F_BUTTON, SFR_P1, 5);
+SI_SBIT(U2F_BUTTON_VAL, SFR_P1, 6);
 
 #define U2F_BUTTON_IS_PRESSED() (U2F_BUTTON == 0)
 
+SI_SBIT(U2F_RED, SFR_P1, 1);
+SI_SBIT(U2F_GREEN, SFR_P1, 0);
+SI_SBIT(U2F_BLUE, SFR_P0, 7);
+
+//#define LED_B(x)\
+//		U2F_BLUE = x ? 0 : 1
+//
+//#define LED_G(x) \
+//		U2F_GREEN = x ? 0 : 1
+//
+//#define LED_R(x)\
+//		U2F_RED = x ? 0 : 1
+
 // Set brightness via PWM
-#define LED_B(x)\
-	PCA0CPL0 = ((((uint8_t)(x))) << PCA0CPL0_PCA0CPL0__SHIFT);\
-	PCA0CPH0 = ((((uint8_t)(x))) << PCA0CPH0_PCA0CPH0__SHIFT)
+#define LED_B(x)
+//\
+//	PCA0CPL0 = ((((uint8_t)(x))) << PCA0CPL0_PCA0CPL0__SHIFT);\
+//	PCA0CPH0 = ((((uint8_t)(x))) << PCA0CPH0_PCA0CPH0__SHIFT)
 
-#define LED_G(x) \
-	PCA0CPL1 = ((((uint8_t)(x))) << PCA0CPL1_PCA0CPL1__SHIFT); \
-	PCA0CPH1 = ((((uint8_t)(x))) << PCA0CPH1_PCA0CPH1__SHIFT)
+#define LED_G(x)
+//\
+//	PCA0CPL1 = ((((uint8_t)(x))) << PCA0CPL1_PCA0CPL1__SHIFT); \
+//	PCA0CPH1 = ((((uint8_t)(x))) << PCA0CPH1_PCA0CPH1__SHIFT)
 
-#define LED_R(x)\
-	PCA0CPL2 = ((((uint8_t)(x))) << PCA0CPL2_PCA0CPL2__SHIFT);\
-	PCA0CPH2 = ((((uint8_t)(x))) << PCA0CPH2_PCA0CPH2__SHIFT)
+#define LED_R(x)
+//\
+//	PCA0CPL2 = ((((uint8_t)(x))) << PCA0CPL2_PCA0CPL2__SHIFT);\
+//	PCA0CPH2 = ((((uint8_t)(x))) << PCA0CPH2_PCA0CPH2__SHIFT)
 
 #define watchdog()	(WDTCN = 0xA5)
 

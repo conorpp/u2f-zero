@@ -29,7 +29,7 @@ static void init(struct APP_DATA* ap)
 	memset(ap,0, sizeof(struct APP_DATA));
 	u2f_hid_init();
 	smb_init();
-	//atecc_idle();
+	atecc_idle();
 #ifndef ATECC_SETUP_DEVICE
 	eeprom_init();
 	u2f_init();
@@ -86,35 +86,35 @@ static uint8_t brightness = 90;
 void rgb(uint8_t * c)
 {
 
-	//if (c[0])
+	if (c[0])
 	{
-	//	PCA0CPM2 |= PCA0CPM2_PWM__ENABLED;
+		PCA0CPM2 |= PCA0CPM2_PWM__ENABLED;
 		LED_R(c[0]);
 	}
-//	else
-//	{
-//		PCA0CPM2 &= ~PCA0CPM2_PWM__ENABLED;
-//	}
-
-	//if (c[2])
+	else
 	{
-	//	PCA0CPM0 |= PCA0CPM0_PWM__ENABLED;
+		PCA0CPM2 &= ~PCA0CPM2_PWM__ENABLED;
+	}
+
+	if (c[2])
+	{
+		PCA0CPM0 |= PCA0CPM0_PWM__ENABLED;
 		LED_B(c[2]);
 	}
-//	else
-//	{
-//		PCA0CPM0 &= ~PCA0CPM0_PWM__ENABLED;
-//	}
-
-	//if (c[1])
+	else
 	{
-	//	PCA0CPM1 |= PCA0CPM1_PWM__ENABLED;
+		PCA0CPM0 &= ~PCA0CPM0_PWM__ENABLED;
+	}
+
+	if (c[1])
+	{
+		PCA0CPM1 |= PCA0CPM1_PWM__ENABLED;
 		LED_G(c[1]);
 	}
-//	else
-//	{
-//		PCA0CPM1 &= ~PCA0CPM1_PWM__ENABLED;
-//	}
+	else
+	{
+		PCA0CPM1 &= ~PCA0CPM1_PWM__ENABLED;
+	}
 
 }
 
@@ -163,6 +163,7 @@ int16_t main(void) {
 	atecc_setup_init(appdata.tmp);
 
 	rgb_hex(appconf.idle_color);
+
 
 	while (1) {
 		watchdog();

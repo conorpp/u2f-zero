@@ -70,13 +70,10 @@ extern void VREG_0_enter_DefaultMode_from_RESET(void) {
 
 	// $[REG1CN - Voltage Regulator 1 Control]
 	/*
-	 // REG1ENB (Voltage Regulator 1 Disable) = ENABLED (Regulator is
-	 //     enabled.)
-	 // BIASENB (Regulator Bias Disable) = DISABLED (Regulator bias is
-	 //     disabled.)
-	 // SUSEN (Voltage Regulator 1 Suspend Enable) = NORMAL (The 5V regulator
-	 //     is in normal power mode. Normal mode is the highest performance mode
-	 //     for the regulator.)
+	 // Regulator is enabled
+	 // Regulator bias is disabled
+	 // The 5V regulator is in normal power mode. Normal mode is the highest
+	 //     performance mode for the regulator
 	 */
 	SFRPAGE = 0x20;
 	REG1CN = REG1CN_REG1ENB__ENABLED | REG1CN_BIASENB__DISABLED
@@ -94,17 +91,13 @@ extern void PORTS_0_enter_DefaultMode_from_RESET(void) {
 
 	// $[P0MDOUT - Port 0 Output Mode]
 	/*
-	 // B0 (Port 0 Bit 0 Output Mode) = OPEN_DRAIN (P0.0 output is open-
-	 //     drain.)
-	 // B1 (Port 0 Bit 1 Output Mode) = OPEN_DRAIN (P0.1 output is open-
-	 //     drain.)
-	 // B3 (Port 0 Bit 3 Output Mode) = OPEN_DRAIN (P0.3 output is open-
-	 //     drain.)
-	 // B4 (Port 0 Bit 4 Output Mode) = PUSH_PULL (P0.4 output is push-pull.)
-	 // B5 (Port 0 Bit 5 Output Mode) = OPEN_DRAIN (P0.5 output is open-
-	 //     drain.)
-	 // B6 (Port 0 Bit 6 Output Mode) = PUSH_PULL (P0.6 output is push-pull.)
-	 // B7 (Port 0 Bit 7 Output Mode) = PUSH_PULL (P0.7 output is push-pull.)
+	 // P0.0 output is open-drain
+	 // P0.1 output is open-drain
+	 // P0.3 output is open-drain
+	 // P0.4 output is push-pull
+	 // P0.5 output is open-drain
+	 // P0.6 output is push-pull
+	 // P0.7 output is push-pull
 	 */
 	SFRPAGE = 0x00;
 	P0MDOUT = P0MDOUT_B0__OPEN_DRAIN | P0MDOUT_B1__OPEN_DRAIN
@@ -118,23 +111,16 @@ extern void PORTS_0_enter_DefaultMode_from_RESET(void) {
 
 	// $[P0SKIP - Port 0 Skip]
 	/*
-	 // B0 (Port 0 Bit 0 Skip) = NOT_SKIPPED (P0.0 pin is not skipped by the
-	 //     crossbar.)
-	 // B1 (Port 0 Bit 1 Skip) = NOT_SKIPPED (P0.1 pin is not skipped by the
-	 //     crossbar.)
-	 // B3 (Port 0 Bit 3 Skip) = NOT_SKIPPED (P0.3 pin is not skipped by the
-	 //     crossbar.)
-	 // B4 (Port 0 Bit 4 Skip) = NOT_SKIPPED (P0.4 pin is not skipped by the
-	 //     crossbar.)
-	 // B5 (Port 0 Bit 5 Skip) = NOT_SKIPPED (P0.5 pin is not skipped by the
-	 //     crossbar.)
-	 // B6 (Port 0 Bit 6 Skip) = SKIPPED (P0.6 pin is skipped by the
-	 //     crossbar.)
-	 // B7 (Port 0 Bit 7 Skip) = NOT_SKIPPED (P0.7 pin is not skipped by the
-	 //     crossbar.)
+	 // P0.0 pin is not skipped by the crossbar
+	 // P0.1 pin is not skipped by the crossbar
+	 // P0.3 pin is skipped by the crossbar
+	 // P0.4 pin is not skipped by the crossbar
+	 // P0.5 pin is not skipped by the crossbar
+	 // P0.6 pin is skipped by the crossbar
+	 // P0.7 pin is not skipped by the crossbar
 	 */
 	P0SKIP = P0SKIP_B0__NOT_SKIPPED | P0SKIP_B1__NOT_SKIPPED
-			| P0SKIP_B3__NOT_SKIPPED | P0SKIP_B4__NOT_SKIPPED
+			|P0SKIP_B2__SKIPPED| P0SKIP_B3__SKIPPED | P0SKIP_B4__NOT_SKIPPED
 			| P0SKIP_B5__NOT_SKIPPED | P0SKIP_B6__SKIPPED
 			| P0SKIP_B7__NOT_SKIPPED;
 	// [P0SKIP - Port 0 Skip]$
@@ -156,16 +142,13 @@ extern void PORTS_1_enter_DefaultMode_from_RESET(void) {
 
 	// $[P1MDOUT - Port 1 Output Mode]
 	/*
-	 // B0 (Port 1 Bit 0 Output Mode) = PUSH_PULL (P1.0 output is push-pull.)
-	 // B1 (Port 1 Bit 1 Output Mode) = PUSH_PULL (P1.1 output is push-pull.)
-	 // B2 (Port 1 Bit 2 Output Mode) = OPEN_DRAIN (P1.2 output is open-
-	 //     drain.)
-	 // B3 (Port 1 Bit 3 Output Mode) = OPEN_DRAIN (P1.3 output is open-
-	 //     drain.)
-	 // B4 (Port 1 Bit 4 Output Mode) = OPEN_DRAIN (P1.4 output is open-
-	 //     drain.)
-	 // B5 (Port 1 Bit 5 Output Mode) = PUSH_PULL (P1.5 output is push-pull.)
-	 // B6 (Port 1 Bit 6 Output Mode) = PUSH_PULL (P1.6 output is push-pull.)
+	 // P1.0 output is push-pull
+	 // P1.1 output is push-pull
+	 // P1.2 output is open-drain
+	 // P1.3 output is open-drain
+	 // P1.4 output is open-drain
+	 // P1.5 output is push-pull
+	 // P1.6 output is push-pull
 	 */
 	P1MDOUT = P1MDOUT_B0__PUSH_PULL | P1MDOUT_B1__PUSH_PULL
 			| P1MDOUT_B2__OPEN_DRAIN | P1MDOUT_B3__OPEN_DRAIN
@@ -248,16 +231,11 @@ extern void PORTS_2_enter_DefaultMode_from_RESET(void) {
 extern void PBCFG_0_enter_DefaultMode_from_RESET(void) {
 	// $[XBR2 - Port I/O Crossbar 2]
 	/*
-	 // WEAKPUD (Port I/O Weak Pullup Disable) = PULL_UPS_ENABLED (Weak
-	 //     Pullups enabled (except for Ports whose I/O are configured for analog
-	 //     mode).)
-	 // XBARE (Crossbar Enable) = ENABLED (Crossbar enabled.)
-	 // URT1E (UART1 I/O Enable) = DISABLED (UART1 I/O unavailable at Port
-	 //     pin.)
-	 // URT1RTSE (UART1 RTS Output Enable) = DISABLED (UART1 RTS1 unavailable
-	 //     at Port pin.)
-	 // URT1CTSE (UART1 CTS Input Enable) = DISABLED (UART1 CTS1 unavailable
-	 //     at Port pin.)
+	 // Weak Pullups enabled 
+	 // Crossbar enabled
+	 // UART1 I/O unavailable at Port pin
+	 // UART1 RTS1 unavailable at Port pin
+	 // UART1 CTS1 unavailable at Port pin
 	 */
 	XBR2 = XBR2_WEAKPUD__PULL_UPS_ENABLED | XBR2_XBARE__ENABLED
 			| XBR2_URT1E__DISABLED | XBR2_URT1RTSE__DISABLED
@@ -269,20 +247,14 @@ extern void PBCFG_0_enter_DefaultMode_from_RESET(void) {
 
 	// $[XBR0 - Port I/O Crossbar 0]
 	/*
-	 // URT0E (UART0 I/O Enable) = ENABLED (UART0 TX0, RX0 routed to Port pins
-	 //     P0.4 and P0.5.)
-	 // SPI0E (SPI I/O Enable) = DISABLED (SPI I/O unavailable at Port pins.)
-	 // SMB0E (SMB0 I/O Enable) = ENABLED (SMBus 0 I/O routed to Port pins.)
-	 // CP0E (Comparator0 Output Enable) = DISABLED (CP0 unavailable at Port
-	 //     pin.)
-	 // CP0AE (Comparator0 Asynchronous Output Enable) = DISABLED
-	 //     (Asynchronous CP0 unavailable at Port pin.)
-	 // CP1E (Comparator1 Output Enable) = DISABLED (CP1 unavailable at Port
-	 //     pin.)
-	 // CP1AE (Comparator1 Asynchronous Output Enable) = DISABLED
-	 //     (Asynchronous CP1 unavailable at Port pin.)
-	 // SYSCKE (SYSCLK Output Enable) = DISABLED (SYSCLK unavailable at Port
-	 //     pin.)
+	 // UART0 TX0, RX0 routed to Port pins P0.4 and P0.5
+	 // SPI I/O unavailable at Port pins
+	 // SMBus 0 I/O routed to Port pins
+	 // CP0 unavailable at Port pin
+	 // Asynchronous CP0 unavailable at Port pin
+	 // CP1 unavailable at Port pin
+	 // Asynchronous CP1 unavailable at Port pin
+	 // SYSCLK unavailable at Port pin
 	 */
 	XBR0 = XBR0_URT0E__ENABLED | XBR0_SPI0E__DISABLED | XBR0_SMB0E__ENABLED
 			| XBR0_CP0E__DISABLED | XBR0_CP0AE__DISABLED | XBR0_CP1E__DISABLED
@@ -291,13 +263,11 @@ extern void PBCFG_0_enter_DefaultMode_from_RESET(void) {
 
 	// $[XBR1 - Port I/O Crossbar 1]
 	/*
-	 // PCA0ME (PCA Module I/O Enable) = CEX0_CEX1_CEX2 (CEX0, CEX1, CEX2
-	 //     routed to Port pins.)
-	 // ECIE (PCA0 External Counter Input Enable) = DISABLED (ECI unavailable
-	 //     at Port pin.)
-	 // T0E (T0 Enable) = DISABLED (T0 unavailable at Port pin.)
-	 // T1E (T1 Enable) = DISABLED (T1 unavailable at Port pin.)
-	 // T2E (T2 Enable) = DISABLED (T2 unavailable at Port pin.)
+	 // CEX0, CEX1, CEX2 routed to Port pins
+	 // ECI unavailable at Port pin
+	 // T0 unavailable at Port pin
+	 // T1 unavailable at Port pin
+	 // T2 unavailable at Port pin
 	 */
 	XBR1 = XBR1_PCA0ME__CEX0_CEX1_CEX2 | XBR1_ECIE__DISABLED
 			| XBR1_T0E__DISABLED | XBR1_T1E__DISABLED | XBR1_T2E__DISABLED;
@@ -311,9 +281,8 @@ extern void PBCFG_0_enter_DefaultMode_from_RESET(void) {
 extern void CIP51_0_enter_DefaultMode_from_RESET(void) {
 	// $[PFE0CN - Prefetch Engine Control]
 	/*
-	 // PFEN (Prefetch Enable) = ENABLED (Enable the prefetch engine (SYSCLK >
-	 //     25 MHz).)
-	 // FLRT (Flash Read Timing) = SYSCLK_BELOW_50_MHZ (SYSCLK < 50 MHz.)
+	 // Enable the prefetch engine 
+	 // SYSCLK < 50 MHz
 	 */
 	SFRPAGE = 0x10;
 	PFE0CN = PFE0CN_PFEN__ENABLED | PFE0CN_FLRT__SYSCLK_BELOW_50_MHZ;
@@ -335,10 +304,8 @@ extern void CLOCK_0_enter_DefaultMode_from_RESET(void) {
 
 	// $[CLKSEL - Clock Select]
 	/*
-	 // CLKSL (Clock Source Select) = HFOSC1 (Clock derived from the Internal
-	 //     High Frequency Oscillator 1.)
-	 // CLKDIV (Clock Source Divider) = SYSCLK_DIV_1 (SYSCLK is equal to
-	 //     selected clock source divided by 1.)
+	 // Clock derived from the Internal High Frequency Oscillator 1
+	 // SYSCLK is equal to selected clock source divided by 1
 	 */
 	CLKSEL = CLKSEL_CLKSL__HFOSC1 | CLKSEL_CLKDIV__SYSCLK_DIV_1;
 	while ((CLKSEL & CLKSEL_DIVRDY__BMASK) == CLKSEL_DIVRDY__NOT_READY)
@@ -368,7 +335,7 @@ extern void TIMER01_0_enter_DefaultMode_from_RESET(void) {
 
 	// $[TH1 - Timer 1 High Byte]
 	/*
-	 // TH1 (Timer 1 High Byte) = 0x30
+	 // Timer 1 High Byte = 0x30
 	 */
 	TH1 = (0x30 << TH1_TH1__SHIFT);
 	// [TH1 - Timer 1 High Byte]$
@@ -410,21 +377,21 @@ extern void TIMER16_2_enter_DefaultMode_from_RESET(void) {
 
 	// $[TMR2RLH - Timer 2 Reload High Byte]
 	/*
-	 // TMR2RLH (Timer 2 Reload High Byte) = 0x44
+	 // Timer 2 Reload High Byte = 0x44
 	 */
 	TMR2RLH = (0x44 << TMR2RLH_TMR2RLH__SHIFT);
 	// [TMR2RLH - Timer 2 Reload High Byte]$
 
 	// $[TMR2RLL - Timer 2 Reload Low Byte]
 	/*
-	 // TMR2RLL (Timer 2 Reload Low Byte) = 0x80
+	 // Timer 2 Reload Low Byte = 0x80
 	 */
 	TMR2RLL = (0x80 << TMR2RLL_TMR2RLL__SHIFT);
 	// [TMR2RLL - Timer 2 Reload Low Byte]$
 
 	// $[TMR2CN0]
 	/*
-	 // TR2 (Timer 2 Run Control) = RUN (Start Timer 2 running.)
+	 // Start Timer 2 running
 	 */
 	TMR2CN0 |= TMR2CN0_TR2__RUN;
 	// [TMR2CN0]$
@@ -468,7 +435,7 @@ extern void TIMER16_3_enter_DefaultMode_from_RESET(void) {
 
 	// $[TMR3CN0]
 	/*
-	 // TR3 (Timer 3 Run Control) = RUN (Start Timer 3 running.)
+	 // Start Timer 3 running
 	 */
 	TMR3CN0 |= TMR3CN0_TR3__RUN;
 	// [TMR3CN0]$
@@ -486,18 +453,13 @@ extern void TIMER16_3_enter_DefaultMode_from_RESET(void) {
 extern void TIMER_SETUP_0_enter_DefaultMode_from_RESET(void) {
 	// $[CKCON0 - Clock Control 0]
 	/*
-	 // SCA (Timer 0/1 Prescale) = SYSCLK_DIV_12 (System clock divided by 12.)
-	 // T0M (Timer 0 Clock Select) = SYSCLK (Counter/Timer 0 uses the system
-	 //     clock.)
-	 // T2MH (Timer 2 High Byte Clock Select) = EXTERNAL_CLOCK (Timer 2 high
-	 //     byte uses the clock defined by T2XCLK in TMR2CN0.)
-	 // T2ML (Timer 2 Low Byte Clock Select) = SYSCLK (Timer 2 low byte uses
-	 //     the system clock.)
-	 // T3MH (Timer 3 High Byte Clock Select) = EXTERNAL_CLOCK (Timer 3 high
-	 //     byte uses the clock defined by T3XCLK in TMR3CN0.)
-	 // T3ML (Timer 3 Low Byte Clock Select) = EXTERNAL_CLOCK (Timer 3 low
-	 //     byte uses the clock defined by T3XCLK in TMR3CN0.)
-	 // T1M (Timer 1 Clock Select) = SYSCLK (Timer 1 uses the system clock.)
+	 // System clock divided by 12
+	 // Counter/Timer 0 uses the system clock
+	 // Timer 2 high byte uses the clock defined by T2XCLK in TMR2CN0
+	 // Timer 2 low byte uses the system clock
+	 // Timer 3 high byte uses the clock defined by T3XCLK in TMR3CN0
+	 // Timer 3 low byte uses the clock defined by T3XCLK in TMR3CN0
+	 // Timer 1 uses the system clock
 	 */
 	CKCON0 = CKCON0_SCA__SYSCLK_DIV_12 | CKCON0_T0M__SYSCLK
 			| CKCON0_T2MH__EXTERNAL_CLOCK | CKCON0_T2ML__SYSCLK
@@ -510,17 +472,14 @@ extern void TIMER_SETUP_0_enter_DefaultMode_from_RESET(void) {
 
 	// $[TMOD - Timer 0/1 Mode]
 	/*
-	 // T0M (Timer 0 Mode Select) = MODE1 (Mode 1, 16-bit Counter/Timer)
-	 // T1M (Timer 1 Mode Select) = MODE2 (Mode 2, 8-bit Counter/Timer with
-	 //     Auto-Reload)
-	 // CT0 (Counter/Timer 0 Select) = TIMER (Timer Mode. Timer 0 increments
-	 //     on the clock defined by T0M in the CKCON0 register.)
-	 // GATE0 (Timer 0 Gate Control) = DISABLED (Timer 0 enabled when TR0 = 1
-	 //     irrespective of INT0 logic level.)
-	 // CT1 (Counter/Timer 1 Select) = TIMER (Timer Mode. Timer 1 increments
-	 //     on the clock defined by T1M in the CKCON0 register.)
-	 // GATE1 (Timer 1 Gate Control) = DISABLED (Timer 1 enabled when TR1 = 1
-	 //     irrespective of INT1 logic level.)
+	 // Mode 1, 16-bit Counter/Timer
+	 // Mode 2, 8-bit Counter/Timer with Auto-Reload
+	 // Timer Mode. Timer 0 increments on the clock defined by T0M in the
+	 //     CKCON0 register
+	 // Timer 0 enabled when TR0 = 1 irrespective of INT0 logic level
+	 // Timer Mode. Timer 1 increments on the clock defined by T1M in the
+	 //     CKCON0 register
+	 // Timer 1 enabled when TR1 = 1 irrespective of INT1 logic level
 	 */
 	TMOD = TMOD_T0M__MODE1 | TMOD_T1M__MODE2 | TMOD_CT0__TIMER
 			| TMOD_GATE0__DISABLED | TMOD_CT1__TIMER | TMOD_GATE1__DISABLED;
@@ -528,7 +487,7 @@ extern void TIMER_SETUP_0_enter_DefaultMode_from_RESET(void) {
 
 	// $[TCON - Timer 0/1 Control]
 	/*
-	 // TR1 (Timer 1 Run Control) = RUN (Start Timer 1 running.)
+	 // Start Timer 1 running
 	 */
 	TCON |= TCON_TR1__RUN;
 	// [TCON - Timer 0/1 Control]$
@@ -550,16 +509,12 @@ extern void SMBUS_0_enter_DefaultMode_from_RESET(void) {
 
 	// $[SMB0CF - SMBus 0 Configuration]
 	/*
-	 // SMBCS (SMBus Clock Source Selection) = TIMER2_LOW (Timer 2 Low Byte
-	 //     Overflow.)
-	 // ENSMB (SMBus Enable) = ENABLED (Enable the SMBus module.)
-	 // SMBFTE (SMBus Free Timeout Detection Enable) = FREE_TO_ENABLED (Enable
-	 //     bus free timeouts. The bus the bus will be considered free if SCL and
-	 //     SDA remain high for more than 10 SMBus clock source periods.)
-	 // SMBTOE (SMBus SCL Timeout Detection Enable) = SCL_TO_ENABLED (Enable
-	 //     SCL low timeouts.)
-	 // EXTHOLD (SMBus Setup and Hold Time Extension Enable) = ENABLED (Enable
-	 //     SDA extended setup and hold times.)
+	 // Timer 2 Low Byte Overflow
+	 // Enable the SMBus module
+	 // Enable bus free timeouts. The bus the bus will be considered free if
+	 //     SCL and SDA remain high for more than 10 SMBus clock source periods
+	 // Enable SCL low timeouts
+	 // Enable SDA extended setup and hold times
 	 */
 	SMB0CF |= SMB0CF_SMBCS__TIMER2_LOW | SMB0CF_ENSMB__ENABLED
 			| SMB0CF_SMBFTE__FREE_TO_ENABLED | SMB0CF_SMBTOE__SCL_TO_ENABLED
@@ -580,7 +535,7 @@ extern void SMBUS_0_enter_DefaultMode_from_RESET(void) {
 extern void UART_0_enter_DefaultMode_from_RESET(void) {
 	// $[SCON0 - UART0 Serial Port Control]
 	/*
-	 // REN (Receive Enable) = RECEIVE_ENABLED (UART0 reception enabled.)
+	 // UART0 reception enabled
 	 */
 	SCON0 |= SCON0_REN__RECEIVE_ENABLED;
 	// [SCON0 - UART0 Serial Port Control]$
@@ -593,22 +548,14 @@ extern void UART_0_enter_DefaultMode_from_RESET(void) {
 extern void INTERRUPT_0_enter_DefaultMode_from_RESET(void) {
 	// $[EIE1 - Extended Interrupt Enable 1]
 	/*
-	 // EADC0 (ADC0 Conversion Complete Interrupt Enable) = DISABLED (Disable
-	 //     ADC0 Conversion Complete interrupt.)
-	 // EWADC0 (ADC0 Window Comparison Interrupt Enable) = DISABLED (Disable
-	 //     ADC0 Window Comparison interrupt.)
-	 // ECP0 (Comparator0 (CP0) Interrupt Enable) = DISABLED (Disable CP0
-	 //     interrupts.)
-	 // ECP1 (Comparator1 (CP1) Interrupt Enable) = DISABLED (Disable CP1
-	 //     interrupts.)
-	 // EMAT (Port Match Interrupts Enable) = DISABLED (Disable all Port Match
-	 //     interrupts.)
-	 // EPCA0 (Programmable Counter Array (PCA0) Interrupt Enable) = DISABLED
-	 //     (Disable all PCA0 interrupts.)
-	 // ESMB0 (SMBus (SMB0) Interrupt Enable) = ENABLED (Enable interrupt
-	 //     requests generated by SMB0.)
-	 // ET3 (Timer 3 Interrupt Enable) = ENABLED (Enable interrupt requests
-	 //     generated by the TF3L or TF3H flags.)
+	 // Disable ADC0 Conversion Complete interrupt
+	 // Disable ADC0 Window Comparison interrupt
+	 // Disable CP0 interrupts
+	 // Disable CP1 interrupts
+	 // Disable all Port Match interrupts
+	 // Disable all PCA0 interrupts
+	 // Enable interrupt requests generated by SMB0
+	 // Enable interrupt requests generated by the TF3L or TF3H flags
 	 */
 	EIE1 = EIE1_EADC0__DISABLED | EIE1_EWADC0__DISABLED | EIE1_ECP0__DISABLED
 			| EIE1_ECP1__DISABLED | EIE1_EMAT__DISABLED | EIE1_EPCA0__DISABLED
@@ -632,21 +579,14 @@ extern void INTERRUPT_0_enter_DefaultMode_from_RESET(void) {
 
 	// $[IE - Interrupt Enable]
 	/*
-	 // EA (All Interrupts Enable) = ENABLED (Enable each interrupt according
-	 //     to its individual mask setting.)
-	 // EX0 (External Interrupt 0 Enable) = DISABLED (Disable external
-	 //     interrupt 0.)
-	 // EX1 (External Interrupt 1 Enable) = DISABLED (Disable external
-	 //     interrupt 1.)
-	 // ESPI0 (SPI0 Interrupt Enable) = DISABLED (Disable all SPI0
-	 //     interrupts.)
-	 // ET0 (Timer 0 Interrupt Enable) = DISABLED (Disable all Timer 0
-	 //     interrupt.)
-	 // ET1 (Timer 1 Interrupt Enable) = DISABLED (Disable all Timer 1
-	 //     interrupt.)
-	 // ET2 (Timer 2 Interrupt Enable) = ENABLED (Enable interrupt requests
-	 //     generated by the TF2L or TF2H flags.)
-	 // ES0 (UART0 Interrupt Enable) = DISABLED (Disable UART0 interrupt.)
+	 // Enable each interrupt according to its individual mask setting
+	 // Disable external interrupt 0
+	 // Disable external interrupt 1
+	 // Disable all SPI0 interrupts
+	 // Disable all Timer 0 interrupt
+	 // Disable all Timer 1 interrupt
+	 // Enable interrupt requests generated by the TF2L or TF2H flags
+	 // Disable UART0 interrupt
 	 */
 	IE = IE_EA__ENABLED | IE_EX0__DISABLED | IE_EX1__DISABLED
 			| IE_ESPI0__DISABLED | IE_ET0__DISABLED | IE_ET1__DISABLED
@@ -672,6 +612,7 @@ extern void USBLIB_0_enter_DefaultMode_from_RESET(void) {
 }
 
 extern void PCA_0_enter_DefaultMode_from_RESET(void) {
+
 	// $[PCA Off]
 	PCA0CN0_CR = PCA0CN0_CR__STOP;
 	// [PCA Off]$
@@ -704,6 +645,7 @@ extern void PCA_0_enter_DefaultMode_from_RESET(void) {
 }
 
 extern void PCACH_0_enter_DefaultMode_from_RESET(void) {
+
 	// $[PCA0 Settings Save]
 	// Select Capture/Compare register)
 	PCA0PWM &= ~PCA0PWM_ARSEL__BMASK;
@@ -711,22 +653,14 @@ extern void PCACH_0_enter_DefaultMode_from_RESET(void) {
 
 	// $[PCA0CPM0 - PCA Channel 0 Capture/Compare Mode]
 	/*
-	 // CAPN (Channel 0 Capture Negative Function Enable) = DISABLED (Disable
-	 //     negative edge capture.)
-	 // ECCF (Channel 0 Capture/Compare Flag Interrupt Enable) = DISABLED
-	 //     (Disable CCF0 interrupts.)
-	 // MAT (Channel 0 Match Function Enable) = DISABLED (Disable match
-	 //     function.)
-	 // PWM16 (Channel 0 16-bit Pulse Width Modulation Enable) = 8_BIT (8 to
-	 //     11-bit PWM selected.)
-	 // CAPP (Channel 0 Capture Positive Function Enable) = DISABLED (Disable
-	 //     positive edge capture.)
-	 // ECOM (Channel 0 Comparator Function Enable) = ENABLED (Enable
-	 //     comparator function.)
-	 // PWM (Channel 0 Pulse Width Modulation Mode Enable) = ENABLED (Enable
-	 //     PWM function.)
-	 // TOG (Channel 0 Toggle Function Enable) = DISABLED (Disable toggle
-	 //     function.)
+	 // Disable negative edge capture
+	 // Disable CCF0 interrupts
+	 // Disable match function
+	 // 8 to 11-bit PWM selected
+	 // Disable positive edge capture
+	 // Enable comparator function
+	 // Enable PWM function
+	 // Disable toggle function
 	 */
 	PCA0CPM0 = PCA0CPM0_CAPN__DISABLED | PCA0CPM0_ECCF__DISABLED
 			| PCA0CPM0_MAT__DISABLED | PCA0CPM0_PWM16__8_BIT
@@ -735,9 +669,17 @@ extern void PCACH_0_enter_DefaultMode_from_RESET(void) {
 	// [PCA0CPM0 - PCA Channel 0 Capture/Compare Mode]$
 
 	// $[PCA0CPL0 - PCA Channel 0 Capture Module Low Byte]
+	/*
+	 // PCA Channel 0 Capture Module Low Byte = 0x96
+	 */
+	PCA0CPL0 = (0x96 << PCA0CPL0_PCA0CPL0__SHIFT);
 	// [PCA0CPL0 - PCA Channel 0 Capture Module Low Byte]$
 
 	// $[PCA0CPH0 - PCA Channel 0 Capture Module High Byte]
+	/*
+	 // PCA Channel 0 Capture Module High Byte = 0x96
+	 */
+	PCA0CPH0 = (0x96 << PCA0CPH0_PCA0CPH0__SHIFT);
 	// [PCA0CPH0 - PCA Channel 0 Capture Module High Byte]$
 
 	// $[Auto-reload]
@@ -749,6 +691,7 @@ extern void PCACH_0_enter_DefaultMode_from_RESET(void) {
 }
 
 extern void PCACH_1_enter_DefaultMode_from_RESET(void) {
+
 	// $[PCA0 Settings Save]
 	// Select Capture/Compare register)
 	PCA0PWM &= ~PCA0PWM_ARSEL__BMASK;
@@ -756,22 +699,14 @@ extern void PCACH_1_enter_DefaultMode_from_RESET(void) {
 
 	// $[PCA0CPM1 - PCA Channel 1 Capture/Compare Mode]
 	/*
-	 // CAPN (Channel 1 Capture Negative Function Enable) = DISABLED (Disable
-	 //     negative edge capture.)
-	 // ECCF (Channel 1 Capture/Compare Flag Interrupt Enable) = DISABLED
-	 //     (Disable CCF1 interrupts.)
-	 // MAT (Channel 1 Match Function Enable) = DISABLED (Disable match
-	 //     function.)
-	 // PWM16 (Channel 1 16-bit Pulse Width Modulation Enable) = 8_BIT (8 to
-	 //     11-bit PWM selected.)
-	 // CAPP (Channel 1 Capture Positive Function Enable) = DISABLED (Disable
-	 //     positive edge capture.)
-	 // ECOM (Channel 1 Comparator Function Enable) = ENABLED (Enable
-	 //     comparator function.)
-	 // PWM (Channel 1 Pulse Width Modulation Mode Enable) = ENABLED (Enable
-	 //     PWM function.)
-	 // TOG (Channel 1 Toggle Function Enable) = DISABLED (Disable toggle
-	 //     function.)
+	 // Disable negative edge capture
+	 // Disable CCF1 interrupts
+	 // Disable match function
+	 // 8 to 11-bit PWM selected
+	 // Disable positive edge capture
+	 // Enable comparator function
+	 // Enable PWM function
+	 // Disable toggle function
 	 */
 	PCA0CPM1 = PCA0CPM1_CAPN__DISABLED | PCA0CPM1_ECCF__DISABLED
 			| PCA0CPM1_MAT__DISABLED | PCA0CPM1_PWM16__8_BIT
@@ -780,13 +715,17 @@ extern void PCACH_1_enter_DefaultMode_from_RESET(void) {
 	// [PCA0CPM1 - PCA Channel 1 Capture/Compare Mode]$
 
 	// $[PCA0CPL1 - PCA Channel 1 Capture Module Low Byte]
+	/*
+	 // PCA Channel 1 Capture Module Low Byte = 0x96
+	 */
+	PCA0CPL1 = (0x96 << PCA0CPL1_PCA0CPL1__SHIFT);
 	// [PCA0CPL1 - PCA Channel 1 Capture Module Low Byte]$
 
 	// $[PCA0CPH1 - PCA Channel 1 Capture Module High Byte]
 	/*
-	 // PCA0CPH1 (PCA Channel 1 Capture Module High Byte) = 0x64
+	 // PCA Channel 1 Capture Module High Byte = 0x96
 	 */
-	PCA0CPH1 = (0x64 << PCA0CPH1_PCA0CPH1__SHIFT);
+	PCA0CPH1 = (0x96 << PCA0CPH1_PCA0CPH1__SHIFT);
 	// [PCA0CPH1 - PCA Channel 1 Capture Module High Byte]$
 
 	// $[Auto-reload]
@@ -798,6 +737,7 @@ extern void PCACH_1_enter_DefaultMode_from_RESET(void) {
 }
 
 extern void PCACH_2_enter_DefaultMode_from_RESET(void) {
+
 	// $[PCA0 Settings Save]
 	// Select Capture/Compare register)
 	PCA0PWM &= ~PCA0PWM_ARSEL__BMASK;
@@ -805,22 +745,14 @@ extern void PCACH_2_enter_DefaultMode_from_RESET(void) {
 
 	// $[PCA0CPM2 - PCA Channel 2 Capture/Compare Mode]
 	/*
-	 // CAPN (Channel 2 Capture Negative Function Enable) = DISABLED (Disable
-	 //     negative edge capture.)
-	 // ECCF (Channel 2 Capture/Compare Flag Interrupt Enable) = DISABLED
-	 //     (Disable CCF2 interrupts.)
-	 // MAT (Channel 2 Match Function Enable) = DISABLED (Disable match
-	 //     function.)
-	 // PWM16 (Channel 2 16-bit Pulse Width Modulation Enable) = 8_BIT (8 to
-	 //     11-bit PWM selected.)
-	 // CAPP (Channel 2 Capture Positive Function Enable) = DISABLED (Disable
-	 //     positive edge capture.)
-	 // ECOM (Channel 2 Comparator Function Enable) = ENABLED (Enable
-	 //     comparator function.)
-	 // PWM (Channel 2 Pulse Width Modulation Mode Enable) = ENABLED (Enable
-	 //     PWM function.)
-	 // TOG (Channel 2 Toggle Function Enable) = DISABLED (Disable toggle
-	 //     function.)
+	 // Disable negative edge capture
+	 // Disable CCF2 interrupts
+	 // Disable match function
+	 // 8 to 11-bit PWM selected
+	 // Disable positive edge capture
+	 // Enable comparator function
+	 // Enable PWM function
+	 // Disable toggle function
 	 */
 	PCA0CPM2 = PCA0CPM2_CAPN__DISABLED | PCA0CPM2_ECCF__DISABLED
 			| PCA0CPM2_MAT__DISABLED | PCA0CPM2_PWM16__8_BIT
@@ -830,16 +762,16 @@ extern void PCACH_2_enter_DefaultMode_from_RESET(void) {
 
 	// $[PCA0CPL2 - PCA Channel 2 Capture Module Low Byte]
 	/*
-	 // PCA0CPL2 (PCA Channel 2 Capture Module Low Byte) = 0xC8
+	 // PCA Channel 2 Capture Module Low Byte = 0x96
 	 */
-	PCA0CPL2 = (0xC8 << PCA0CPL2_PCA0CPL2__SHIFT);
+	PCA0CPL2 = (0x96 << PCA0CPL2_PCA0CPL2__SHIFT);
 	// [PCA0CPL2 - PCA Channel 2 Capture Module Low Byte]$
 
 	// $[PCA0CPH2 - PCA Channel 2 Capture Module High Byte]
 	/*
-	 // PCA0CPH2 (PCA Channel 2 Capture Module High Byte) = 0xC8
+	 // PCA Channel 2 Capture Module High Byte = 0x96
 	 */
-	PCA0CPH2 = (0xC8 << PCA0CPH2_PCA0CPH2__SHIFT);
+	PCA0CPH2 = (0x96 << PCA0CPH2_PCA0CPH2__SHIFT);
 	// [PCA0CPH2 - PCA Channel 2 Capture Module High Byte]$
 
 	// $[Auto-reload]

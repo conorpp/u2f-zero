@@ -28,6 +28,7 @@
     <property object="P0.3" propertyId="ports.settings.iomode" value="Digital Push-Pull Output"/>
     <property object="P0.3" propertyId="ports.settings.outputmode" value="Push-pull"/>
     <property object="P0.3" propertyId="ports.settings.skip" value="Skipped"/>
+    <property object="P0.3" propertyId="ports.settings.skip" value="Skipped"/>
     <property object="P0.4" propertyId="ports.settings.iomode" value="Digital Push-Pull Output"/>
     <property object="P0.4" propertyId="ports.settings.outputmode" value="Push-pull"/>
     <property object="P0.6" propertyId="ports.settings.iomode" value="Digital Push-Pull Output"/>
@@ -45,21 +46,24 @@
     <property object="P1.6" propertyId="ports.settings.outputmode" value="Push-pull"/>
     <property object="PBCFG_0" propertyId="pbcfg.settings.enablecrossbar" value="Enabled"/>
     <property object="PCACH_0" propertyId="ABPeripheral.included" value="true"/>
+    <property object="PCACH_0" propertyId="pcach.pcachannel.capturecomparehighbyte" value="150"/>
+    <property object="PCACH_0" propertyId="pcach.pcachannel.capturecomparelowbyte" value="150"/>
     <property object="PCACH_0" propertyId="pcach.pcachannel.capturecompareregister" value="65500"/>
     <property object="PCACH_0" propertyId="pcach.pcachannel.clockdivider" value="100"/>
     <property object="PCACH_0" propertyId="pcach.pcachannelcapturecomparemode.enablechannelcomparatorfunction" value="Enabled"/>
     <property object="PCACH_0" propertyId="pcach.pcachannelcapturecomparemode.enablechannelpulsewidthmodulationmoden" value="Enabled"/>
     <property object="PCACH_0" propertyId="pcach.pcacontrol.channelcapturecomparemode" value="Predefined 8~11-bit pulse modulator"/>
     <property object="PCACH_1" propertyId="ABPeripheral.included" value="true"/>
-    <property object="PCACH_1" propertyId="pcach.pcachannel.capturecomparehighbyte" value="100"/>
+    <property object="PCACH_1" propertyId="pcach.pcachannel.capturecomparehighbyte" value="150"/>
+    <property object="PCACH_1" propertyId="pcach.pcachannel.capturecomparelowbyte" value="150"/>
     <property object="PCACH_1" propertyId="pcach.pcachannel.capturecompareregister" value="25600"/>
     <property object="PCACH_1" propertyId="pcach.pcachannel.clockdivider" value="100"/>
     <property object="PCACH_1" propertyId="pcach.pcachannelcapturecomparemode.enablechannelcomparatorfunction" value="Enabled"/>
     <property object="PCACH_1" propertyId="pcach.pcachannelcapturecomparemode.enablechannelpulsewidthmodulationmoden" value="Enabled"/>
     <property object="PCACH_1" propertyId="pcach.pcacontrol.channelcapturecomparemode" value="Predefined 8~11-bit pulse modulator"/>
     <property object="PCACH_2" propertyId="ABPeripheral.included" value="true"/>
-    <property object="PCACH_2" propertyId="pcach.pcachannel.capturecomparehighbyte" value="200"/>
-    <property object="PCACH_2" propertyId="pcach.pcachannel.capturecomparelowbyte" value="200"/>
+    <property object="PCACH_2" propertyId="pcach.pcachannel.capturecomparehighbyte" value="150"/>
+    <property object="PCACH_2" propertyId="pcach.pcachannel.capturecomparelowbyte" value="150"/>
     <property object="PCACH_2" propertyId="pcach.pcachannel.capturecompareregister" value="25600"/>
     <property object="PCACH_2" propertyId="pcach.pcachannel.clockdivider" value="100"/>
     <property object="PCACH_2" propertyId="pcach.pcachannelcapturecomparemode.enablechannelcomparatorfunction" value="Enabled"/>

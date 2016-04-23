@@ -37,6 +37,12 @@ extern "C" {
 
 extern SI_SEGMENT_VARIABLE(ReportDescriptor0[34], const uint8_t, SI_SEG_CODE);
 
+#if 0
+// $[HID Report Descriptors]
+extern SI_SEGMENT_VARIABLE(ReportDescriptor0[0], const uint8_t, SI_SEG_CODE);
+// [HID Report Descriptors]$
+#endif
+
 extern SI_SEGMENT_VARIABLE(deviceDesc[], const USB_DeviceDescriptor_TypeDef, SI_SEG_CODE);
 extern SI_SEGMENT_VARIABLE(configDesc[], const uint8_t, SI_SEG_CODE);
 extern SI_SEGMENT_VARIABLE(initstruct, const USBD_Init_TypeDef, SI_SEG_CODE);

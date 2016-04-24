@@ -262,7 +262,7 @@ Wire Wire Line
 Wire Wire Line
 	8100 5050 8100 5250
 Text Label 8100 5250 0    60   ~ 0
-+3.3V
++5V
 Text Label 4550 5000 2    60   ~ 0
 C2CK
 Text Label 4550 5100 2    60   ~ 0
@@ -359,7 +359,7 @@ U 1 1 5705BC18
 P 5350 4250
 F 0 "E0" H 5800 4750 60  0000 C CNN
 F 1 "EFM8UB1_24pin" H 5300 4750 60  0000 C CNN
-F 2 "Housings_SSOP:SSOP-24_3.9x8.7mm_Pitch0.635mm" H 5650 4650 60  0001 C CNN
+F 2 "footprints:QSOP-24_3.9x8.7mm_Pitch0.635mm_fat" H 5650 4650 60  0001 C CNN
 F 3 "" H 5350 4250 60  0000 C CNN
 	1    5350 4250
 	1    0    0    -1  
@@ -367,14 +367,7 @@ $EndComp
 Wire Wire Line
 	4800 4700 4700 4700
 Wire Wire Line
-	4700 4700 4700 4600
-Wire Wire Line
 	4700 4600 4800 4600
-Wire Wire Line
-	4700 4650 4100 4650
-Connection ~ 4700 4650
-Text Label 4100 4650 2    60   ~ 0
-+3.3V
 $Comp
 L debug-pin GND1
 U 1 1 570602D3
@@ -388,4 +381,6 @@ F 3 "" H 6850 3550 60  0000 C CNN
 $EndComp
 Text Label 7050 3400 3    60   ~ 0
 GND
+Wire Wire Line
+	4700 4700 4700 4600
 $EndSCHEMATC

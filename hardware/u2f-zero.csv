@@ -1,0 +1,17 @@
+Reference, Value, Footprint, Datasheet, MFG Name, MFG Part Num, Distributer PN, Distributer Link
+A1,ATECC508A,Housings_SOIC:SOIC-8_3.9x4.9mm_Pitch1.27mm,http://www.atmel.com/Images/Atmel-8923S-CryptoAuth-ATECC508A-Datasheet-Summary.pdf,Atmel,ATECC508A-SSHDA-B,ATECC508A-SSHDA-B-ND,http://www.digikey.com/product-detail/en/atmel/ATECC508A-SSHDA-B/ATECC508A-SSHDA-B-ND/5213053
+C3,0.1uF,Capacitors_SMD:C_0402,http://media.digikey.com/pdf/Data%20Sheets/Samsung%20PDFs/CL_Series_MLCC_ds.pdf,Samsung Electro-Mechanics America, Inc,CL05A104MP5NNNC,1276-1443-1-ND,http://www.digikey.com/product-detail/en/CL05A104MP5NNNC/1276-1443-1-ND/3889529
+C4,4.7uF,Capacitors_SMD:C_0603,http://media.digikey.com/pdf/Data%20Sheets/Samsung%20PDFs/CL_Series_MLCC_ds.pdf,Samsung Electro-Mechanics America, Inc,CL10B475KQ8NQNC,1276-2087-1-ND,http://www.digikey.com/product-detail/en/CL10B475KQ8NQNC/1276-2087-1-ND/3890173
+Z1,DF5A5.6JE,TO_SOT_Packages_SMD:SOT-553,http://optoelectronics.liteon.com/upload/download/DS22-2008-0044/S_110_LTST-C19HE1WT.pdf,Toshiba Semiconductor and Storage,DF5A5.6JE,LM,DF5A5.6JELMCT-ND,http://www.digikey.com/product-detail/en/DF5A5.6JE,LM/DF5A5.6JELMCT-ND/5403466
+R1,100,Resistors_SMD:R_0603,http://www.vishay.com/docs/20035/dcrcwe3.pdf,Vishay Dale,CRCW0603100RFKEA,541-100HCT-ND,http://www.digikey.com/product-detail/en/CRCW0603100RFKEA/541-100HCT-ND/1179695
+RGB1,CA_RGB,footprints:LED-0606,http://optoelectronics.liteon.com/upload/download/DS22-2008-0044/S_110_LTST-C19HE1WT.pdf,Lite-On Inc,LTST-C19HE1WT,160-2162-1-ND,http://www.digikey.com/product-detail/en/LTST-C19HE1WT/160-2162-1-ND/4866310
+SW1,SW_PUSH,footprints:u2f-button,http://www.digikey.com/product-detail/en/e-switch/TL3305AF260QG/EG5353CT-ND/5816198,E-Switch,TL3305AF260QG,EG5353CT-ND,http://www.digikey.com/product-detail/en/e-switch/TL3305AF260QG/EG5353CT-ND/5816198
+TX1,debug-pin,footprints:debug,
+RX1,debug-pin,footprints:debug,
+C2CK1,debug-pin,footprints:debug,
+C2D1,debug-pin,footprints:debug,
+E0,EFM8UB1_24pin,footprints:QSOP-24_3.9x8.7mm_Pitch0.635mm_fat,https://www.silabs.com/Support%20Documents/TechnicalDocs/EFM8UB1_DataSheet.pdf,Silicon Labs,EFM8UB11F16G-C-QSOP24,r	336-3411-5-ND,http://www.digikey.com/product-detail/en/silicon-labs/EFM8UB11F16G-C-QSOP24/336-3411-5-ND/5592439
+GND1,debug-pin,footprints:debug,
+F1,u2f-fiducial,footprints:u2f-fiducial,
+F2,u2f-fiducial,footprints:u2f-fiducial,
+F3,u2f-fiducial,footprints:u2f-fiducial,

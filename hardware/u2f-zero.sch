@@ -415,4 +415,37 @@ Text Label 7050 3400 3    60   ~ 0
 GND
 Wire Wire Line
 	4700 4700 4700 4600
+$Comp
+L u2f-fiducial F1
+U 1 1 571C39BB
+P 2600 5450
+F 0 "F1" H 2450 5650 60  0000 C CNN
+F 1 "u2f-fiducial" H 2950 5650 60  0000 C CNN
+F 2 "footprints:u2f-fiducial" H 2600 5450 60  0001 C CNN
+F 3 "" H 2600 5450 60  0000 C CNN
+	1    2600 5450
+	1    0    0    -1  
+$EndComp
+$Comp
+L u2f-fiducial F2
+U 1 1 571C3A1E
+P 3100 5600
+F 0 "F2" H 2950 5800 60  0000 C CNN
+F 1 "u2f-fiducial" H 3450 5800 60  0000 C CNN
+F 2 "footprints:u2f-fiducial" H 3100 5600 60  0001 C CNN
+F 3 "" H 3100 5600 60  0000 C CNN
+	1    3100 5600
+	1    0    0    -1  
+$EndComp
+$Comp
+L u2f-fiducial F3
+U 1 1 571C3A85
+P 3500 5750
+F 0 "F3" H 3350 5950 60  0000 C CNN
+F 1 "u2f-fiducial" H 3850 5950 60  0000 C CNN
+F 2 "footprints:u2f-fiducial" H 3500 5750 60  0001 C CNN
+F 3 "" H 3500 5750 60  0000 C CNN
+	1    3500 5750
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC

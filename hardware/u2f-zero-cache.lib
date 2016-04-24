@@ -195,4 +195,18 @@ X p 1 -200 -150 200 D 50 50 1 1 I
 ENDDRAW
 ENDDEF
 #
+# u2f-fiducial
+#
+DEF u2f-fiducial F 0 40 Y Y 1 F N
+F0 "F" -150 200 60 H V C CNN
+F1 "u2f-fiducial" 350 200 60 H V C CNN
+F2 "" 0 0 60 H V C CNN
+F3 "" 0 0 60 H V C CNN
+DRAW
+C 0 0 71 0 1 0 N
+P 2 0 1 0  0 -150  0 150 N
+P 2 0 1 0  150 0  -150 0 N
+ENDDRAW
+ENDDEF
+#
 #End Library

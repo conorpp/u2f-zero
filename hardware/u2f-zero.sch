@@ -55,7 +55,7 @@ P 5100 3050
 F 0 "A1" H 5400 3350 60  0000 C CNN
 F 1 "ATECC508A" H 5000 3350 60  0000 C CNN
 F 2 "Housings_SOIC:SOIC-8_3.9x4.9mm_Pitch1.27mm" H 4700 3300 60  0001 C CNN
-F 3 "" H 4700 3300 60  0000 C CNN
+F 3 "http://www.atmel.com/Images/Atmel-8923S-CryptoAuth-ATECC508A-Datasheet-Summary.pdf" H 4700 3300 60  0001 C CNN
 	1    5100 3050
 	-1   0    0    1   
 $EndComp
@@ -66,7 +66,7 @@ P 5300 5750
 F 0 "C3" H 5325 5850 50  0000 L CNN
 F 1 "0.1uF" H 5325 5650 50  0000 L CNN
 F 2 "Capacitors_SMD:C_0402" H 5338 5600 50  0001 C CNN
-F 3 "" H 5300 5750 50  0000 C CNN
+F 3 "http://media.digikey.com/pdf/Data%20Sheets/Samsung%20PDFs/CL_Series_MLCC_ds.pdf" H 5300 5750 50  0001 C CNN
 	1    5300 5750
 	0    -1   1    0   
 $EndComp
@@ -77,7 +77,7 @@ P 5300 6100
 F 0 "C4" H 5325 6200 50  0000 L CNN
 F 1 "4.7uF" H 5325 6000 50  0000 L CNN
 F 2 "Capacitors_SMD:C_0603" H 5338 5950 50  0001 C CNN
-F 3 "" H 5300 6100 50  0000 C CNN
+F 3 "http://media.digikey.com/pdf/Data%20Sheets/Samsung%20PDFs/CL_Series_MLCC_ds.pdf" H 5300 6100 50  0001 C CNN
 	1    5300 6100
 	0    1    1    0   
 $EndComp
@@ -90,7 +90,7 @@ P 3250 3950
 F 0 "Z1" H 2850 4000 60  0000 C CNN
 F 1 "DF5A5.6JE" H 2700 4100 60  0000 C CNN
 F 2 "TO_SOT_Packages_SMD:SOT-553" H 3250 3950 60  0001 C CNN
-F 3 "" H 3250 3950 60  0000 C CNN
+F 3 "http://optoelectronics.liteon.com/upload/download/DS22-2008-0044/S_110_LTST-C19HE1WT.pdf" H 3250 3950 60  0001 C CNN
 	1    3250 3950
 	1    0    0    -1  
 $EndComp
@@ -113,7 +113,7 @@ P 8100 4900
 F 0 "R1" V 8180 4900 50  0000 C CNN
 F 1 "100" V 8100 4900 50  0000 C CNN
 F 2 "Resistors_SMD:R_0603" V 8030 4900 50  0001 C CNN
-F 3 "" H 8100 4900 50  0000 C CNN
+F 3 "http://www.vishay.com/docs/20035/dcrcwe3.pdf" H 8100 4900 50  0001 C CNN
 	1    8100 4900
 	-1   0    0    1   
 $EndComp
@@ -130,7 +130,7 @@ P 7050 4700
 F 0 "RGB1" H 7300 4850 60  0000 C CNN
 F 1 "CA_RGB" H 6950 4850 60  0000 C CNN
 F 2 "footprints:LED-0606" H 7850 4750 60  0001 C CNN
-F 3 "" H 7050 4750 60  0000 C CNN
+F 3 "http://optoelectronics.liteon.com/upload/download/DS22-2008-0044/S_110_LTST-C19HE1WT.pdf" H 7050 4750 60  0001 C CNN
 	1    7050 4700
 	1    0    0    1   
 $EndComp
@@ -167,7 +167,7 @@ P 6500 5200
 F 0 "SW1" H 6650 5310 50  0000 C CNN
 F 1 "SW_PUSH" H 6500 5120 50  0000 C CNN
 F 2 "footprints:u2f-button" H 6500 5200 50  0001 C CNN
-F 3 "" H 6500 5200 50  0000 C CNN
+F 3 "http://www.digikey.com/product-detail/en/e-switch/TL3305AF260QG/EG5353CT-ND/5816198" H 6500 5200 50  0001 C CNN
 	1    6500 5200
 	1    0    0    -1  
 $EndComp
@@ -360,7 +360,7 @@ P 5350 4250
 F 0 "E0" H 5800 4750 60  0000 C CNN
 F 1 "EFM8UB1_24pin" H 5300 4750 60  0000 C CNN
 F 2 "footprints:QSOP-24_3.9x8.7mm_Pitch0.635mm_fat" H 5650 4650 60  0001 C CNN
-F 3 "" H 5350 4250 60  0000 C CNN
+F 3 "https://www.silabs.com/Support%20Documents/TechnicalDocs/EFM8UB1_DataSheet.pdf" H 5350 4250 60  0001 C CNN
 	1    5350 4250
 	1    0    0    -1  
 $EndComp

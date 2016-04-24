@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<export version="D">
+  <design>
+    <source>C:/Users/Conor/Desktop/u2f-zero/hardware/u2f-zero.sch</source>
+    <date>4/23/2016 11:00:53 PM</date>
+    <tool>Eeschema 4.0.1-stable</tool>
+    <sheet number="1" name="/" tstamps="/">
+      <title_block>
+        <title/>
+        <company/>
+        <rev/>
+        <date/>
+        <source>u2f-zero.sch</source>
+        <comment number="1" value=""/>
+        <comment number="2" value=""/>
+        <comment number="3" value=""/>
+        <comment number="4" value=""/>
+      </title_block>
+    </sheet>
+  </design>
+  <components>
+    <comp ref="A1">
+      <value>ATECC508A</value>
+      <footprint>Housings_SOIC:SOIC-8_3.9x4.9mm_Pitch1.27mm</footprint>
+      <datasheet>http://www.atmel.com/Images/Atmel-8923S-CryptoAuth-ATECC508A-Datasheet-Summary.pdf</datasheet>
+      <fields>
+        <field name="MFG Name">Atmel</field>
+        <field name="MFG Part Num">ATECC508A-SSHDA-B</field>
+        <field name="Distributer PN">ATECC508A-SSHDA-B-ND</field>
+        <field name="Distributer Link">http://www.digikey.com/product-detail/en/atmel/ATECC508A-SSHDA-B/ATECC508A-SSHDA-B-ND/5213053</field>
+      </fields>
+      <libsource lib="u2f-zero-rescue" part="ATECC508A-RESCUE-u2f-zero"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>56857313</tstamp>
+    </comp>
+    <comp ref="C3">
+      <value>0.1uF</value>
+      <footprint>Capacitors_SMD:C_0402</footprint>
+      <datasheet>http://media.digikey.com/pdf/Data%20Sheets/Samsung%20PDFs/CL_Series_MLCC_ds.pdf</datasheet>
+      <fields>
+        <field name="MFG Name">Samsung Electro-Mechanics America, Inc</field>
+        <field name="MFG Part Num">CL05A104MP5NNNC</field>
+        <field name="Distributer PN">1276-1443-1-ND</field>
+        <field name="Distributer Link">http://www.digikey.com/product-detail/en/CL05A104MP5NNNC/1276-1443-1-ND/3889529</field>
+      </fields>
+      <libsource lib="device" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>56857DEB</tstamp>
+    </comp>
+    <comp ref="C4">
+      <value>4.7uF</value>
+      <footprint>Capacitors_SMD:C_0603</footprint>
+      <datasheet>http://media.digikey.com/pdf/Data%20Sheets/Samsung%20PDFs/CL_Series_MLCC_ds.pdf</datasheet>
+      <fields>
+        <field name="MFG Name">Samsung Electro-Mechanics America, Inc</field>
+        <field name="MFG Part Num">CL10B475KQ8NQNC</field>
+        <field name="Distributer PN">1276-2087-1-ND</field>
+        <field name="Distributer Link">http://www.digikey.com/product-detail/en/CL10B475KQ8NQNC/1276-2087-1-ND/3890173</field>
+      </fields>
+      <libsource lib="device" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>56857E44</tstamp>
+    </comp>
+    <comp ref="Z1">
+      <value>DF5A5.6JE</value>
+      <footprint>TO_SOT_Packages_SMD:SOT-553</footprint>
+      <datasheet>http://optoelectronics.liteon.com/upload/download/DS22-2008-0044/S_110_LTST-C19HE1WT.pdf</datasheet>
+      <fields>
+        <field name="MFG Name">Toshiba Semiconductor and Storage</field>
+        <field name="MFG Part Num">DF5A5.6JE,LM</field>
+        <field name="Distributer PN">DF5A5.6JELMCT-ND</field>
+        <field name="Distributer Link">http://www.digikey.com/product-detail/en/DF5A5.6JE,LM/DF5A5.6JELMCT-ND/5403466</field>
+      </fields>
+      <libsource lib="discrete" part="DF5A5.6JE"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>56857EAF</tstamp>
+    </comp>
+    <comp ref="R1">
+      <value>100</value>
+      <footprint>Resistors_SMD:R_0603</footprint>
+      <datasheet>http://www.vishay.com/docs/20035/dcrcwe3.pdf</datasheet>
+      <fields>
+        <field name="MFG Name">Vishay Dale</field>
+        <field name="MFG Part Num">CRCW0603100RFKEA</field>
+        <field name="Distributer PN">541-100HCT-ND</field>
+        <field name="Distributer Link">http://www.digikey.com/product-detail/en/CRCW0603100RFKEA/541-100HCT-ND/1179695</field>
+      </fields>
+      <libsource lib="device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>56857B9B</tstamp>
+    </comp>
+    <comp ref="RGB1">
+      <value>CA_RGB</value>
+      <footprint>footprints:LED-0606</footprint>
+      <datasheet>http://optoelectronics.liteon.com/upload/download/DS22-2008-0044/S_110_LTST-C19HE1WT.pdf</datasheet>
+      <fields>
+        <field name="MFG Name">Lite-On Inc</field>
+        <field name="MFG Part Num">LTST-C19HE1WT</field>
+        <field name="Distributer PN">160-2162-1-ND</field>
+        <field name="Distributer Link">http://www.digikey.com/product-detail/en/LTST-C19HE1WT/160-2162-1-ND/4866310</field>
+      </fields>
+      <libsource lib="u2f-zero-rescue" part="CA_RGB-RESCUE-u2f-zero"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5686DEFD</tstamp>
+    </comp>
+    <comp ref="SW1">
+      <value>SW_PUSH</value>
+      <footprint>footprints:u2f-button</footprint>
+      <datasheet>http://www.digikey.com/product-detail/en/e-switch/TL3305AF260QG/EG5353CT-ND/5816198</datasheet>
+      <fields>
+        <field name="MFG Name">E-Switch</field>
+        <field name="MFG Part Num">TL3305AF260QG</field>
+        <field name="Distributer PN">EG5353CT-ND</field>
+        <field name="Distributer Link">http://www.digikey.com/product-detail/en/e-switch/TL3305AF260QG/EG5353CT-ND/5816198</field>
+      </fields>
+      <libsource lib="device" part="SW_PUSH"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5685E9F9</tstamp>
+    </comp>
+    <comp ref="TX1">
+      <value>debug-pin</value>
+      <footprint>footprints:debug</footprint>
+      <libsource lib="debug" part="debug-pin"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>56A3F7EB</tstamp>
+    </comp>
+    <comp ref="RX1">
+      <value>debug-pin</value>
+      <footprint>footprints:debug</footprint>
+      <libsource lib="debug" part="debug-pin"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>56A3F89E</tstamp>
+    </comp>
+    <comp ref="C2CK1">
+      <value>debug-pin</value>
+      <footprint>footprints:debug</footprint>
+      <libsource lib="debug" part="debug-pin"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>56A3F8D6</tstamp>
+    </comp>
+    <comp ref="C2D1">
+      <value>debug-pin</value>
+      <footprint>footprints:debug</footprint>
+      <libsource lib="debug" part="debug-pin"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>56A3F90D</tstamp>
+    </comp>
+    <comp ref="E0">
+      <value>EFM8UB1_24pin</value>
+      <footprint>footprints:QSOP-24_3.9x8.7mm_Pitch0.635mm_fat</footprint>
+      <datasheet>https://www.silabs.com/Support%20Documents/TechnicalDocs/EFM8UB1_DataSheet.pdf</datasheet>
+      <fields>
+        <field name="MFG Name">Silicon Labs</field>
+        <field name="MFG Part Num">EFM8UB11F16G-C-QSOP24</field>
+        <field name="Distributer PN">r	336-3411-5-ND</field>
+        <field name="Distributer Link">http://www.digikey.com/product-detail/en/silicon-labs/EFM8UB11F16G-C-QSOP24/336-3411-5-ND/5592439</field>
+      </fields>
+      <libsource lib="u2f-zero-rescue" part="EFM8UB1_24pin"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5705BC18</tstamp>
+    </comp>
+    <comp ref="GND1">
+      <value>debug-pin</value>
+      <footprint>footprints:debug</footprint>
+      <libsource lib="debug" part="debug-pin"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>570602D3</tstamp>
+    </comp>
+    <comp ref="F1">
+      <value>u2f-fiducial</value>
+      <footprint>footprints:u2f-fiducial</footprint>
+      <libsource lib="u2f-zero-rescue" part="u2f-fiducial"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>571C39BB</tstamp>
+    </comp>
+    <comp ref="F2">
+      <value>u2f-fiducial</value>
+      <footprint>footprints:u2f-fiducial</footprint>
+      <libsource lib="u2f-zero-rescue" part="u2f-fiducial"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>571C3A1E</tstamp>
+    </comp>
+    <comp ref="F3">
+      <value>u2f-fiducial</value>
+      <footprint>footprints:u2f-fiducial</footprint>
+      <libsource lib="u2f-zero-rescue" part="u2f-fiducial"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>571C3A85</tstamp>
+    </comp>
+  </components>
+  <libparts>
+    <libpart lib="u2f-zero-rescue" part="ATECC508A-RESCUE-u2f-zero">
+      <fields>
+        <field name="Reference">A</field>
+        <field name="Value">ATECC508A-RESCUE-u2f-zero</field>
+      </fields>
+      <pins>
+        <pin num="1" name="NC" type="passive"/>
+        <pin num="2" name="NC" type="passive"/>
+        <pin num="3" name="NC" type="passive"/>
+        <pin num="4" name="GND" type="passive"/>
+        <pin num="5" name="SDA" type="passive"/>
+        <pin num="6" name="SCL" type="passive"/>
+        <pin num="7" name="NC" type="passive"/>
+        <pin num="8" name="VCC" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="device" part="C">
+      <description>Unpolarized capacitor</description>
+      <footprints>
+        <fp>C?</fp>
+        <fp>C_????_*</fp>
+        <fp>C_????</fp>
+        <fp>SMD*_c</fp>
+        <fp>Capacitor*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">C</field>
+        <field name="Value">C</field>
+      </fields>
+      <pins>
+        <pin num="1" name="~" type="passive"/>
+        <pin num="2" name="~" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="u2f-zero-rescue" part="CA_RGB-RESCUE-u2f-zero">
+      <fields>
+        <field name="Reference">RGB</field>
+        <field name="Value">CA_RGB-RESCUE-u2f-zero</field>
+      </fields>
+      <pins>
+        <pin num="1" name="R" type="input"/>
+        <pin num="2" name="G" type="input"/>
+        <pin num="3" name="B" type="input"/>
+        <pin num="4" name="VCC" type="input"/>
+      </pins>
+    </libpart>
+    <libpart lib="discrete" part="DF5A5.6JE">
+      <fields>
+        <field name="Reference">Z</field>
+        <field name="Value">DF5A5.6JE</field>
+      </fields>
+      <pins>
+        <pin num="1" name="C1" type="input"/>
+        <pin num="2" name="GND" type="BiDi"/>
+        <pin num="3" name="C2" type="input"/>
+        <pin num="4" name="C3" type="input"/>
+        <pin num="5" name="C4" type="input"/>
+      </pins>
+    </libpart>
+    <libpart lib="u2f-zero-rescue" part="EFM8UB1_24pin">
+      <fields>
+        <field name="Reference">E</field>
+        <field name="Value">EFM8UB1_24pin</field>
+      </fields>
+      <pins>
+        <pin num="1" name="P0.2" type="passive"/>
+        <pin num="2" name="P0.1/SCL" type="passive"/>
+        <pin num="3" name="P0.0/SDA" type="passive"/>
+        <pin num="4" name="GND" type="input"/>
+        <pin num="5" name="D+" type="passive"/>
+        <pin num="6" name="D-" type="passive"/>
+        <pin num="7" name="VIO" type="input"/>
+        <pin num="8" name="VDD" type="input"/>
+        <pin num="9" name="VREGIN" type="input"/>
+        <pin num="10" name="P3.1" type="input"/>
+        <pin num="11" name="C2CK" type="passive"/>
+        <pin num="12" name="C2D" type="passive"/>
+        <pin num="13" name="P1.6" type="passive"/>
+        <pin num="14" name="P1.5" type="passive"/>
+        <pin num="15" name="P1.4" type="passive"/>
+        <pin num="16" name="P1.3" type="passive"/>
+        <pin num="17" name="P1.2" type="passive"/>
+        <pin num="18" name="P1.1" type="passive"/>
+        <pin num="19" name="P1.0" type="passive"/>
+        <pin num="20" name="P0.7" type="passive"/>
+        <pin num="21" name="P0.6" type="passive"/>
+        <pin num="22" name="P0.5" type="passive"/>
+        <pin num="23" name="P0.4" type="passive"/>
+        <pin num="24" name="P0.3" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="device" part="R">
+      <description>Resistor</description>
+      <footprints>
+        <fp>R_*</fp>
+        <fp>Resistor_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">R</field>
+        <field name="Value">R</field>
+      </fields>
+      <pins>
+        <pin num="1" name="~" type="passive"/>
+        <pin num="2" name="~" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="device" part="SW_PUSH">
+      <description>Button</description>
+      <fields>
+        <field name="Reference">SW</field>
+        <field name="Value">SW_PUSH</field>
+      </fields>
+      <pins>
+        <pin num="1" name="1" type="passive"/>
+        <pin num="2" name="2" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="debug" part="debug-pin">
+      <fields>
+        <field name="Reference">p</field>
+        <field name="Value">debug-pin</field>
+      </fields>
+      <pins>
+        <pin num="1" name="p" type="input"/>
+      </pins>
+    </libpart>
+    <libpart lib="u2f-zero-rescue" part="u2f-fiducial">
+      <fields>
+        <field name="Reference">F</field>
+        <field name="Value">u2f-fiducial</field>
+      </fields>
+    </libpart>
+  </libparts>
+  <libraries>
+    <library logical="u2f-zero-rescue">
+      <uri>C:\Users\Conor\Desktop\u2f-zero\hardware\u2f-zero-rescue.lib</uri>
+    </library>
+    <library logical="device">
+      <uri>C:\Program Files\KiCad\share\kicad\library\device.lib</uri>
+    </library>
+    <library logical="debug">
+      <uri>C:\Users\Conor\Desktop\u2f-zero\hardware\library\debug.lib</uri>
+    </library>
+    <library logical="discrete">
+      <uri>C:\Users\Conor\Desktop\u2f-zero\hardware\library\discrete.lib</uri>
+    </library>
+  </libraries>
+  <nets>
+    <net code="1" name="Net-(A1-Pad5)">
+      <node ref="E0" pin="3"/>
+      <node ref="A1" pin="5"/>
+    </net>
+    <net code="2" name="Net-(A1-Pad6)">
+      <node ref="E0" pin="2"/>
+      <node ref="A1" pin="6"/>
+    </net>
+    <net code="3" name="GND">
+      <node ref="SW1" pin="2"/>
+      <node ref="C3" pin="2"/>
+      <node ref="A1" pin="4"/>
+      <node ref="GND1" pin="1"/>
+      <node ref="C4" pin="1"/>
+      <node ref="Z1" pin="2"/>
+      <node ref="E0" pin="4"/>
+    </net>
+    <net code="4" name="/+5V">
+      <node ref="C4" pin="2"/>
+      <node ref="R1" pin="1"/>
+      <node ref="E0" pin="9"/>
+      <node ref="C3" pin="1"/>
+      <node ref="A1" pin="8"/>
+      <node ref="Z1" pin="3"/>
+    </net>
+    <net code="5" name="Net-(E0-Pad18)">
+      <node ref="RGB1" pin="1"/>
+      <node ref="E0" pin="18"/>
+    </net>
+    <net code="6" name="Net-(E0-Pad20)">
+      <node ref="RGB1" pin="3"/>
+      <node ref="E0" pin="20"/>
+    </net>
+    <net code="7" name="Net-(E0-Pad19)">
+      <node ref="RGB1" pin="2"/>
+      <node ref="E0" pin="19"/>
+    </net>
+    <net code="8" name="Net-(R1-Pad2)">
+      <node ref="RGB1" pin="4"/>
+      <node ref="R1" pin="2"/>
+    </net>
+    <net code="9" name="Net-(E0-Pad13)">
+      <node ref="SW1" pin="1"/>
+      <node ref="E0" pin="14"/>
+      <node ref="E0" pin="13"/>
+    </net>
+    <net code="10" name="Net-(E0-Pad16)">
+      <node ref="E0" pin="16"/>
+    </net>
+    <net code="11" name="Net-(E0-Pad21)">
+      <node ref="E0" pin="21"/>
+    </net>
+    <net code="12" name="Net-(E0-Pad24)">
+      <node ref="E0" pin="24"/>
+    </net>
+    <net code="13" name="Net-(E0-Pad15)">
+      <node ref="E0" pin="15"/>
+    </net>
+    <net code="14" name="Net-(E0-Pad17)">
+      <node ref="E0" pin="17"/>
+    </net>
+    <net code="15" name="Net-(E0-Pad7)">
+      <node ref="E0" pin="8"/>
+      <node ref="E0" pin="7"/>
+    </net>
+    <net code="16" name="Net-(E0-Pad1)">
+      <node ref="E0" pin="1"/>
+    </net>
+    <net code="17" name="Net-(E0-Pad10)">
+      <node ref="E0" pin="10"/>
+    </net>
+    <net code="18" name="/HD+">
+      <node ref="Z1" pin="5"/>
+      <node ref="E0" pin="5"/>
+    </net>
+    <net code="19" name="Net-(A1-Pad2)">
+      <node ref="A1" pin="2"/>
+    </net>
+    <net code="20" name="Net-(A1-Pad3)">
+      <node ref="A1" pin="3"/>
+    </net>
+    <net code="21" name="Net-(A1-Pad7)">
+      <node ref="A1" pin="7"/>
+    </net>
+    <net code="22" name="Net-(Z1-Pad1)">
+      <node ref="Z1" pin="1"/>
+    </net>
+    <net code="23" name="/HD-">
+      <node ref="E0" pin="6"/>
+      <node ref="Z1" pin="4"/>
+    </net>
+    <net code="24" name="/C2CK">
+      <node ref="C2CK1" pin="1"/>
+      <node ref="E0" pin="11"/>
+    </net>
+    <net code="25" name="/C2D">
+      <node ref="C2D1" pin="1"/>
+      <node ref="E0" pin="12"/>
+    </net>
+    <net code="26" name="/TX">
+      <node ref="TX1" pin="1"/>
+      <node ref="E0" pin="23"/>
+    </net>
+    <net code="27" name="/RX">
+      <node ref="E0" pin="22"/>
+      <node ref="RX1" pin="1"/>
+    </net>
+    <net code="28" name="Net-(A1-Pad1)">
+      <node ref="A1" pin="1"/>
+    </net>
+  </nets>
+</export>

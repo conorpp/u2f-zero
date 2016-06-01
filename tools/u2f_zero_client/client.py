@@ -6,7 +6,8 @@
 #   Saves generated public key (r,s) to specified filename in ascii hex
 #
 from __future__ import print_function
-import time,sys,array,binascii,signal
+import time, os, sys, array, binascii, signal
+
 try:
     import hid
 except:
@@ -15,6 +16,11 @@ except:
     print('     apt-get install libusb-1.0-0-dev libudev-dev')
     print('     pip install hidapi')
     sys.exit(1)
+
+
+cmd_prefix = [0xff,0xff,0xff,0xff]
+if os.name == 'ns':
+    cmd_prefix.insert(0,0)
 
 class commands:
     U2F_CONFIG_GET_SERIAL_NUM = 0x80
@@ -132,12 +138,12 @@ def do_configure(h,output):
     print( 'Done')
 
 def do_rng(h):
-    cmd = [0xff,0xff,0xff,0xff, commands.U2F_CUSTOM_RNG, 0,0]
+    cmd = [0,0xff,0xff,0xff,0xff, commands.U2F_CUSTOM_RNG, 0,0]
     # typically runs around 700 bytes/s
     while True:
         h.write(cmd)
         rng = h.read(64,1000)
-        if rng[4] != commands.U2F_CUSTOM_RNG:
+        if not rng or rng[4] != commands.U2F_CUSTOM_RNG:
             sys.stderr.write('error: device error\n')
         else:
             if rng[6] != 32:
@@ -147,7 +153,7 @@ def do_rng(h):
                 sys.stdout.write(data)
 
 def do_seed(h):
-    cmd = [0xff,0xff,0xff,0xff, commands.U2F_CUSTOM_SEED, 0,20]
+    cmd = cmd_prefix + [ commands.U2F_CUSTOM_SEED, 0,20]
     num = 0
     # typically runs around 414 bytes/s
     def signal_handler(signal, frame):
@@ -162,14 +168,15 @@ def do_seed(h):
         buf = [ord(x) for x in c]
         h.write(cmd + buf)
         res = h.read(64, 1000)
-        if res[7] != 1:
+        if not res or res[7] != 1:
             sys.stderr.write('error: device error\n')
-        num += len(c)
+        else:
+            num += len(c)
 
     h.close()
 
 def do_wipe(h):
-    cmd = [0xff,0xff,0xff,0xff, commands.U2F_CUSTOM_WIPE, 0,0]
+    cmd = cmd_prefix + [ commands.U2F_CUSTOM_WIPE, 0,0]
     h.write(cmd)
     print( 'Press U2F button until the LED is no longer red.')
     res = None
@@ -188,7 +195,7 @@ def hexcode2bytes(color):
     return h
 
 def set_idle_color(h,color):
-    cmd = [0xff,0xff,0xff,0xff, commands.U2F_CUSTOM_IDLE_COLOR, 0,4,0]
+    cmd = cmd_prefix + [ commands.U2F_CUSTOM_IDLE_COLOR, 0,4,0]
     h.write(cmd + hexcode2bytes(color) + [0])
     res = h.read(64, 10000)
 
@@ -198,7 +205,7 @@ def set_idle_color(h,color):
     h.close()
 
 def set_button_color(h,color):
-    cmd = [0xff,0xff,0xff,0xff, commands.U2F_CUSTOM_IDLE_COLORP, 0,4,0]
+    cmd = cmd_prefix + [ commands.U2F_CUSTOM_IDLE_COLORP, 0,4,0]
     h.write(cmd + hexcode2bytes(color))
     res = h.read(64, 10000)
 
@@ -208,7 +215,7 @@ def set_button_color(h,color):
     h.close()
 
 def set_led_pulse(h,s):
-    cmd = [0xff,0xff,0xff,0xff, commands.U2F_CUSTOM_PULSE, 0,2]
+    cmd = cmd_prefix + [ commands.U2F_CUSTOM_PULSE, 0,2]
 
     ms = int(s)
 

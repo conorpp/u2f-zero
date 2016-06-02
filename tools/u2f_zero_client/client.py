@@ -95,7 +95,7 @@ def do_configure(h,output):
     config = "\x01\x23\x6d\x10\x00\x00\x50\x00\xd7\x2c\xa5\x71\xee\xc0\x85\x00\xc0\x00\x55\x00\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\xff\xff\xff\xff\x00\x00\x00\x00\xff\xff\xff\xff\x00\x00\x00\x00\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\x00\x00\x55\x55\xff\xff\x00\x00\x00\x00\x00\x00\x13\x00\x13\x00\x13\x00\x13\x00\x13\x00\x13\x00\x13\x00\x13\x00\x13\x00\x13\x00\x13\x00\x13\x00\x13\x00\x13\x00\x13\x00\x33\x00";
 
 
-    h.write([commands.U2F_CONFIG_IS_BUILD])
+    h.write([0,commands.U2F_CONFIG_IS_BUILD])
     data = h.read(64,1000)
     if data[1] == 1:
         print( 'Device is configured.')
@@ -104,7 +104,7 @@ def do_configure(h,output):
 
     time.sleep(0.250)
 
-    h.write([commands.U2F_CONFIG_GET_SERIAL_NUM])
+    h.write([0,commands.U2F_CONFIG_GET_SERIAL_NUM])
     while True:
         data = h.read(64,1000)
         l = data[1]
@@ -119,7 +119,7 @@ def do_configure(h,output):
 
     crc = get_crc(config)
     print( 'crc is ', [hex(x) for x in crc])
-    h.write([commands.U2F_CONFIG_LOCK] + crc)
+    h.write([0,commands.U2F_CONFIG_LOCK] + crc)
     data = h.read(64,1000)
     if data[1] == 1:
         print( 'locked eeprom with crc ',crc)
@@ -128,7 +128,7 @@ def do_configure(h,output):
 
     time.sleep(0.250)
 
-    h.write([commands.U2F_CONFIG_GENKEY])
+    h.write([0,commands.U2F_CONFIG_GENKEY])
     data = h.read(64,1000)
     data = array.array('B',data).tostring()
     data = binascii.hexlify(data)

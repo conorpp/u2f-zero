@@ -16,5 +16,5 @@ cert=$3
 
 hex2pubkey $pub pubkey.pem
 signcert $key pubkey.pem $cert
-cat $cert | cbytes.py
+cbytes.py $cert
 

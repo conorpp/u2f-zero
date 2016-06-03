@@ -82,21 +82,16 @@ int8_t u2f_wipe_keys()
 
 void u2f_init()
 {
-	uint8_t i,ec;
+	int8_t i,ec;
 	struct atecc_response res;
 
-	eeprom_read(U2F_APP_CONFIG, (uint8_t* )&appconf, sizeof(struct APP_CONF));
 	eeprom_read(U2F_EEPROM_CONFIG, (uint8_t* )&key_store, sizeof(struct key_storage_header));
-
 
 	// initialize key handles
 	if (key_store.num_keys != U2F_NUM_KEYS)
 	{
 		watchdog();
-		key_store.num_keys = U2F_NUM_KEYS;
-		key_store.valid_keys = 0;
-		key_store.num_issued = 0;
-		flush_key_store();
+
 
 		for (i=0; i < U2F_NUM_KEYS; i++)
 		{
@@ -107,22 +102,22 @@ void u2f_init()
 							sizeof(appdata.tmp), &res);
 			if (ec != 0)
 			{
-				u2f_printb("REDO! REDO! ",1,i);
+				u2f_printb("REDO! REDO! ",2,i,-ec);
 				eeprom_erase(U2F_EEPROM_CONFIG);
 				// reset
 				reboot();
 			}
 			res.buf[0] = i+1;
 
-			appconf.pulse_period = 20;
-			appconf.idle_color = U2F_DEFAULT_COLOR;
-			appconf.idle_color_prime = U2F_DEFAULT_COLOR_PRIME;
-
-			flush_app_conf();
 
 			eeprom_write(U2F_KEYS_ADDR + i * U2F_KEY_HANDLE_SIZE,
 							res.buf, U2F_KEY_HANDLE_SIZE);
 		}
+
+		key_store.num_keys = U2F_NUM_KEYS;
+		key_store.valid_keys = 0;
+		key_store.num_issued = 0;
+		flush_key_store();
 
 	}
 

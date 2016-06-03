@@ -133,7 +133,7 @@ int8_t atecc_send_recv(uint8_t cmd, uint8_t p1, uint16_t p2,
 		errors++;
 		if (errors > 5)
 		{
-			return -1;
+			return -2;
 		}
 		switch(get_app_error())
 		{

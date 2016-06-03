@@ -15,7 +15,7 @@
 // application settings
 #define U2F_ATTESTATION_KEY_SLOT	15
 //#define ATECC_SETUP_DEVICE
-//#define U2F_PRINT
+#define U2F_PRINT
 
 // efm8ub1 application eeprom memory mappings
 #define U2F_KEY_HEADER_ADDR		0xF800
@@ -24,12 +24,12 @@
 
 //								{blue(0), green(0x5a), red(0)}
 #define U2F_DEFAULT_BRIGHTNESS					90
-#define U2F_DEFAULT_COLOR 						0x005a00
+#define U2F_COLOR 								0x005a00
 #define U2F_DEFAULT_COLOR_PRIME 				0x5a0000
 #define U2F_DEFAULT_COLOR_ERROR 				0x0000c8
 #define U2F_DEFAULT_COLOR_INPUT 				0x008080
 #define U2F_DEFAULT_COLOR_INPUT_SUCCESS			0x809600
-#define U2F_DEFAULT_COLOR_WINK 					0x960000
+#define U2F_COLOR_WINK 							0x960000
 #define U2F_DEFAULT_COLOR_WINK_OUT_OF_SPACE 	0x0f0f96
 
 #define U2F_DEFAULT_COLOR_PERIOD				20
@@ -64,6 +64,8 @@ typedef enum
 	ERROR_HID_BUFFER_FULL = 0x17,
 	ERROR_HID_INVALID_CMD = 0x18,
 	ERROR_DAMN_WATCHDOG = 0x19,
+	ERROR_OUT_OF_CIDS = 0x20,
+	ERROR_I2C_RESTART = 0x21,
 }
 APP_ERROR_CODE;
 
@@ -71,13 +73,6 @@ struct APP_DATA
 {
 	// must be at least 70 bytes
 	uint8_t tmp[70];
-};
-
-struct APP_CONF
-{
-	uint16_t pulse_period;
-	uint32_t idle_color;
-	uint32_t idle_color_prime;
 };
 
 #define U2F_CONFIG_GET_SERIAL_NUM		0x80
@@ -109,11 +104,9 @@ uint8_t get_app_state();
 
 void set_app_state(APP_STATE s);
 
-void flush_app_conf();
-
-void rgb(uint8_t * c);
+void rgb(uint8_t r, uint8_t g, uint8_t b);
 void rgb_hex(uint32_t _rgb);
-void app_wink(uint32_t c);
+void app_wink(uint32_t color);
 
 // should be called after initializing eeprom
 void u2f_init();

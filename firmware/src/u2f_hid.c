@@ -257,20 +257,17 @@ static void hid_u2f_parse(struct u2f_hid_msg* req)
 	switch(hid_layer.current_cmd)
 	{
 		case U2FHID_INIT:
-			//u2f_printlx("got init packet ",1,req->cid);
 			if (U2FHID_LEN(req) != 8)
 			{
-				// this one is safe
 				stamp_error(hid_layer.current_cid, ERR_INVALID_LEN);
-				u2f_prints("invalid len init\r\n");
 				goto fail;
 			}
 			u2f_hid_set_len(17);
 
-			//u2f_printlx("cid: ",1,hid_layer.current_cid);
 			if (hid_layer.current_cid == 0)
 			{
 				u2f_prints("out of cid's\r\n");
+				set_app_error(ERROR_OUT_OF_CIDS);
 				goto fail;
 			}
 
@@ -346,7 +343,7 @@ static void hid_u2f_parse(struct u2f_hid_msg* req)
 			u2f_hid_set_len(0);
 			u2f_hid_writeback(NULL, 0);
 			u2f_hid_flush();
-			app_wink(U2F_DEFAULT_COLOR_WINK);
+			app_wink(U2F_COLOR_WINK);
 			break;
 		case U2FHID_LOCK:
 

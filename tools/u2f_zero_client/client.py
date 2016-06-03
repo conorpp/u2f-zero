@@ -53,9 +53,12 @@ def open_u2f():
     try:
         h.open(0x10c4,0x8acf)
     except IOError as ex:
-        print( ex)
-        print( 'U2F Zero not found')
-        sys.exit(1)
+        try:
+            h.open(0x10c4,0x8acf)
+        except:
+            print( ex)
+            print( 'U2F Zero not found')
+            sys.exit(1)
     return h
 
 def die(msg):
@@ -90,6 +93,16 @@ def get_crc(data):
     crc1 = (crc>>8) & 0xff;
     return [crc1,crc2]
 
+def read_n_tries(dev,tries,num,wait):
+    data = None
+    for i in range(0,tries-1):
+        try:
+            return dev.read(num,wait)
+        except:
+            time.sleep(.1)
+            pass
+    return dev.read(num,wait)
+
 
 def do_configure(h,output):
     config = "\x01\x23\x6d\x10\x00\x00\x50\x00\xd7\x2c\xa5\x71\xee\xc0\x85\x00\xc0\x00\x55\x00\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\xff\xff\xff\xff\x00\x00\x00\x00\xff\xff\xff\xff\x00\x00\x00\x00\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\x00\x00\x55\x55\xff\xff\x00\x00\x00\x00\x00\x00\x13\x00\x13\x00\x13\x00\x13\x00\x13\x00\x13\x00\x13\x00\x13\x00\x13\x00\x13\x00\x13\x00\x13\x00\x13\x00\x13\x00\x13\x00\x33\x00";
@@ -106,7 +119,7 @@ def do_configure(h,output):
 
     h.write([0,commands.U2F_CONFIG_GET_SERIAL_NUM])
     while True:
-        data = h.read(64,1000)
+        data = read_n_tries(h,5,64,1000)
         l = data[1]
         print( 'read %i bytes' % l)
         if data[0] == commands.U2F_CONFIG_GET_SERIAL_NUM:
@@ -120,7 +133,8 @@ def do_configure(h,output):
     crc = get_crc(config)
     print( 'crc is ', [hex(x) for x in crc])
     h.write([0,commands.U2F_CONFIG_LOCK] + crc)
-    data = h.read(64,1000)
+    data = read_n_tries(h,5,64,1000)
+    
     if data[1] == 1:
         print( 'locked eeprom with crc ',crc)
     else:
@@ -129,7 +143,7 @@ def do_configure(h,output):
     time.sleep(0.250)
 
     h.write([0,commands.U2F_CONFIG_GENKEY])
-    data = h.read(64,1000)
+    data = read_n_tries(h,5,64,1000)
     data = array.array('B',data).tostring()
     data = binascii.hexlify(data)
     print( 'generated key:')

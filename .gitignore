@@ -61,7 +61,10 @@ pubkey.c.txt
 *.__i
 *.__ia
 release/
+*~
 
 # hardware
 *.gbr
 gerbers/
+
+

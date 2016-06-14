@@ -43,6 +43,16 @@ gencert.sh "$1" "$(cat pubkey.hex)" attest.der > ../firmware/src/cert.c
 
 echo "building..."
 
+if [[ "$(python -c 'import os,sys; sys.stdout.write(os.name)')" != "nt" ]] 
+then
+
+    echo "Building from command line only works on Windows"
+    echo "Open Simplicity Studio and rebuild final program."
+    echo "Then you can erase and reprogram U2F Token."
+    exit 1
+
+fi
+
 PATH1=$PATH
 cd ../firmware/release && make all && cd ../../tools
 export PATH=$PATH1

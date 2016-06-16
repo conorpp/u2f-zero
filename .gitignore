@@ -25,7 +25,9 @@
 *.app
 *.i*86
 *.x86_64
-*.hex
+u2f-firmware.hex
+pubkey.hex
+prog.hex
 
 # Debug files
 *.dSYM/

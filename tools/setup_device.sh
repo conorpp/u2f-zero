@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SETUP_HEX=../firmware/release/SETUP.hex
+SETUP_HEX=../firmware/SETUP.hex
 FINAL_HEX=../firmware/release/u2f-firmware.hex
 
 if [[ $# != "1" ]]
@@ -13,19 +13,24 @@ fi
 
 export PATH=$PATH:gencert:u2f_zero_client:flashing
 
-# setup atecc
-echo "erasing..."
-erase.sh
+if [[ "$(python -c 'import os,sys; sys.stdout.write(os.name)')" == "nt" ]] 
+then
 
-while [[ "$?" -ne "0" ]] ; do
-    sleep .1
+    # setup atecc
+    echo "erasing..."
     erase.sh
-done
 
-echo "programming setup..."
-program.sh $SETUP_HEX
+    while [[ "$?" -ne "0" ]] ; do
+        sleep .1
+        erase.sh
+    done
 
-[[ "$?" -ne "0" ]] && exit 1
+    echo "programming setup..."
+    program.sh $SETUP_HEX
+
+    [[ "$?" -ne "0" ]] && exit 1
+
+fi
 
 echo "configuring..."
 client.py configure pubkey.hex >/dev/null
@@ -41,6 +46,7 @@ gencert.sh "$1" "$(cat pubkey.hex)" attest.der > ../firmware/src/cert.c
 
 [[ "$?" -ne "0" ]] && exit 1
 
+echo "done."
 echo "building..."
 
 if [[ "$(python -c 'import os,sys; sys.stdout.write(os.name)')" != "nt" ]] 

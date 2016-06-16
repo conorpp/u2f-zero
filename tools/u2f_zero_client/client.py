@@ -18,9 +18,7 @@ except:
     sys.exit(1)
 
 
-cmd_prefix = [0xff,0xff,0xff,0xff]
-if os.name == 'ns':
-    cmd_prefix.insert(0,0)
+cmd_prefix = [0, 0xff,0xff,0xff,0xff]
 
 class commands:
     U2F_CONFIG_GET_SERIAL_NUM = 0x80

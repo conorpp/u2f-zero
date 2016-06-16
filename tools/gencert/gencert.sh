@@ -15,6 +15,9 @@ pub=$2
 cert=$3
 
 hex2pubkey $pub pubkey.pem
+[[ "$?" -ne "0" ]] && exit 1
 signcert $key pubkey.pem $cert
+[[ "$?" -ne "0" ]] && exit 1
 cbytes.py $cert
+[[ "$?" -ne "0" ]] && exit 1
 

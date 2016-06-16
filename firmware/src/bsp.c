@@ -130,7 +130,7 @@ void u2f_printd(const char * tag, uint8_t c, ...)
     va_start(args,c);
     while(c--)
     {
-        u2f_putd(va_arg(args, int16_t));
+        u2f_putd((int32_t)va_arg(args, int16_t));
 
     }
     put_line();
@@ -158,7 +158,7 @@ void u2f_printx(const char * tag, uint8_t c, ...)
     va_start(args,c);
     while(c--)
     {
-        u2f_putx(va_arg(args, uint16_t));
+        u2f_putx((int32_t)va_arg(args, uint16_t));
         u2f_prints(" ");
     }
     put_line();

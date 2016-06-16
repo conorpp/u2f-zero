@@ -157,7 +157,7 @@ int16_t main(void) {
 
 		if (ms_since(ms_heart,500))
 		{
-			u2f_printd("ms ", 1, (uint16_t)get_ms());
+			u2f_printl("ms ", 1, get_ms());
 		}
 
 		if (!USBD_EpIsBusy(EP1OUT) && !USBD_EpIsBusy(EP1IN) && state != APP_HID_MSG)

@@ -42,8 +42,6 @@ if len(sys.argv) not in [2,3,4]:
     print('     rng: Continuously dump random numbers from the devices hardware RNG.')
     print('     seed: update the hardware RNG seed with input from stdin')
     print('     wipe: wipe all registered keys on U2F Zero.  Must also press button 5 times.  Not reversible.')
-    print('     color <idle|button> <color>: Set the LED color when idle or when button is pressed.  Must be 6 digit hex code.')
-    print('     brightness <1-255>: Set the LED brightness between 1-255 (default 90).')
     sys.exit(1)
 
 def open_u2f():
@@ -256,29 +254,6 @@ if __name__ == '__main__':
         do_seed(h)
     elif action == 'wipe':
         do_wipe(h)
-    elif action == 'color':
-        if len(sys.argv) != 4:
-            print('error: need <idle|button> and 6 digit hex code')
-            sys.exit(1)
-        color = sys.argv[3]
-        color = color.replace('#','')
-        if len(color) != 6:
-            print('error: must be 6 digit hex code')
-            sys.exit(1)
-
-        if sys.argv[2].lower() == 'idle':
-            set_idle_color(h,color)
-        elif sys.argv[2].lower() == 'button':
-            set_button_color(h,color)
-        else:
-            print('error: must select idle color or button color')
-            sys.exit(1)
-    elif action == 'pulse':
-        if len(sys.argv) != 3:
-            print('error: need pulse pulse <0-255>')
-            sys.exit(1)
-        set_led_pulse(h,float(sys.argv[2]))
- 
     else:
         print( 'error: invalid action: ', action)
         h.close()

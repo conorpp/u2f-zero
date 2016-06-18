@@ -26,3 +26,7 @@ However, side channel leakage is an unsolved problem in industry and academia.  
 For more information about U2F Zero's secure implementation and the problem of side channels, check out [the wiki](https://github.com/conorpp/u2f-zero/wiki/Security-Overview).
 
 
+License
+-------
+
+Everything is open source and licensed under the [Simplified BSD License](https://github.com/conorpp/u2f-zero/blob/master/LICENSE.txt).

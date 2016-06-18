@@ -25,6 +25,9 @@
  * The views and conclusions contained in the software and documentation are those
  * of the authors and should not be interpreted as representing official policies,
  * either expressed or implied, of the FreeBSD Project.
+ *
+ * Cross platform implementation of U2F.
+ *
  */
 
 #include "app.h"
@@ -35,11 +38,6 @@
 #include "bsp.h"
 #include "u2f.h"
 
-#ifdef DEBUG_PC
-#include <stdio.h>
-#else
-#define printf(x)
-#endif
 
 // void u2f_response_writeback(uint8_t * buf, uint8_t len);
 static int16_t u2f_register(struct u2f_register_request * req);
@@ -53,22 +51,17 @@ void u2f_request(struct u2f_request_apdu * req)
     switch(req->ins)
     {
         case U2F_REGISTER:
-        	u2f_prints("U2F_REGISTER\r\n");
             *rcode = u2f_register((struct u2f_register_request*)req->payload);
             break;
         case U2F_AUTHENTICATE:
-        	u2f_prints("U2F_AUTHENTICATE\r\n");
         	 *rcode = u2f_authenticate((struct u2f_authenticate_request*)req->payload, req->p1);
         	break;
         case U2F_VERSION:
-        	u2f_prints("U2F_VERSION\r\n");
         	*rcode =u2f_version();
         	break;
         case U2F_VENDOR_FIRST:
-        	u2f_prints("U2F_VENDOR_FIRST\r\n");
         	break;
         case U2F_VENDOR_LAST:
-        	u2f_prints("U2F_VENDOR_LAST\r\n");
         	break;
         default:
         	break;

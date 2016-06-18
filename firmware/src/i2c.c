@@ -84,7 +84,7 @@ void smb_set_ext_write( uint8_t* extbuf, uint8_t extlen)
 	SMB_preflags |= SMB_WRITE_EXT;
 }
 
-
+// CRC-16 appropriate for a byte model interrupt routine.
 uint16_t feed_crc(uint16_t crc, uint8_t b)
 {
 	crc ^= b;
@@ -98,6 +98,7 @@ uint16_t feed_crc(uint16_t crc, uint8_t b)
 	return crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
 }
 
+// Resulting CRC should be reversed to be correct CRC-16
 uint16_t reverse_bits(uint16_t crc)
 {
 	// efficient bit reversal for 16 bit int

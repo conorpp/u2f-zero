@@ -25,6 +25,11 @@
  * The views and conclusions contained in the software and documentation are those
  * of the authors and should not be interpreted as representing official policies,
  * either expressed or implied, of the FreeBSD Project.
+ *
+ *
+ * These are commands are "middleware" for HID messages.  So they don't need
+ * the HID U2F layer to be called.  Thus they are custom commands not necessary for U2F.
+ *
  */
 
 #include <stdint.h>

@@ -27,20 +27,12 @@
  * either expressed or implied, of the FreeBSD Project.
  */
 #include <SI_EFM8UB1_Register_Enums.h>
-#include <stdarg.h>
 
-#include "efm8_usb.h"
-#include "usb_0.h"
-#include "atecc508a.h"
 #include "InitDevice.h"
-#include "descriptors.h"
 #include "eeprom.h"
-#include "idle.h"
 #include "bsp.h"
 #include "app.h"
-#include "i2c.h"
 #include "custom.h"
-#include "u2f_hid.h"
 #include "u2f.h"
 #include "tests.h"
 
@@ -139,11 +131,6 @@ void rgb(uint8_t r, uint8_t g, uint8_t b)
 
 }
 
-void rgb_hex(uint32_t c)
-{
-	rgb(c,c>>8,c>>16);
-}
-
 
 #define ms_since(ms,num) (((uint16_t)get_ms() - (ms)) >= num ? ((ms=(uint16_t)get_ms())):0)
 
@@ -168,20 +155,22 @@ int16_t main(void) {
 	watchdog();
 
 	u2f_prints("U2F ZERO\r\n");
+
 	if (RSTSRC & RSTSRC_WDTRSF__SET)
 	{
 		error = ERROR_DAMN_WATCHDOG;
 	}
+
 	run_tests();
+
 	atecc_setup_init(appdata.tmp);
 
 	rgb_hex(U2F_COLOR);
 
 
 	while (1) {
+
 		watchdog();
-
-
 
 		if (ms_since(ms_heart,500))
 		{
@@ -196,6 +185,7 @@ int16_t main(void) {
 		switch(state)
 		{
 			case APP_NOTHING:
+				// Flash gradient on LED
 				if (ms_since(ms_grad, 10))
 				{
 					if (light == 90)
@@ -219,6 +209,7 @@ int16_t main(void) {
 				}
 				break;
 			case APP_HID_MSG:
+				// HID msg received, pass to protocols
 				if (custom_command(hid_msg))
 				{
 
@@ -232,6 +223,7 @@ int16_t main(void) {
 					state = APP_NOTHING;
 				break;
 			case APP_WINK:
+				// Do wink pattern for USB HID wink request
 				rgb_hex(winkc);
 				light = 1;
 				ms_wink = get_ms();

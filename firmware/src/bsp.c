@@ -55,12 +55,14 @@ void usb_write(uint8_t* buf, uint8_t len)
 }
 
 
+// Painfully lightweight printing routines
 #ifdef U2F_PRINT
 
 void putf(char c)
 {
 	uint8_t i;
 	SBUF0 = c;
+	// Blocking delay that works for 115200 baud on this device (<1ms)
 	for (i=0; i<200; i++){}
 	for (i=0; i<200; i++){}
 	for (i=0; i<190; i++){}

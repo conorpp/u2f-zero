@@ -34,8 +34,8 @@
 
 #include "bsp.h"
 
+// millisecond timer
 uint32_t data _MS_ = 0;
-
 SI_INTERRUPT (TIMER2_ISR, TIMER2_IRQn)
 {
 	TMR2CN0_TF2H = 0;
@@ -52,20 +52,20 @@ SI_INTERRUPT (TIMER2_ISR, TIMER2_IRQn)
 #define SMB_TX_EXT (SMB_WRITE|SMB_WRITE_EXT)
 #define SMB_TX (SMB_WRITE)
 
-data uint8_t SMB_addr = 0;
-uint8_t * SMB_write_buf = NULL;
-data uint8_t SMB_write_len = 0;
-data uint8_t SMB_write_offset = 0;
-data uint8_t SMB_read_len = 0;
-data uint8_t SMB_read_offset = 0;
-uint8_t * SMB_read_buf = NULL;
-uint8_t * SMB_write_ext_buf = NULL;
-data uint8_t  SMB_write_ext_len = 0;
-data uint8_t  SMB_write_ext_offset = 0;
-uint8_t SMB_preflags = 0;
-uint16_t  SMB_crc = 0;
-data uint8_t  SMB_crc_offset = 0;
-data volatile uint8_t SMB_FLAGS = 0;
+data uint8_t SMB_addr 				= 0;
+uint8_t * SMB_write_buf 			= NULL;
+data uint8_t SMB_write_len 			= 0;
+data uint8_t SMB_write_offset 		= 0;
+data uint8_t SMB_read_len 			= 0;
+data uint8_t SMB_read_offset 		= 0;
+uint8_t * SMB_read_buf 				= NULL;
+uint8_t * SMB_write_ext_buf 		= NULL;
+data uint8_t  SMB_write_ext_len 	= 0;
+data uint8_t  SMB_write_ext_offset 	= 0;
+uint8_t SMB_preflags 				= 0;
+uint16_t  SMB_crc 					= 0;
+data uint8_t  SMB_crc_offset 		= 0;
+data volatile uint8_t SMB_FLAGS 	= 0;
 
 static void update_from_packet_length()
 {
@@ -212,19 +212,9 @@ SI_INTERRUPT (SMBUS0_ISR, SMBUS0_IRQn)
 		SMB0CN0_SI = 0;
 }
 
-//-----------------------------------------------------------------------------
-// TIMER3_ISR
-//-----------------------------------------------------------------------------
-//
-// TIMER3 ISR Content goes here. Remember to clear flag bits:
-// TMR3CN::TF3H (Timer # High Byte Overflow Flag)
-// TMR3CN::TF3L (Timer # Low Byte Overflow Flag)
-//
-//
+
 // A Timer3 interrupt indicates an SMBus SCL low timeout.
 // The SMBus is disabled and re-enabled here
-//
-//-----------------------------------------------------------------------------
 SI_INTERRUPT (TIMER3_ISR, TIMER3_IRQn)
 {
 	restart_bus();

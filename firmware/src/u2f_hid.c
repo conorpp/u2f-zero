@@ -127,7 +127,8 @@ void u2f_hid_flush()
 	u2f_hid_reset_packet();
 }
 
-
+// Buffers data to a 64 byte buffer before writing it while
+// handling U2F HID sequencing
 void u2f_hid_writeback(uint8_t * payload, uint16_t len)
 {
 	struct u2f_hid_msg * r = (struct u2f_hid_response *) _hid_pkt;

@@ -64,7 +64,7 @@ bool USBD_IsSelfPoweredCb(void) {
 	return false;
 }
 
-
+// Necessary routine for USB HID
 USB_Status_TypeDef USBD_SetupCmdCb(
 		SI_VARIABLE_SEGMENT_POINTER(setup, USB_Setup_TypeDef, MEM_MODEL_SEG)) {
 
@@ -133,19 +133,15 @@ USB_Status_TypeDef USBD_SetupCmdCb(
 	return retVal;
 }
 
+// Application specific routine that just passes message
 
 uint8_t hidmsgbuf[64];
-
 uint16_t USBD_XferCompleteCb(uint8_t epAddr, USB_Status_TypeDef status,
 		uint16_t xferred, uint16_t remaining) {
 
-
 	if (epAddr == EP1OUT)
 	{
-		// dump_hex(hidmsgbuf, sizeof(hidmsgbuf));
-
 		set_app_u2f_hid_msg((struct u2f_hid_msg *) hidmsgbuf );
-
 	}
 	return 0;
 }

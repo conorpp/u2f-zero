@@ -25,6 +25,9 @@
  * The views and conclusions contained in the software and documentation are those
  * of the authors and should not be interpreted as representing official policies,
  * either expressed or implied, of the FreeBSD Project.
+ *
+ * This is all of the device specific functionality for implementing U2F that u2f.c relies on.
+ *
  */
 
 #include "app.h"
@@ -68,7 +71,9 @@ static uint8_t key_same(struct key_handle * k1, struct key_handle * k2)
 	for (i=0; i < U2F_KEY_HANDLE_SIZE-1; i++)
 	{
 		if (k1->entropy[i] != k2->entropy[i])
+		{
 			return 1;
+		}
 	}
 	return 0;
 }

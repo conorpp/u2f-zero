@@ -128,6 +128,9 @@ void u2f_hid_writeback(uint8_t * payload, uint16_t len);
 // u2f_hid_flush flush any remaining data that may be buffered.
 void u2f_hid_flush();
 
+// u2f_hid_request entry function for U2F HID protocol.
+// It will pass up to U2F protocol if necessary.
+// @param req the U2F HID message
 void u2f_hid_request(struct u2f_hid_msg* req);
 
 #define U2FHID_IS_INIT(cmd)			((cmd) & 0x80)

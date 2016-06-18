@@ -129,7 +129,8 @@ uint8_t get_app_state();
 void set_app_state(APP_STATE s);
 
 void rgb(uint8_t r, uint8_t g, uint8_t b);
-void rgb_hex(uint32_t _rgb);
+#define rgb_hex(c) (rgb((c),(c)>>8,(c)>>16))
+
 void app_wink(uint32_t color);
 
 // should be called after initializing eeprom
@@ -137,6 +138,8 @@ void u2f_init();
 
 
 #ifdef ATECC_SETUP_DEVICE
+
+#include "atecc508a.h"
 
 void atecc_setup_device(struct config_msg * msg);
 void atecc_setup_init(uint8_t * buf);

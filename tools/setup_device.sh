@@ -2,6 +2,7 @@
 
 SETUP_HEX=../firmware/SETUP.hex
 FINAL_HEX=../firmware/release/u2f-firmware.hex
+FLASH_TOOLS=0
 
 if [[ $# != "1" ]]
 then
@@ -13,7 +14,7 @@ fi
 
 export PATH=$PATH:gencert:u2f_zero_client:flashing
 
-if [[ "$(python -c 'import os,sys; sys.stdout.write(os.name)')" == "nt" ]] 
+if [[ $FLASH_TOOLS = 1 ]] 
 then
 
     # setup atecc
@@ -49,7 +50,7 @@ gencert.sh "$1" "$(cat pubkey.hex)" attest.der > ../firmware/src/cert.c
 echo "done."
 echo "building..."
 
-if [[ "$(python -c 'import os,sys; sys.stdout.write(os.name)')" != "nt" ]] 
+if [[ $FLASH_TOOLS = 1 ]] 
 then
 
     echo "Building from command line only works on Windows"

@@ -50,10 +50,9 @@ gencert.sh "$1" "$(cat pubkey.hex)" attest.der > ../firmware/src/cert.c
 echo "done."
 echo "building..."
 
-if [[ $FLASH_TOOLS = 1 ]] 
+if [[ $FLASH_TOOLS != 1 ]] 
 then
 
-    echo "Building from command line only works on Windows"
     echo "Open Simplicity Studio and rebuild final program."
     echo "Then you can erase and reprogram U2F Token."
     exit 1

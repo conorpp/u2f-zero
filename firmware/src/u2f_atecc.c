@@ -26,7 +26,9 @@
  * of the authors and should not be interpreted as representing official policies,
  * either expressed or implied, of the FreeBSD Project.
  *
- * This is all of the device specific functionality for implementing U2F that u2f.c relies on.
+ *
+ * u2f_atecc.c
+ * 		platform specific functionality for implementing U2F
  *
  */
 
@@ -310,7 +312,7 @@ int8_t u2f_new_keypair(uint8_t * handle, uint8_t * pubkey)
 	return 0;
 }
 
-int8_t u2f_load_key(uint8_t * handle, uint8_t len)
+int8_t u2f_load_key(uint8_t * handle)
 {
 	struct key_handle k;
 	uint8_t keyslot = handle[0]-1;

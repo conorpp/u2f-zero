@@ -25,6 +25,14 @@
  * The views and conclusions contained in the software and documentation are those
  * of the authors and should not be interpreted as representing official policies,
  * either expressed or implied, of the FreeBSD Project.
+ *
+ * u2f_hid.c
+ *
+ * 		U2F HID layer.  Implemented to be platform independent.  See API docs in u2f_hid.h.
+ * 		Makes calls to U2F layer, implemented in u2f.c.
+ *
+ * 		U2F HID spec: https://fidoalliance.org/specs/fido-u2f-v1.0-nfc-bt-amendment-20150514/fido-u2f-hid-protocol.html
+ *
  */
 #include "app.h"
 
@@ -268,6 +276,7 @@ static int buffer_request(struct u2f_hid_msg* req)
 	}
 	memmove(hid_layer.buffer + hid_layer.bytes_buffered, req->pkt.cont.payload, U2FHID_CONT_PAYLOAD_SIZE);
 	hid_layer.bytes_buffered += U2FHID_CONT_PAYLOAD_SIZE;
+	return 0;
 }
 
 static void hid_u2f_parse(struct u2f_hid_msg* req)
@@ -303,7 +312,7 @@ static void hid_u2f_parse(struct u2f_hid_msg* req)
 
 			// write back the same data nonce
 			u2f_hid_writeback(req->pkt.init.payload, 8);
-			u2f_hid_writeback(init_res, 9);
+			u2f_hid_writeback((uint8_t *)init_res, 9);
 			u2f_hid_flush();
 			hid_layer.current_cid = init_res->cid;
 

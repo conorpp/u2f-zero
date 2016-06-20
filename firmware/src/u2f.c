@@ -26,7 +26,10 @@
  * of the authors and should not be interpreted as representing official policies,
  * either expressed or implied, of the FreeBSD Project.
  *
- * Cross platform implementation of U2F.
+ * u2f.c
+ * 		Cross platform implementation of U2F.  See API docs in u2f.h.
+ *
+ * 		U2F spec: https://fidoalliance.org/specs/fido-u2f-v1.0-nfc-bt-amendment-20150514/fido-u2f-raw-message-formats.html
  *
  */
 
@@ -112,7 +115,7 @@ static int16_t u2f_authenticate(struct u2f_authenticate_request * req, uint8_t c
 
 	uint8_t up = 1;
 	uint32_t count;
-	if (u2f_load_key(req->kh, req->khl) != 0)
+	if (u2f_load_key(req->kh) != 0)
 	{
 		u2f_hid_set_len(2);
 		return U2F_SW_WRONG_DATA;
@@ -134,7 +137,7 @@ static int16_t u2f_authenticate(struct u2f_authenticate_request * req, uint8_t c
     u2f_sha256_start();
     u2f_sha256_update(req->app,32);
     u2f_sha256_update(&up,1);
-    u2f_sha256_update(&count,4);
+    u2f_sha256_update((uint8_t *)&count,4);
     u2f_sha256_update(req->chal,32);
 
     u2f_sha256_finish();
@@ -147,7 +150,7 @@ static int16_t u2f_authenticate(struct u2f_authenticate_request * req, uint8_t c
     u2f_hid_set_len(7 + get_signature_length((uint8_t*)req));
 
     u2f_response_writeback(&up,1);
-    u2f_response_writeback(&count,4);
+    u2f_response_writeback((uint8_t *)&count,4);
     dump_signature_der((uint8_t*)req);
 
 	return U2F_SW_NO_ERROR;

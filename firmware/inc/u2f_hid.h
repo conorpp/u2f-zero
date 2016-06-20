@@ -25,6 +25,10 @@
  * The views and conclusions contained in the software and documentation are those
  * of the authors and should not be interpreted as representing official policies,
  * either expressed or implied, of the FreeBSD Project.
+ *
+ *
+ * U2F HID spec: https://fidoalliance.org/specs/fido-u2f-v1.0-nfc-bt-amendment-20150514/fido-u2f-hid-protocol.html
+ *
  */
 
 #ifndef U2F_HID_H_
@@ -120,9 +124,9 @@ void u2f_hid_init();
 void u2f_hid_set_len(uint16_t len);
 
 // u2f_hid_writeback handles the sequencing and per packet buffering
-// @payload the buffer to write
-// @len length of buffer
-// @@prereq is that hid_layer.current_cid, hid_layer.res_len each set to correct values
+//  @payload the buffer to write
+//  @len length of buffer
+//  @prereq is that hid_layer.current_cid, hid_layer.res_len each set to correct values
 void u2f_hid_writeback(uint8_t * payload, uint16_t len);
 
 // u2f_hid_flush flush any remaining data that may be buffered.
@@ -130,8 +134,19 @@ void u2f_hid_flush();
 
 // u2f_hid_request entry function for U2F HID protocol.
 // It will pass up to U2F protocol if necessary.
-// @param req the U2F HID message
+//  @param req the U2F HID message
 void u2f_hid_request(struct u2f_hid_msg* req);
+
+// app_wink blink a light on the platform
+// must be implemented elsewhere for specific platform used
+//  @color optional hex color
+extern void app_wink(uint32_t color);
+
+
+// set_app_error set global error value
+// must be implemented elsewhere for specific platform used
+//  @ec error values defined in app.h
+extern void set_app_error(uint8_t ec);
 
 #define U2FHID_IS_INIT(cmd)			((cmd) & 0x80)
 

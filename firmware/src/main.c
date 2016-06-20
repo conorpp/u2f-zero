@@ -25,13 +25,21 @@
  * The views and conclusions contained in the software and documentation are those
  * of the authors and should not be interpreted as representing official policies,
  * either expressed or implied, of the FreeBSD Project.
+ *
+ * main.c
+ * 		This file contains the main loop of the application.
+ * 		It listens for messages on USB and upon receiving a message,
+ * 		it will pass it up to the U2F HID layer, implemented in u2f_hid.c.
+ *
  */
 #include <SI_EFM8UB1_Register_Enums.h>
 
 #include "InitDevice.h"
+#include "app.h"
+#include "i2c.h"
+#include "atecc508a.h"
 #include "eeprom.h"
 #include "bsp.h"
-#include "app.h"
 #include "custom.h"
 #include "u2f.h"
 #include "tests.h"
@@ -90,10 +98,6 @@ void set_app_u2f_hid_msg(struct u2f_hid_msg * msg )
 	hid_msg = msg;
 }
 
-uint8_t * color_max;
-static uint8_t color[3];
-static uint32_t current_color;
-static uint8_t brightness = 90;
 
 
 void rgb(uint8_t r, uint8_t g, uint8_t b)

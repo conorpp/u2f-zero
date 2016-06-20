@@ -29,11 +29,12 @@
 #include <SI_EFM8UB1_Register_Enums.h>
 #include <efm8_usb.h>
 #include <stdio.h>
-#include "idle.h"
 #include "app.h"
 #include "bsp.h"
 #include "descriptors.h"
 #include "u2f_hid.h"
+
+#define UNUSED(expr) do { (void)(expr); } while (0)
 
 #define HID_INTERFACE_INDEX 0
 
@@ -57,6 +58,10 @@ void USBD_ResetCb(void) {
 
 void USBD_DeviceStateChangeCb(USBD_State_TypeDef oldState,
 		USBD_State_TypeDef newState) {
+
+	UNUSED(oldState);
+	UNUSED(newState);
+
 	u2f_print_ev("USBD_DeviceStateChangeCb\r\n");
 }
 
@@ -133,11 +138,17 @@ USB_Status_TypeDef USBD_SetupCmdCb(
 	return retVal;
 }
 
-// Application specific routine that just passes message
+
+
 
 uint8_t hidmsgbuf[64];
 uint16_t USBD_XferCompleteCb(uint8_t epAddr, USB_Status_TypeDef status,
-		uint16_t xferred, uint16_t remaining) {
+		uint16_t xferred, uint16_t remaining ) {
+
+	UNUSED(status);
+	UNUSED(xferred);
+	UNUSED(remaining);
+
 
 	if (epAddr == EP1OUT)
 	{

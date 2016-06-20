@@ -87,7 +87,6 @@ void dump_hex(uint8_t* hex, uint8_t len)
 
 void u2f_prints(char* d)
 {
-	static SI_SEG_DATA uint16_t i;
 	while(*d)
 	{
 		// UART0 output queue
@@ -99,7 +98,7 @@ static void int2str_reduce_n(char ** snum, uint32_t copy, uint8_t n)
 {
     do
     {
-        *snum++;
+        (*snum)++;
         copy /= n;
     }while(copy);
 }
@@ -137,7 +136,7 @@ void u2f_putd(int32_t i)
 
 void u2f_putx(int32_t i)
 {
-	u2f_prints(xint2str((int32_t)i));
+	u2f_prints(xint2str(i));
 }
 
 static void put_space()

@@ -116,7 +116,6 @@ struct config_msg
 extern uint8_t hidmsgbuf[64];
 
 extern data struct APP_DATA appdata;
-extern data struct APP_CONF appconf;
 
 void set_app_u2f_hid_msg(struct u2f_hid_msg * msg );
 

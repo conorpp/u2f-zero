@@ -35,8 +35,6 @@
 #include "bsp.h"
 #include "app.h"
 
-static void smb_init_crc();
-
 uint8_t smb_read (uint8_t addr, uint8_t* dest, uint8_t count)
 {
 	while(SMB_IS_BUSY()){}
@@ -110,6 +108,5 @@ uint16_t reverse_bits(uint16_t crc)
 
 void smb_init()
 {
-	// memset(&SMB,0,sizeof(SMB));
 	SMB_FLAGS = 0;
 }

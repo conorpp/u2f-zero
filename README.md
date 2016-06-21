@@ -10,7 +10,7 @@ U2F Zero is an open source U2F token.  It's a two factor authentication token th
 
 You can easily [build your own](https://github.com/conorpp/u2f-zero/wiki/Building-a-U2F-Token).  You just need to order the 
 [8 SMT parts](https://github.com/conorpp/u2f-zero/wiki/Parts-List#smt-parts), [$4.6 PCBs](https://oshpark.com/shared_projects/Rq9evtm7), and [programmer](http://www.digikey.com/product-detail/en/silicon-labs/DEBUGADPTR1-USB/336-1182-ND/807653).
-It ends up being $35 for programmer and $4.5/board.  
+It ends up being $35 for programmer and $4.5/board.  The token is durable enough to survive on a key chain for years, even after going through the wash.
 
 Check out [the wiki](https://github.com/conorpp/u2f-zero/wiki) for more on how to [build your own](https://github.com/conorpp/u2f-zero/wiki/Building-a-U2F-Token).
 

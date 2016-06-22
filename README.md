@@ -5,7 +5,7 @@ U2F Zero
 
 U2F Zero is an open source U2F token for 2 factor authentication.  It is implemented securely.  It works with Google accounts, Github, Duo, OpenSSH, and anything else supporting U2F.
 
-![](http://i.imgur.com/lL3VLz1.jpg)
+![](http://i.imgur.com/lL3VLz1.jpg "The door keys are not used")
 
 
 You can easily [build your own](https://github.com/conorpp/u2f-zero/wiki/Building-a-U2F-Token).  You just need to order the 

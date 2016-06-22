@@ -112,6 +112,7 @@ int8_t u2f_wipe_keys()
 void u2f_init()
 {
 	int8_t i,ec;
+	data uint8_t xdata * clear = 0;
 	struct atecc_response res;
 
 	eeprom_read(U2F_EEPROM_CONFIG, (uint8_t* )&key_store, sizeof(struct key_storage_header));
@@ -131,8 +132,16 @@ void u2f_init()
 							sizeof(appdata.tmp), &res);
 			if (ec != 0)
 			{
-				u2f_printb("REDO! REDO! ",2,i,-ec);
+				u2f_printb("atecc_send_recv failed ",2,i,-ec);
+
+				// erase eeprom
 				eeprom_erase(U2F_EEPROM_CONFIG);
+
+				// erase ram
+				for (i=0; i<0x400;i++)
+				{
+					*(clear++) = 0x0;
+				}
 				// reset
 				reboot();
 			}

@@ -98,7 +98,6 @@ static void int2str_reduce_n(char ** snum, uint32_t copy, uint8_t n)
 {
     do
     {
-        (*snum)++;
         copy /= n;
     }while(copy);
 }

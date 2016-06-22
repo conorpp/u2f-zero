@@ -148,6 +148,7 @@ int16_t main(void) {
 
 	enter_DefaultMode_from_RESET();
 
+
 	// ~200 ms interval watchdog
 	WDTCN = 4;
 

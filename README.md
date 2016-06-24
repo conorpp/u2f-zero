@@ -5,10 +5,7 @@ U2F Zero
 
 U2F Zero is an open source U2F token for 2 factor authentication.  It is implemented securely.  It works with Google accounts, Github, Duo, OpenSSH, and anything else supporting U2F.
 
-![](http://i.imgur.com/lL3VLz1.jpg "The door keys are not used")
-
-<p align="center"><sub align="center">Not used keys ^ </sub></p>
-
+![](http://i.imgur.com/dQpo9wC.jpg "The door keys are not used")
 
 You can easily [build your own](https://github.com/conorpp/u2f-zero/wiki/Building-a-U2F-Token).  You just need to order the 
 [8 SMT parts](https://github.com/conorpp/u2f-zero/wiki/Parts-List#smt-parts), [$4.6 PCBs](https://oshpark.com/shared_projects/Rq9evtm7), and [programmer](http://www.digikey.com/product-detail/en/silicon-labs/DEBUGADPTR1-USB/336-1182-ND/807653).

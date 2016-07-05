@@ -38,7 +38,7 @@ client.py configure pubkey.hex >/dev/null
 
 while [[ "$?" -ne "0" ]] ; do
     sleep .2
-    client.py configure pubkey.hex >/dev/null
+    client.py configure pubkey.hex
 done
 
 

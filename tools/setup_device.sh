@@ -2,14 +2,24 @@
 
 SETUP_HEX=../firmware/SETUP.hex
 FINAL_HEX=../firmware/release/u2f-firmware.hex
-FLASH_TOOLS=0
+FLASH_TOOLS=1
+SN=
+SN_build=
 
-if [[ $# != "1" ]]
+if [[ $# != "1" ]] && [[ $# != "2" ]] && [[ $# != "3" ]]
 then
 
-    echo "usage: $0 <ca-key>"
+    echo "usage: $0 <ca-key> [debugger-SN] [new-SN-for-U2F-token]"
     exit 1
 
+fi
+
+
+if [[ $# != "1" ]] ; then
+	SN=$2
+    if [[ $# = "3" ]] ; then
+        SN_build=$3
+    fi
 fi
 
 export PATH=$PATH:gencert:u2f_zero_client:flashing
@@ -19,22 +29,27 @@ then
 
     # setup atecc
     echo "erasing..."
-    erase.sh
+    erase.sh $SN
 
     while [[ "$?" -ne "0" ]] ; do
         sleep .1
-        erase.sh
+        erase.sh $SN
     done
 
     echo "programming setup..."
-    program.sh $SETUP_HEX
+    program.sh $SETUP_HEX $SN
 
     [[ "$?" -ne "0" ]] && exit 1
 
 fi
 
 echo "configuring..."
-client.py configure pubkey.hex >/dev/null
+
+if [[ -n $SN_build ]] ; then
+    client.py configure pubkey.hex -s $SN_build >/dev/null
+else
+    client.py configure pubkey.hex >/dev/null
+fi
 
 while [[ "$?" -ne "0" ]] ; do
     sleep .2
@@ -46,6 +61,14 @@ echo "generate attestation certificate..."
 gencert.sh "$1" "$(cat pubkey.hex)" attest.der > ../firmware/src/cert.c
 
 [[ "$?" -ne "0" ]] && exit 1
+
+if [[ -n $SN_build ]] ; then
+    sed -i "/#define SER_STRING.*/c\#define SER_STRING \"$SN_build\""  ../firmware/src/descriptors.c
+    rm ../firmware/release/u2f-firmware.omf
+fi
+
+sed -i "s/firmware.*src.*cert.c/tools\/workers\/$SN\/firmware\/src\/cert.c/g"  ../firmware/release/src/cert.__i
+sed -i "s/firmware.*src.*descriptors.c/tools\/workers\/$SN\/firmware\/src\/descriptors.c/g"  ../firmware/release/src/descriptors.__i
 
 echo "done."
 echo "building..."
@@ -60,20 +83,21 @@ then
 fi
 
 PATH1=$PATH
-cd ../firmware/release && make all && cd ../../tools
-export PATH=$PATH1
-
+cur=`pwd`
+cd ../firmware/release && make all && cd $cur
 
 [[ "$?" -ne "0" ]] && exit 1
 
+export PATH=$PATH1
+
 echo "programming final build..."
 cp $FINAL_HEX prog.hex
-program.sh prog.hex
+program.sh prog.hex $SN
 #rm prog.hex
 
 while [[ "$?" -ne "0" ]] ; do
     sleep .2
-    program.sh prog.hex
+    program.sh prog.hex $SN
 done
 
 [[ "$?" -ne "0" ]] && exit 1

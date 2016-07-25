@@ -1,4 +1,3 @@
 #!/bin/bash
-
 # silabs utility    debugger      debugger id    C2
-FlashUtilCL.exe     FLASHEraseUSB "EC3004BCC9E"  1
+FlashUtilCL.exe     FLASHEraseUSB "$1"  1

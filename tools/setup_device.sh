@@ -32,7 +32,8 @@ then
     erase.sh $SN
 
     while [[ "$?" -ne "0" ]] ; do
-        sleep .1
+        echo "$SN is retrying erase ... "
+        sleep 0.3
         erase.sh $SN
     done
 
@@ -66,9 +67,6 @@ if [[ -n $SN_build ]] ; then
     sed -i "/#define SER_STRING.*/c\#define SER_STRING \"$SN_build\""  ../firmware/src/descriptors.c
     rm ../firmware/release/u2f-firmware.omf
 fi
-
-sed -i "s/firmware.*src.*cert.c/tools\/workers\/$SN\/firmware\/src\/cert.c/g"  ../firmware/release/src/cert.__i
-sed -i "s/firmware.*src.*descriptors.c/tools\/workers\/$SN\/firmware\/src\/descriptors.c/g"  ../firmware/release/src/descriptors.__i
 
 echo "done."
 echo "building..."

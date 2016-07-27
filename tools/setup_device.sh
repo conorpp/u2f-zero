@@ -33,7 +33,7 @@ then
 
     while [[ "$?" -ne "0" ]] ; do
         echo "$SN is retrying erase ... "
-        sleep 0.3
+        sleep 0.2
         erase.sh $SN
     done
 

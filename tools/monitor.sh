@@ -20,9 +20,13 @@ function is_running {
 
     sn=$1
     if [[ -f workers/$sn/worker/.finished ]] ; then
+        pwd
+        echo "$sn finished"
         return 1
     fi
-
+    
+    pwd
+    echo "$sn still running"
     return 0
 
 }
@@ -31,7 +35,7 @@ function start_programming {
 
     sn=$1
     rm -f workers/$sn/worker/.finished
-    cd workers/$sn/worker && ./$setup ../../../$key $sn $starting_SN && touch .finished  &
+    cd workers/$sn/worker && ./$setup ../../../$key $sn $starting_SN && touch .finished && cd ../../.. &
     export starting_SN=$(inc_hex $starting_SN)
 
 }
@@ -57,7 +61,7 @@ mkdir workers
 
 for i in `seq 1 $num_adapters` ; do
 
-    echo ${adapters[$i]}
+    echo "$i :" ${adapters[$i]}
     mkdir workers/${adapters[$i]}
     mkdir workers/${adapters[$i]}/worker
     cp -rf $firmware workers/${adapters[$i]}
@@ -81,21 +85,28 @@ echo $starting_SN
 #is_running ${adapters[1]}
 #echo $?
 
+#exit 0
+
 for (( ; ; ))
 do
-    for j in `seq 1 $num_adapters` ; do
-        is_running ${adapters[$j]}
 
-        if [[ $? -eq 1 ]] ; then
-            echo "time to start $j ${adapters[$j]}"
-            start_programming ${adapters[$j]}
-        else
-            echo "$j is already running"
-        fi
+    read -n 1 j
 
-    done
+    if [[ $j -gt $num_adapters ]] ; then
 
-    sleep 1
+        echo "$j is too big"
+        continue
+
+    fi
+
+    is_running ${adapters[$j]}
+
+    if [[ $? -eq 1 ]] ; then
+        echo "starting $j ${adapters[$j]}"
+        start_programming ${adapters[$j]}
+    else
+        echo "$j ${adapters[$j]} is already running"
+    fi
 
 done
 

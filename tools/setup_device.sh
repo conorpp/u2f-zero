@@ -91,7 +91,6 @@ export PATH=$PATH1
 echo "programming final build..."
 cp $FINAL_HEX prog.hex
 program.sh prog.hex $SN
-#rm prog.hex
 
 while [[ "$?" -ne "0" ]] ; do
     sleep .2

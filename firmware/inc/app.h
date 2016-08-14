@@ -40,6 +40,7 @@
 #define U2F_ATTESTATION_KEY_SLOT	15
 //#define ATECC_SETUP_DEVICE
 #define U2F_PRINT
+//#define U2F_BLINK_ERRORS
 
 // efm8ub1 application eeprom memory mappings
 #define U2F_KEY_HEADER_ADDR		0xF800
@@ -128,7 +129,7 @@ uint8_t get_app_state();
 void set_app_state(APP_STATE s);
 
 void rgb(uint8_t r, uint8_t g, uint8_t b);
-#define rgb_hex(c) (rgb((c),(c)>>8,(c)>>16))
+#define rgb_hex(c) (rgb((c)&0xff,((c)>>8)&0xff,((c)>>16)&0xff))
 
 void app_wink(uint32_t color);
 

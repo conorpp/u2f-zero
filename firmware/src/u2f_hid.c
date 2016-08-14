@@ -77,7 +77,7 @@ static struct hid_layer_param
 	// total length of response in bytes
 	uint16_t res_len;
 
-	#define BUFFER_SIZE 200
+	#define BUFFER_SIZE 270
 	uint8_t buffer[BUFFER_SIZE];
 
 } hid_layer;
@@ -90,7 +90,7 @@ static uint8_t CID_NUM = 0;
 
 static uint8_t _hid_pkt[HID_PACKET_SIZE];
 static uint8_t _hid_offset = 0;
-static uint8_t _hid_seq = 0;
+static uint16_t _hid_seq = 0;
 static uint8_t _hid_in_session = 0;
 
 #define u2f_hid_busy() (_hid_in_session)
@@ -140,29 +140,34 @@ void u2f_hid_flush()
 void u2f_hid_writeback(uint8_t * payload, uint16_t len)
 {
 	struct u2f_hid_msg * r = (struct u2f_hid_response *) _hid_pkt;
+
 	_hid_in_session = 1;
-	if (_hid_offset == 0)
-	{
-		r->cid = hid_layer.current_cid;
-		if (!_hid_seq)
-		{
-			r->pkt.init.cmd = hid_layer.current_cmd;
-			U2FHID_SET_LEN(r, hid_layer.res_len);
-			_hid_offset = 7;
-		}
-		else
-		{
-			r->pkt.cont.seq = _hid_seq - 1;
-			_hid_offset = 5;
-			if (_hid_seq-1 > 127)
-			{
-				set_app_error(ERROR_SEQ_EXCEEDED);
-				return;
-			}
-		}
-	}
+
+
 	while(len--)
 	{
+
+		if (_hid_offset == 0)
+		{
+			r->cid = hid_layer.current_cid;
+			if (!_hid_seq)
+			{
+				r->pkt.init.cmd = hid_layer.current_cmd;
+				U2FHID_SET_LEN(r, hid_layer.res_len);
+				_hid_offset = 7;
+			}
+			else
+			{
+				r->pkt.cont.seq = (uint8_t)_hid_seq - 1;
+				_hid_offset = 5;
+				if (_hid_seq-1 > 127)
+				{
+					set_app_error(ERROR_SEQ_EXCEEDED);
+					return;
+				}
+			}
+		}
+
 		_hid_pkt[_hid_offset++] = *payload++;
 		hid_layer.bytes_written++;
 		if (_hid_offset == HID_PACKET_SIZE)
@@ -172,13 +177,6 @@ void u2f_hid_writeback(uint8_t * payload, uint16_t len)
 
 			usb_write(_hid_pkt, HID_PACKET_SIZE);
 			memset(_hid_pkt, 0, HID_PACKET_SIZE);
-
-			if (len)
-			{
-				u2f_hid_writeback(payload, len);
-				return;
-			}
-			else break;
 		}
 	}
 
@@ -409,9 +407,15 @@ static void hid_u2f_parse(struct u2f_hid_msg* req)
 
 void u2f_hid_request(struct u2f_hid_msg* req)
 {
-	uint8_t* payload = req->pkt.init.payload;
-	static int8_t last_seq = -1;
-	struct CID* cid = get_cid(req->cid);
+	uint8_t* payload;
+	static int8_t last_seq;
+	struct CID* cid;
+
+	restart:
+
+	payload = req->pkt.init.payload;
+	last_seq = -1;
+	cid = get_cid(req->cid);
 
 
 	if (cid != NULL)
@@ -474,8 +478,7 @@ void u2f_hid_request(struct u2f_hid_msg* req)
 				if (req->pkt.init.cmd & TYPE_INIT)
 				{
 					u2f_hid_reset_packet();
-					u2f_hid_request(req);
-					return;
+					goto restart;
 				}
 
 				hid_layer.last_buffered = get_ms();
@@ -497,8 +500,7 @@ void u2f_hid_request(struct u2f_hid_msg* req)
 				hid_layer.state = HID_READY;
 				u2f_hid_reset_packet();
 				stamp_error(hid_layer.current_cid, ERR_MSG_TIMEOUT);
-				u2f_hid_request(req);
-				return;
+				goto restart;
 			}
 			else
 			{

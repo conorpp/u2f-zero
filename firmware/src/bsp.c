@@ -37,7 +37,9 @@
 void u2f_delay(uint32_t ms) {
 	uint32_t ms_now = get_ms();
 	while((get_ms() - ms_now) < ms)
-	{}
+	{
+		watchdog();
+	}
 }
 
 void usb_write(uint8_t* buf, uint8_t len)

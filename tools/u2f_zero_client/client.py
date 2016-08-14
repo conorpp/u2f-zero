@@ -78,7 +78,7 @@ if len(sys.argv) not in [2,3,4,5,6]:
 def open_u2f(SN=None):
     h = hid.device()
     try:
-        h.open(0x10c4,0x8acf,unicode(SN))
+        h.open(0x10c4,0x8acf,SN if SN is None else unicode(SN))
     except IOError as ex:
         try:
             h.open(0x10c4,0x8acf)

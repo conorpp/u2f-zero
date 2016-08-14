@@ -2,7 +2,7 @@
 
 SETUP_HEX=../firmware/SETUP.hex
 FINAL_HEX=../firmware/release/u2f-firmware.hex
-FLASH_TOOLS=1
+FLASH_TOOLS=0
 SN=
 SN_build=
 

@@ -71,7 +71,7 @@
 #define U2FHID_LEN(req) (*(uint16_t*)&req->pkt.init.bcnth)
 #define U2FHID_SET_LEN(req,len) (*(uint16_t*)&req->pkt.init.bcnth = (uint16_t)len)
 
-#define U2FHID_TIMEOUT_MS 1500
+#define U2FHID_TIMEOUT_MS 5000
 #define U2FHID_TIMEOUT(hid) (get_ms() - (hid)->last_buffered > U2FHID_TIMEOUT_MS)
 
 struct u2f_hid_msg

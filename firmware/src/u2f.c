@@ -60,13 +60,14 @@ void u2f_request(struct u2f_request_apdu * req)
         	 *rcode = u2f_authenticate((struct u2f_authenticate_request*)req->payload, req->p1);
         	break;
         case U2F_VERSION:
-        	*rcode =u2f_version();
+        	*rcode = u2f_version();
         	break;
         case U2F_VENDOR_FIRST:
-        	break;
         case U2F_VENDOR_LAST:
+        	*rcode = U2F_SW_NO_ERROR;
         	break;
         default:
+        	*rcode = U2F_SW_INS_NOT_SUPPORTED;
         	break;
     }
     u2f_response_writeback((uint8_t*)rcode,2);

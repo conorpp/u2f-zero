@@ -39,7 +39,7 @@
 // application settings
 #define U2F_ATTESTATION_KEY_SLOT	15
 //#define ATECC_SETUP_DEVICE
-#define U2F_PRINT
+//#define U2F_PRINT
 //#define U2F_BLINK_ERRORS
 
 // efm8ub1 application eeprom memory mappings

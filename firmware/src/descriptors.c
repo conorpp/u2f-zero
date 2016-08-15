@@ -126,7 +126,7 @@ SI_SEGMENT_VARIABLE(configDesc[],
 #define LANG_STRING   htole16( SLAB_USB_LANGUAGE )
 #define MFR_STRING                             "Silicon Labs"
 #define PROD_STRING                            "U2F Zero"
-#define SER_STRING 							   "CAFEBABEFFFFFFFD"
+#define SER_STRING 							   "CAFEBABEFFFFFFFF"
 #define INT0_STRING                            "U2F Zero"
 
 

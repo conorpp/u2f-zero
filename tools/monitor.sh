@@ -9,6 +9,7 @@ num_adapters=0
 firmware=../firmware
 export setup=setup_device.sh
 export starting_SN=CAFEBABE00000000
+setup_SNs=(0 CAFEBABEFFFFFFF0 CAFEBABEFFFFFFF1 CAFEBABEFFFFFFF2)
 
 function inc_hex {
     a=$((0x$1 + 1))
@@ -34,8 +35,11 @@ function is_running {
 function start_programming {
 
     sn=$1
+    setupf=$2
+    setup_sn=$3
     rm -f workers/$sn/worker/.finished
-    cd workers/$sn/worker && ./$setup ../../../$key $sn $starting_SN && touch .finished && cd ../../.. &
+    cd workers/$sn/worker && ./$setup ../../../$key $sn $starting_SN $setupf $setup_sn \
+        && touch .finished && cd ../../.. &
     export starting_SN=$(inc_hex $starting_SN)
 
 }
@@ -103,7 +107,7 @@ do
 
     if [[ $? -eq 1 ]] ; then
         echo "starting $j ${adapters[$j]}"
-        start_programming ${adapters[$j]}
+        start_programming ${adapters[$j]} ../firmware/SETUP_"${setup_SNs[$j]}".hex ${setup_SNs[$j]}
     else
         echo "$j ${adapters[$j]} is already running"
     fi

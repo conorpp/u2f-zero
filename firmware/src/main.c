@@ -48,7 +48,7 @@ data struct APP_DATA appdata;
 
 uint8_t error;
 uint8_t state;
-uint8_t winkc;
+uint32_t winkc;
 struct u2f_hid_msg * hid_msg;
 
 static void init(struct APP_DATA* ap)

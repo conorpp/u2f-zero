@@ -188,6 +188,8 @@ int16_t main(void) {
 			USBD_Read(EP1OUT, hidmsgbuf, sizeof(hidmsgbuf), true);
 		}
 
+		u2f_hid_check_timeouts();
+
 		switch(state)
 		{
 			case APP_NOTHING:
@@ -282,11 +284,13 @@ int16_t main(void) {
 			rgb_hex(U2F_DEFAULT_COLOR_ERROR);
 #endif
 			error = 0;
-			while(!ms_since(ms_heart,2000))
+			while(!ms_since(ms_heart,500))
 			{
 				watchdog();
 			}
 		}
+
+
 
 
 	}

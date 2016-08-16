@@ -57,7 +57,9 @@ typedef enum
 struct CID
 {
 	uint32_t cid;
-	uint32_t last_used;
+	uint16_t last_used;
+	uint8_t busy;
+	uint8_t last_cmd;
 };
 
 static struct hid_layer_param
@@ -85,7 +87,7 @@ static struct hid_layer_param
 uint32_t _hid_lockt = 0;
 uint32_t _hid_lock_cid = 0;
 
-struct CID CIDS[5];
+static struct CID CIDS[5];
 static uint8_t CID_NUM = 0;
 
 static uint8_t _hid_pkt[HID_PACKET_SIZE];
@@ -144,7 +146,7 @@ void u2f_hid_writeback(uint8_t * payload, uint16_t len)
 	_hid_in_session = 1;
 
 
-	while(len--)
+	do
 	{
 
 		if (_hid_offset == 0)
@@ -178,7 +180,9 @@ void u2f_hid_writeback(uint8_t * payload, uint16_t len)
 			usb_write(_hid_pkt, HID_PACKET_SIZE);
 			memset(_hid_pkt, 0, HID_PACKET_SIZE);
 		}
+		if (!len) break;
 	}
+	while(--len);
 
 }
 
@@ -212,9 +216,23 @@ static uint32_t get_new_cid()
 		CIDS[i].cid = base + CID_NUM++;
 	}while(CIDS[i].cid == 0 || CIDS[i].cid == U2FHID_BROADCAST);
 
-	refresh_cid(CIDS+i);
+	CIDS[i].busy = 0;
 
 	return CIDS[i].cid;
+}
+
+static int8_t add_new_cid(uint32_t cid)
+{
+	int i;
+	for(i = 0; i < CID_MAX; i++)
+	{
+		if (is_cid_free(CIDS+i))
+		{
+			CIDS[i].cid = cid;
+			return 0;
+		}
+	}
+	return -1;
 }
 
 static struct CID* get_cid(uint32_t cid)
@@ -237,22 +255,25 @@ static void del_cid(uint32_t cid)
 		if (CIDS[i].cid == cid)
 		{
 			CIDS[i].cid = 0;
+			CIDS[i].busy = 0;
 		}
 	}
 }
 
-
+static uint8_t errbuf[HID_PACKET_SIZE];
 static void stamp_error(uint32_t cid, uint8_t err)
 {
-	uint8_t errbuf[HID_PACKET_SIZE];
+
 	struct u2f_hid_msg * res = (struct u2f_hid_msg *)errbuf;
+	memset(errbuf,0,sizeof(errbuf));
 	res->cid = cid;
 	res->pkt.init.cmd = U2FHID_ERROR;
 	res->pkt.init.payload[0] = err;
 	res->pkt.init.bcnth = 0;
 	res->pkt.init.bcntl = 1;
 
-	usb_write(errbuf, HID_PACKET_SIZE);
+
+	usb_write(res, HID_PACKET_SIZE);
 	del_cid(cid);
 }
 
@@ -277,9 +298,10 @@ static int buffer_request(struct u2f_hid_msg* req)
 	return 0;
 }
 
-static void hid_u2f_parse(struct u2f_hid_msg* req)
+// return 0 if finished
+// return 1 if expecting more cont packets
+static uint8_t hid_u2f_parse(struct u2f_hid_msg* req)
 {
-
 	uint16_t len = 0;
 	uint8_t secs;
 	struct u2f_hid_init_response * init_res = appdata.tmp;
@@ -294,19 +316,26 @@ static void hid_u2f_parse(struct u2f_hid_msg* req)
 			}
 			u2f_hid_set_len(17);
 
-			if (hid_layer.current_cid == 0)
-			{
-				u2f_prints("out of cid's\r\n");
-				set_app_error(ERROR_OUT_OF_CIDS);
-				goto fail;
-			}
 
-			init_res->cid = get_new_cid();
-			init_res->version_id = 1;
-			init_res->version_major = 1;
+			if (hid_layer.current_cid == U2FHID_BROADCAST)
+			{
+				if (hid_layer.current_cid == 0)
+				{
+					u2f_prints("out of cid's\r\n");
+					set_app_error(ERROR_OUT_OF_CIDS);
+					goto fail;
+				}
+				init_res->cid = get_new_cid();
+			}
+			else
+			{
+				init_res->cid = hid_layer.current_cid;
+			}
+			init_res->version_id = 2;
+			init_res->version_major = 2;
 			init_res->version_minor = 0;
 			init_res->version_build = 0;
-			init_res->cflags = 0;
+			init_res->cflags = CAPABILITY_WINK | CAPABILITY_LOCK;
 
 			// write back the same data nonce
 			u2f_hid_writeback(req->pkt.init.payload, 8);
@@ -349,19 +378,42 @@ static void hid_u2f_parse(struct u2f_hid_msg* req)
 			break;
 		case U2FHID_PING:
 
-			//u2f_prints("U2F PING\r\n");
+			hid_layer.current_cid = req->cid;
 
-			if (!u2f_hid_busy())
+			if (hid_layer.bytes_buffered == 0)
 			{
+				start_buffering(req);
 				u2f_hid_set_len(U2FHID_LEN(req));
-				u2f_hid_writeback(req->pkt.init.payload, MIN(hid_layer.res_len, U2FHID_INIT_PAYLOAD_SIZE));
+				if (hid_layer.bytes_buffered >= U2FHID_LEN(req))
+				{
+					u2f_hid_writeback(hid_layer.buffer,hid_layer.bytes_buffered);
+					u2f_hid_flush();
+				}
+				else
+				{
+					return 1;
+				}
 			}
 			else
 			{
-				u2f_hid_writeback(req->pkt.cont.payload, MIN(hid_layer.res_len - hid_layer.bytes_written, U2FHID_CONT_PAYLOAD_SIZE));
+				if (hid_layer.bytes_buffered + U2FHID_CONT_PAYLOAD_SIZE > BUFFER_SIZE)
+				{
+					u2f_hid_writeback(hid_layer.buffer,hid_layer.bytes_buffered);
+					hid_layer.bytes_buffered = 0;
+				}
+
+				buffer_request(req);
+				if (hid_layer.bytes_buffered >= hid_layer.req_len)
+				{
+					u2f_hid_writeback(hid_layer.buffer,hid_layer.bytes_buffered);
+					u2f_hid_flush();
+				}
+				else
+				{
+					return 1;
+				}
 			}
 
-			if (hid_layer.res_len == hid_layer.bytes_written) u2f_hid_flush();
 			break;
 
 		case U2FHID_WINK:
@@ -384,26 +436,47 @@ static void hid_u2f_parse(struct u2f_hid_msg* req)
 			}
 			else
 			{
-				_hid_lock_cid = hid_layer.current_cid;
-				_hid_lockt = get_ms() + 1000 * secs;
+				if (secs)
+				{
+					_hid_lock_cid = hid_layer.current_cid;
+					_hid_lockt = get_ms() + 1000 * secs;
+
+				}
+				else
+				{
+					_hid_lockt = get_ms();
+					_hid_lock_cid = 0;
+				}
+				hid_layer.current_cmd = U2FHID_LOCK;
 				u2f_hid_set_len(0);
 				u2f_hid_writeback(NULL, 0);
 				u2f_hid_flush();
 			}
-
 			break;
 		default:
 			set_app_error(ERROR_HID_INVALID_CMD);
 			stamp_error(hid_layer.current_cid, ERR_INVALID_CMD);
 	}
 
-	return;
+	return u2f_hid_busy();
 
 	fail:
 		u2f_prints("U2F HID FAIL\r\n");
-	return;
+	return 0;
 }
 
+void u2f_hid_check_timeouts()
+{
+	uint8_t i;
+	for(i = 0; i < CID_MAX; i++)
+	{
+		if (CIDS[i].busy && (((uint16_t)get_ms() - (CIDS[i].last_used)) >= 700) && CIDS[i].last_cmd == U2FHID_PING)
+		{
+			stamp_error(CIDS[i].cid, ERR_MSG_TIMEOUT);
+			CIDS[i].busy = 0;
+		}
+	}
+}
 
 void u2f_hid_request(struct u2f_hid_msg* req)
 {
@@ -417,10 +490,19 @@ void u2f_hid_request(struct u2f_hid_msg* req)
 	last_seq = -1;
 	cid = get_cid(req->cid);
 
+	// Error checking
+	if (!(U2FHID_IS_INIT(req->pkt.init.cmd)))
+	{
+		if (U2FHID_LEN(req) <= U2FHID_INIT_PAYLOAD_SIZE)
+		{
+			return;
+		}
+	}
+
 
 	if (cid != NULL)
 	{
-		refresh_cid(cid);
+		cid->busy = 0;
 	}
 	else if (req->cid == U2FHID_BROADCAST)
 	{
@@ -428,92 +510,123 @@ void u2f_hid_request(struct u2f_hid_msg* req)
 	}
 	else
 	{
-		// Ignore CID's we did not allocate.
-		//u2f_printlx("ignoring pkt ",1,req->cid);
-		return;
+		if (U2FHID_IS_INIT(req->pkt.init.cmd))
+		{
+			add_new_cid(req->cid);
+			cid = get_cid(req->cid);
+			cid->busy = 0;
+		}
+		else
+		{
+			// ignore random cont packets
+			return;
+		}
+
 	}
 
+	hid_layer.current_cid = req->cid;
+	hid_layer.current_cmd = req->pkt.init.cmd;
+	hid_layer.last_buffered = get_ms();
+
+	cid->last_used = (uint16_t)get_ms();
+	cid->last_cmd = req->pkt.init.cmd;
+
 	// ignore if we locked to a different cid
-	if(hid_is_locked())
+	if(hid_is_locked() && req->pkt.init.cmd != U2FHID_INIT)
 	{
-		if (!hid_is_lock_cid(cid))
+		if (!hid_is_lock_cid(cid->cid))
 		{
-			stamp_error(hid_layer.current_cid, ERR_CHANNEL_BUSY);
+			stamp_error(cid->cid, ERR_CHANNEL_BUSY);
 			return;
 		}
 	}
 
-	hid_layer.state = (u2f_hid_busy()) ? HID_BUSY : HID_READY;
-
-	switch(hid_layer.state)
+	if (req->pkt.init.cmd & TYPE_INIT)
 	{
-		case HID_READY:
-			if (req->pkt.init.cmd & TYPE_INIT)
-			{
-				if (U2FHID_LEN(req) > U2FHID_MAX_PAYLOAD_SIZE)
-				{
-					//u2f_prints("length too big\r\n");
-					stamp_error(req->cid, ERR_INVALID_LEN);
-					return;
-				}
-				u2f_hid_reset_packet();
-				hid_layer.current_cid = req->cid;
-				hid_layer.current_cmd = req->pkt.init.cmd;
-				hid_layer.last_buffered = get_ms();
-				last_seq = -1;
+		cid->busy = hid_u2f_parse(req);
+		return;
+	}
+	else
+	{
 
-			}
-			else
-			{
-				stamp_error(req->cid, ERR_INVALID_CMD);
-				u2f_prints("ERR_INVALID_CMD\r\n");
-				return;
-			}
 
-			break;
-		case HID_BUSY:
-			// buffer long requests
-			if (req->cid == hid_layer.current_cid)
-			{
-				if (req->pkt.init.cmd & TYPE_INIT)
-				{
-					u2f_hid_reset_packet();
-					goto restart;
-				}
+		// verify packets arrive in ascending order
+		hid_layer.last_buffered = get_ms();
+		if (last_seq + 1 != req->pkt.cont.seq)
+		{
+			u2f_hid_reset_packet();
+			stamp_error(hid_layer.current_cid, ERR_INVALID_SEQ);
+			return;
+		}
+		last_seq = req->pkt.cont.seq;
 
-				hid_layer.last_buffered = get_ms();
-
-				// verify packets arrive in ascending order
-				if (last_seq + 1 != req->pkt.cont.seq)
-				{
-					u2f_hid_reset_packet();
-					stamp_error(hid_layer.current_cid, ERR_INVALID_SEQ);
-					return;
-				}
-				last_seq = req->pkt.cont.seq;
-
-			}
-			else if (U2FHID_TIMEOUT(&hid_layer))
-			{
-				// return timeout error for old channel and run again for new channel
-				//u2f_prints("timeout, switching\r\n");
-				hid_layer.state = HID_READY;
-				u2f_hid_reset_packet();
-				stamp_error(hid_layer.current_cid, ERR_MSG_TIMEOUT);
-				goto restart;
-			}
-			else
-			{
-				// Current application may not be interrupted
-				stamp_error(req->cid, ERR_CHANNEL_BUSY);
-				return;
-			}
-			break;
-
+		cid->busy = hid_u2f_parse(req);
+		return;
 	}
 
-	hid_u2f_parse(req);
-	return;
+
+
+//	hid_layer.state = (u2f_hid_busy()) ? HID_BUSY : HID_READY;
+//
+//	switch(hid_layer.state)
+//	{
+//		case HID_READY:
+//			if (req->pkt.init.cmd & TYPE_INIT)
+//			{
+//				if (U2FHID_LEN(req) > U2FHID_MAX_PAYLOAD_SIZE)
+//				{
+//					//u2f_prints("length too big\r\n");
+//					stamp_error(req->cid, ERR_INVALID_LEN);
+//					return;
+//				}
+//				u2f_hid_reset_packet();
+//				hid_layer.current_cid = req->cid;
+//				hid_layer.current_cmd = req->pkt.init.cmd;
+//				hid_layer.last_buffered = get_ms();
+//				last_seq = -1;
+//
+//			}
+//			break;
+//		case HID_BUSY:
+//
+//
+//
+//
+//			// buffer long requests
+//			if (req->cid == hid_layer.current_cid)
+//			{
+//				if (req->pkt.init.cmd & TYPE_INIT)
+//				{
+//					u2f_hid_reset_packet();
+//					goto restart;
+//				}
+//
+//
+//
+//
+//
+//			}
+////			else if (U2FHID_TIMEOUT(&hid_layer))
+////			{
+////				// return timeout error for old channel and run again for new channel
+////				//u2f_prints("timeout, switching\r\n");
+////				hid_layer.state = HID_READY;
+////				u2f_hid_reset_packet();
+////				stamp_error(hid_layer.current_cid, ERR_MSG_TIMEOUT);
+////				goto restart;
+////			}
+//			else
+//			{
+//				// Current application may not be interrupted
+//				stamp_error(req->cid, ERR_CHANNEL_BUSY);
+//				return;
+//			}
+//			break;
+//
+//	}
+
+//	hid_u2f_parse(req);
+//	return;
 }
 
 #endif

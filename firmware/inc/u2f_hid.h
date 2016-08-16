@@ -62,6 +62,9 @@
 #define ERR_SYNC_FAIL           0x0b    // SYNC command failed
 #define ERR_OTHER               0x7f    // Other unspecified error
 
+#define CAPABILITY_WINK  		0x01
+#define CAPABILITY_LOCK  		0x02
+
 #define U2FHID_BROADCAST 		0xffffffff
 
 #define U2FHID_INIT_PAYLOAD_SIZE  (HID_PACKET_SIZE-7)
@@ -147,6 +150,9 @@ extern void app_wink(uint32_t color);
 // must be implemented elsewhere for specific platform used
 //  @ec error values defined in app.h
 extern void set_app_error(uint8_t ec);
+
+// Call from main loop to ensure stale channels get timeout error.
+void u2f_hid_check_timeouts();
 
 #define U2FHID_IS_INIT(cmd)			((cmd) & 0x80)
 

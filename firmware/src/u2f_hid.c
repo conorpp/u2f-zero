@@ -45,7 +45,8 @@
 
 #ifndef U2F_HID_DISABLE
 
-#define CID_MAX (sizeof(CIDS)/sizeof(uint32_t))
+#define CID_MAX (sizeof(CIDS)/sizeof(struct CID))
+#define BROADCAST_CID (CIDS[CID_MAX-1])
 
 
 typedef enum
@@ -57,7 +58,7 @@ typedef enum
 struct CID
 {
 	uint32_t cid;
-	uint16_t last_used;
+	uint32_t last_used;
 	uint8_t busy;
 	uint8_t last_cmd;
 };
@@ -88,6 +89,7 @@ uint32_t _hid_lockt = 0;
 uint32_t _hid_lock_cid = 0;
 
 static struct CID CIDS[5];
+
 static uint8_t CID_NUM = 0;
 
 static uint8_t _hid_pkt[HID_PACKET_SIZE];
@@ -186,10 +188,7 @@ void u2f_hid_writeback(uint8_t * payload, uint16_t len)
 
 }
 
-static uint8_t is_cid_free(struct CID* c)
-{
-	return (c->cid == 0 || get_ms() - c->last_used > 1000);
-}
+
 
 static void refresh_cid(struct CID* c)
 {
@@ -201,9 +200,9 @@ static uint32_t get_new_cid()
 {
 	static uint32_t base = 0xcafebabe;
 	int i;
-	for(i = 0; i < CID_MAX; i++)
+	for(i = 0; i < CID_MAX-1; i++)
 	{
-		if (is_cid_free(CIDS+i))
+		if (!CIDS[i].busy)
 		{
 			goto newcid;
 		}
@@ -224,9 +223,9 @@ static uint32_t get_new_cid()
 static int8_t add_new_cid(uint32_t cid)
 {
 	int i;
-	for(i = 0; i < CID_MAX; i++)
+	for(i = 0; i < CID_MAX-1; i++)
 	{
-		if (is_cid_free(CIDS+i))
+		if (!CIDS[i].busy)
 		{
 			CIDS[i].cid = cid;
 			return 0;
@@ -337,11 +336,16 @@ static uint8_t hid_u2f_parse(struct u2f_hid_msg* req)
 			init_res->version_build = 0;
 			init_res->cflags = CAPABILITY_WINK | CAPABILITY_LOCK;
 
+			u2f_printlx("replied to cid ",1,hid_layer.current_cid);
 			// write back the same data nonce
 			u2f_hid_writeback(req->pkt.init.payload, 8);
 			u2f_hid_writeback((uint8_t *)init_res, 9);
 			u2f_hid_flush();
+
 			hid_layer.current_cid = init_res->cid;
+
+
+			u2f_printlx("init'd to cid ",1,hid_layer.current_cid);
 
 			break;
 		case U2FHID_MSG:
@@ -378,7 +382,7 @@ static uint8_t hid_u2f_parse(struct u2f_hid_msg* req)
 			break;
 		case U2FHID_PING:
 
-			hid_layer.current_cid = req->cid;
+			u2f_prints("PING\r\n");
 
 			if (hid_layer.bytes_buffered == 0)
 			{
@@ -387,6 +391,7 @@ static uint8_t hid_u2f_parse(struct u2f_hid_msg* req)
 				if (hid_layer.bytes_buffered >= U2FHID_LEN(req))
 				{
 					u2f_hid_writeback(hid_layer.buffer,hid_layer.bytes_buffered);
+					u2f_printd("PING DONE ",1,hid_layer.bytes_buffered + hid_layer.bytes_written);
 					u2f_hid_flush();
 				}
 				else
@@ -400,12 +405,15 @@ static uint8_t hid_u2f_parse(struct u2f_hid_msg* req)
 				{
 					u2f_hid_writeback(hid_layer.buffer,hid_layer.bytes_buffered);
 					hid_layer.bytes_buffered = 0;
+					u2f_prints("PING WB\r\n");
+
 				}
 
 				buffer_request(req);
-				if (hid_layer.bytes_buffered >= hid_layer.req_len)
+				if (hid_layer.bytes_buffered + hid_layer.bytes_written >= hid_layer.req_len)
 				{
 					u2f_hid_writeback(hid_layer.buffer,hid_layer.bytes_buffered);
+					u2f_printd("PING D0N3 ",1,hid_layer.bytes_buffered + hid_layer.bytes_written);
 					u2f_hid_flush();
 				}
 				else
@@ -413,6 +421,7 @@ static uint8_t hid_u2f_parse(struct u2f_hid_msg* req)
 					return 1;
 				}
 			}
+
 
 			break;
 
@@ -456,6 +465,7 @@ static uint8_t hid_u2f_parse(struct u2f_hid_msg* req)
 		default:
 			set_app_error(ERROR_HID_INVALID_CMD);
 			stamp_error(hid_layer.current_cid, ERR_INVALID_CMD);
+			u2f_printb("invalid cmd: ",1,hid_layer.current_cmd);
 	}
 
 	return u2f_hid_busy();
@@ -470,81 +480,130 @@ void u2f_hid_check_timeouts()
 	uint8_t i;
 	for(i = 0; i < CID_MAX; i++)
 	{
-		if (CIDS[i].busy && (((uint16_t)get_ms() - (CIDS[i].last_used)) >= 700) && CIDS[i].last_cmd == U2FHID_PING)
+		if (CIDS[i].busy && ((get_ms() - CIDS[i].last_used) >= 500))
 		{
+
+
+			u2f_printlx("timeout cid ",2,CIDS[i].cid,get_ms());
 			stamp_error(CIDS[i].cid, ERR_MSG_TIMEOUT);
-			CIDS[i].busy = 0;
+			del_cid(CIDS[i].cid);
+			u2f_hid_reset_packet();
 		}
 	}
+
 }
+
 
 void u2f_hid_request(struct u2f_hid_msg* req)
 {
 	uint8_t* payload;
 	static int8_t last_seq;
-	struct CID* cid;
+	struct CID* cid = NULL;
 
 	restart:
 
 	payload = req->pkt.init.payload;
-	last_seq = -1;
 	cid = get_cid(req->cid);
 
 	// Error checking
-	if (!(U2FHID_IS_INIT(req->pkt.init.cmd)))
+	if ((U2FHID_IS_INIT(req->pkt.init.cmd)))
 	{
+		if (U2FHID_LEN(req) > 7609)
+		{
+			stamp_error(req->cid, ERR_INVALID_LEN);
+			return;
+		}
+		if (req->pkt.init.cmd != U2FHID_INIT && req->cid != hid_layer.current_cid && u2f_hid_busy())
+		{
+			stamp_error(req->cid, ERR_CHANNEL_BUSY);
+			return;
+		}
+	}
+	else
+	{
+		// do i need this?..
 		if (U2FHID_LEN(req) <= U2FHID_INIT_PAYLOAD_SIZE)
 		{
 			return;
 		}
+
+	}
+	if (!req->cid)
+	{
+		stamp_error(req->cid, ERR_SYNC_FAIL);
+		return;
 	}
 
 
-	if (cid != NULL)
+
+	if (req->cid == U2FHID_BROADCAST)
+	{
+		if (!(req->pkt.init.cmd == U2FHID_INIT))
+		{
+			stamp_error(req->cid, ERR_SYNC_FAIL);
+			return;
+		}
+		cid = &BROADCAST_CID;
+		BROADCAST_CID.cid = U2FHID_BROADCAST;
+	}
+	else if (U2FHID_IS_INIT(req->pkt.init.cmd) && cid == NULL)
+	{
+		add_new_cid(req->cid);
+		cid = get_cid(req->cid);
+		if (cid == NULL)
+		{
+			u2f_prints("out of cids\r\n");
+			return;
+		}
+		cid->busy = 0;
+	}
+	else if (cid == NULL)
+	{
+		// ignore random cont packets
+		u2f_prints("ignoring random cont\r\n");
+		return;
+	}
+
+
+
+	// Reset init packets
+	if (req->pkt.init.cmd == U2FHID_INIT)
 	{
 		cid->busy = 0;
 	}
-	else if (req->cid == U2FHID_BROADCAST)
-	{
-
-	}
 	else
 	{
-		if (U2FHID_IS_INIT(req->pkt.init.cmd))
-		{
-			add_new_cid(req->cid);
-			cid = get_cid(req->cid);
-			cid->busy = 0;
-		}
-		else
-		{
-			// ignore random cont packets
-			return;
-		}
 
 	}
 
+	u2f_printlx("got cid ",1,req->cid);
+
 	hid_layer.current_cid = req->cid;
-	hid_layer.current_cmd = req->pkt.init.cmd;
 	hid_layer.last_buffered = get_ms();
 
-	cid->last_used = (uint16_t)get_ms();
-	cid->last_cmd = req->pkt.init.cmd;
+
+	cid->last_used = get_ms();
+
+
+
 
 	// ignore if we locked to a different cid
 	if(hid_is_locked() && req->pkt.init.cmd != U2FHID_INIT)
 	{
-		if (!hid_is_lock_cid(cid->cid))
+		if (!hid_is_lock_cid(req->cid))
 		{
-			stamp_error(cid->cid, ERR_CHANNEL_BUSY);
+			stamp_error(req->cid, ERR_CHANNEL_BUSY);
 			return;
 		}
 	}
 
-	if (req->pkt.init.cmd & TYPE_INIT)
+	if ((req->pkt.init.cmd & TYPE_INIT) && !cid->busy)
 	{
-		cid->busy = hid_u2f_parse(req);
-		return;
+		u2f_prints("type init\r\n");
+		cid->last_cmd = req->pkt.init.cmd;
+		hid_layer.current_cmd = req->pkt.init.cmd;
+		last_seq = -1;
+
 	}
 	else
 	{
@@ -554,15 +613,18 @@ void u2f_hid_request(struct u2f_hid_msg* req)
 		hid_layer.last_buffered = get_ms();
 		if (last_seq + 1 != req->pkt.cont.seq)
 		{
-			u2f_hid_reset_packet();
 			stamp_error(hid_layer.current_cid, ERR_INVALID_SEQ);
+			u2f_hid_reset_packet();
+			u2f_prints("invalid seq!\r\n");
 			return;
 		}
 		last_seq = req->pkt.cont.seq;
 
-		cid->busy = hid_u2f_parse(req);
-		return;
+		hid_layer.current_cmd = cid->last_cmd;
+
 	}
+
+	cid->busy = hid_u2f_parse(req);
 
 
 

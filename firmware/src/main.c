@@ -230,35 +230,35 @@ int16_t main(void) {
 				if (state == APP_HID_MSG)
 					state = APP_NOTHING;
 				break;
-			case APP_WINK:
-				// Do wink pattern for USB HID wink request
-				rgb_hex(winkc);
-				light = 1;
-				ms_wink = get_ms();
-				state = _APP_WINK;
-				break;
-			case _APP_WINK:
-
-				if (ms_since(ms_wink,150))
-				{
-					if (light)
-					{
-						light = 0;
-						rgb_hex(winkc);
-					}
-					else
-					{
-						light = 1;
-						rgb_hex(0);
-					}
-					winks++;
-				}
-				if (winks == 5)
-				{
-					winks = 0;
-					state = APP_NOTHING;
-				}
-				break;
+//			case APP_WINK:
+//				// Do wink pattern for USB HID wink request
+//				rgb_hex(winkc);
+//				light = 1;
+//				ms_wink = get_ms();
+//				state = _APP_WINK;
+//				break;
+//			case _APP_WINK:
+//
+//				if (ms_since(ms_wink,150))
+//				{
+//					if (light)
+//					{
+//						light = 0;
+//						rgb_hex(winkc);
+//					}
+//					else
+//					{
+//						light = 1;
+//						rgb_hex(0);
+//					}
+//					winks++;
+//				}
+//				if (winks == 5)
+//				{
+//					winks = 0;
+//					state = APP_NOTHING;
+//				}
+//				break;
 		}
 
 		if (error)

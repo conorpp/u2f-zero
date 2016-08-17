@@ -153,6 +153,7 @@ extern void set_app_error(uint8_t ec);
 
 // Call from main loop to ensure stale channels get timeout error.
 void u2f_hid_check_timeouts();
+void u2f_print_hid_check_timeouts();
 
 #define U2FHID_IS_INIT(cmd)			((cmd) & 0x80)
 

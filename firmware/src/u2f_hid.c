@@ -80,7 +80,7 @@ static struct hid_layer_param
 	// total length of response in bytes
 	uint16_t res_len;
 
-	#define BUFFER_SIZE 270
+	#define BUFFER_SIZE 210
 	uint8_t buffer[BUFFER_SIZE];
 
 } hid_layer;
@@ -320,7 +320,6 @@ static uint8_t hid_u2f_parse(struct u2f_hid_msg* req)
 			{
 				if (hid_layer.current_cid == 0)
 				{
-					u2f_prints("out of cid's\r\n");
 					set_app_error(ERROR_OUT_OF_CIDS);
 					goto fail;
 				}
@@ -336,7 +335,6 @@ static uint8_t hid_u2f_parse(struct u2f_hid_msg* req)
 			init_res->version_build = 0;
 			init_res->cflags = CAPABILITY_WINK | CAPABILITY_LOCK;
 
-			u2f_printlx("replied to cid ",1,hid_layer.current_cid);
 			// write back the same data nonce
 			u2f_hid_writeback(req->pkt.init.payload, 8);
 			u2f_hid_writeback((uint8_t *)init_res, 9);
@@ -345,7 +343,6 @@ static uint8_t hid_u2f_parse(struct u2f_hid_msg* req)
 			hid_layer.current_cid = init_res->cid;
 
 
-			u2f_printlx("init'd to cid ",1,hid_layer.current_cid);
 
 			break;
 		case U2FHID_MSG:
@@ -353,7 +350,6 @@ static uint8_t hid_u2f_parse(struct u2f_hid_msg* req)
 			if (U2FHID_LEN(req) < 4)
 			{
 				stamp_error(hid_layer.current_cid, ERR_INVALID_LEN);
-				u2f_prints("invalid len msg\r\n");
 				goto fail;
 			}
 			// buffer 2 payloads (120 bytes) to get full U2F message
@@ -382,7 +378,6 @@ static uint8_t hid_u2f_parse(struct u2f_hid_msg* req)
 			break;
 		case U2FHID_PING:
 
-			u2f_prints("PING\r\n");
 
 			if (hid_layer.bytes_buffered == 0)
 			{
@@ -391,7 +386,6 @@ static uint8_t hid_u2f_parse(struct u2f_hid_msg* req)
 				if (hid_layer.bytes_buffered >= U2FHID_LEN(req))
 				{
 					u2f_hid_writeback(hid_layer.buffer,hid_layer.bytes_buffered);
-					u2f_printd("PING DONE ",1,hid_layer.bytes_buffered + hid_layer.bytes_written);
 					u2f_hid_flush();
 				}
 				else
@@ -405,7 +399,6 @@ static uint8_t hid_u2f_parse(struct u2f_hid_msg* req)
 				{
 					u2f_hid_writeback(hid_layer.buffer,hid_layer.bytes_buffered);
 					hid_layer.bytes_buffered = 0;
-					u2f_prints("PING WB\r\n");
 
 				}
 
@@ -413,7 +406,6 @@ static uint8_t hid_u2f_parse(struct u2f_hid_msg* req)
 				if (hid_layer.bytes_buffered + hid_layer.bytes_written >= hid_layer.req_len)
 				{
 					u2f_hid_writeback(hid_layer.buffer,hid_layer.bytes_buffered);
-					u2f_printd("PING D0N3 ",1,hid_layer.bytes_buffered + hid_layer.bytes_written);
 					u2f_hid_flush();
 				}
 				else
@@ -552,7 +544,6 @@ void u2f_hid_request(struct u2f_hid_msg* req)
 		cid = get_cid(req->cid);
 		if (cid == NULL)
 		{
-			u2f_prints("out of cids\r\n");
 			return;
 		}
 		cid->busy = 0;
@@ -560,7 +551,6 @@ void u2f_hid_request(struct u2f_hid_msg* req)
 	else if (cid == NULL)
 	{
 		// ignore random cont packets
-		u2f_prints("ignoring random cont\r\n");
 		return;
 	}
 
@@ -599,7 +589,6 @@ void u2f_hid_request(struct u2f_hid_msg* req)
 
 	if ((req->pkt.init.cmd & TYPE_INIT) && !cid->busy)
 	{
-		u2f_prints("type init\r\n");
 		cid->last_cmd = req->pkt.init.cmd;
 		hid_layer.current_cmd = req->pkt.init.cmd;
 		last_seq = -1;
@@ -615,7 +604,6 @@ void u2f_hid_request(struct u2f_hid_msg* req)
 		{
 			stamp_error(hid_layer.current_cid, ERR_INVALID_SEQ);
 			u2f_hid_reset_packet();
-			u2f_prints("invalid seq!\r\n");
 			return;
 		}
 		last_seq = req->pkt.cont.seq;

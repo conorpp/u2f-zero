@@ -39,13 +39,17 @@
 // application settings
 #define U2F_ATTESTATION_KEY_SLOT	15
 //#define ATECC_SETUP_DEVICE
-#define U2F_PRINT
+//#define U2F_PRINT
 //#define U2F_BLINK_ERRORS
 
 // efm8ub1 application eeprom memory mappings
 #define U2F_KEY_HEADER_ADDR		0xF800
-#define U2F_EEPROM_CONFIG		(0xF800 + 128)
-#define U2F_APP_CONFIG			(0xF800 + 256)
+#define U2F_EEPROM_CONFIG		(U2F_KEY_HEADER_ADDR + 128)
+#define U2F_EEPROM_APP_IDS		(U2F_EEPROM_CONFIG + 64)
+
+#if ((U2F_ATTESTATION_KEY_SLOT * 32) > 768)
+#error "not enough eeprom"
+#endif
 
 //								{blue(0), green(0x5a), red(0)}
 #define U2F_DEFAULT_BRIGHTNESS					90

@@ -59,6 +59,7 @@
 
 // U2F Authenticate
 #define U2F_AUTHENTICATE_CHECK				0x7
+#define U2F_AUTHENTICATE_SIGN				0x3
 
 
 // Command status responses
@@ -66,6 +67,9 @@
 #define U2F_SW_WRONG_DATA                   0x6984
 #define U2F_SW_CONDITIONS_NOT_SATISFIED     0x6985
 #define U2F_SW_INS_NOT_SUPPORTED            0x6d00
+#define U2F_SW_WRONG_LENGTH            		0x6700
+#define U2F_SW_CLASS_NOT_SUPPORTED          0x6E00
+#define U2F_SW_WRONG_PAYLOAD	            0x6a80
 
 struct u2f_request_apdu
 {
@@ -153,11 +157,19 @@ extern void u2f_sha256_finish();
 //  @return -1 for failure, 0 for success
 extern int8_t u2f_ecdsa_sign(uint8_t * dest, uint8_t * handle);
 
+
 // u2f_new_keypair callback to get a new key handle
 //  @handle location to write the key handle (should be U2F_KEY_HANDLE_SIZE bytes long)
+//  @appid the new application ID to store persistently and associate with key pair. 32 bytes.
 //  @pubkey location to write the public key R & S (64 bytes)
 //  @return -1 for failure, 0 for success
-extern int8_t u2f_new_keypair(uint8_t * handle, uint8_t * pubkey);
+int8_t u2f_new_keypair(uint8_t * handle, uint8_t * appid, uint8_t * pubkey);
+
+// u2f_appid_eq must check if app id is equal to app id associated with key pair handle
+/// @handle the handle for the key pair
+/// @appid the 32 byte app id to check against
+/// @return non-zero not equal, 0 equal
+int8_t u2f_appid_eq(uint8_t * handle, uint8_t * appid);
 
 // u2f_load_key Load a key into memory or check to see that the handle exists
 //  @handle the key handle to check

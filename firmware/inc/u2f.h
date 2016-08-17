@@ -70,6 +70,7 @@
 #define U2F_SW_WRONG_LENGTH            		0x6700
 #define U2F_SW_CLASS_NOT_SUPPORTED          0x6E00
 #define U2F_SW_WRONG_PAYLOAD	            0x6a80
+#define U2F_SW_INSUFFICIENT_MEMORY          0x9210
 
 // Delay in milliseconds to wait for user input
 #define U2F_MS_USER_INPUT_WAIT				4850

@@ -213,7 +213,7 @@ static int16_t u2f_register(struct u2f_register_request * req)
     if ( u2f_new_keypair(key_handle, req->app, pubkey) == -1)
     {
     	u2f_hid_set_len(2);
-    	return U2F_SW_CONDITIONS_NOT_SATISFIED;
+    	return U2F_SW_INSUFFICIENT_MEMORY;
     }
 
     u2f_sha256_start();

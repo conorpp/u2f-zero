@@ -219,7 +219,7 @@ int8_t u2f_get_user_feedback()
 		{	// yellow
 			rgb_hex(U2F_DEFAULT_COLOR_INPUT);
 		}
-		if (get_ms() - t > 4000)
+		if (get_ms() - t > U2F_MS_USER_INPUT_WAIT)
 			break;
 		watchdog();
 	}

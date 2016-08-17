@@ -80,7 +80,7 @@ static struct hid_layer_param
 	// total length of response in bytes
 	uint16_t res_len;
 
-	#define BUFFER_SIZE 210
+	#define BUFFER_SIZE 270
 	uint8_t buffer[BUFFER_SIZE];
 
 } hid_layer;
@@ -472,10 +472,8 @@ void u2f_hid_check_timeouts()
 	uint8_t i;
 	for(i = 0; i < CID_MAX; i++)
 	{
-		if (CIDS[i].busy && ((get_ms() - CIDS[i].last_used) >= 500))
+		if (CIDS[i].busy && ((get_ms() - CIDS[i].last_used) >= 750))
 		{
-
-
 			u2f_printlx("timeout cid ",2,CIDS[i].cid,get_ms());
 			stamp_error(CIDS[i].cid, ERR_MSG_TIMEOUT);
 			del_cid(CIDS[i].cid);
@@ -488,13 +486,9 @@ void u2f_hid_check_timeouts()
 
 void u2f_hid_request(struct u2f_hid_msg* req)
 {
-	uint8_t* payload;
 	static int8_t last_seq;
 	struct CID* cid = NULL;
 
-	restart:
-
-	payload = req->pkt.init.payload;
 	cid = get_cid(req->cid);
 
 	// Error checking
@@ -511,15 +505,12 @@ void u2f_hid_request(struct u2f_hid_msg* req)
 			return;
 		}
 	}
-	else
+	else if (cid == NULL || !cid->busy)
 	{
-		// do i need this?..
-		if (U2FHID_LEN(req) <= U2FHID_INIT_PAYLOAD_SIZE)
-		{
-			return;
-		}
-
+		// ignore random cont packets
+		return;
 	}
+
 	if (!req->cid)
 	{
 		stamp_error(req->cid, ERR_SYNC_FAIL);
@@ -548,11 +539,7 @@ void u2f_hid_request(struct u2f_hid_msg* req)
 		}
 		cid->busy = 0;
 	}
-	else if (cid == NULL)
-	{
-		// ignore random cont packets
-		return;
-	}
+
 
 
 
@@ -561,20 +548,11 @@ void u2f_hid_request(struct u2f_hid_msg* req)
 	{
 		cid->busy = 0;
 	}
-	else
-	{
-
-	}
-
-	u2f_printlx("got cid ",1,req->cid);
 
 	hid_layer.current_cid = req->cid;
 	hid_layer.last_buffered = get_ms();
 
-
 	cid->last_used = get_ms();
-
-
 
 
 	// ignore if we locked to a different cid
@@ -614,69 +592,6 @@ void u2f_hid_request(struct u2f_hid_msg* req)
 
 	cid->busy = hid_u2f_parse(req);
 
-
-
-//	hid_layer.state = (u2f_hid_busy()) ? HID_BUSY : HID_READY;
-//
-//	switch(hid_layer.state)
-//	{
-//		case HID_READY:
-//			if (req->pkt.init.cmd & TYPE_INIT)
-//			{
-//				if (U2FHID_LEN(req) > U2FHID_MAX_PAYLOAD_SIZE)
-//				{
-//					//u2f_prints("length too big\r\n");
-//					stamp_error(req->cid, ERR_INVALID_LEN);
-//					return;
-//				}
-//				u2f_hid_reset_packet();
-//				hid_layer.current_cid = req->cid;
-//				hid_layer.current_cmd = req->pkt.init.cmd;
-//				hid_layer.last_buffered = get_ms();
-//				last_seq = -1;
-//
-//			}
-//			break;
-//		case HID_BUSY:
-//
-//
-//
-//
-//			// buffer long requests
-//			if (req->cid == hid_layer.current_cid)
-//			{
-//				if (req->pkt.init.cmd & TYPE_INIT)
-//				{
-//					u2f_hid_reset_packet();
-//					goto restart;
-//				}
-//
-//
-//
-//
-//
-//			}
-////			else if (U2FHID_TIMEOUT(&hid_layer))
-////			{
-////				// return timeout error for old channel and run again for new channel
-////				//u2f_prints("timeout, switching\r\n");
-////				hid_layer.state = HID_READY;
-////				u2f_hid_reset_packet();
-////				stamp_error(hid_layer.current_cid, ERR_MSG_TIMEOUT);
-////				goto restart;
-////			}
-//			else
-//			{
-//				// Current application may not be interrupted
-//				stamp_error(req->cid, ERR_CHANNEL_BUSY);
-//				return;
-//			}
-//			break;
-//
-//	}
-
-//	hid_u2f_parse(req);
-//	return;
 }
 
 #endif

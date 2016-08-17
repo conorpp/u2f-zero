@@ -52,9 +52,6 @@ void u2f_request(struct u2f_request_apdu * req)
     uint16_t * rcode = (uint16_t *)req;
     uint32_t len = ((req->LC3) | ((uint32_t)req->LC2 << 8) | ((uint32_t)req->LC1 << 16));
 
-    u2f_printlx("len:",1,len);
-    dump_hex(req,20);
-
     u2f_response_start();
 
     if (req->cla != 0)

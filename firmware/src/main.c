@@ -140,8 +140,6 @@ void rgb(uint8_t r, uint8_t g, uint8_t b)
 
 int16_t main(void) {
 
-	uint32_t testd;
-	uint16_t eaddr;
 	uint16_t ms_heart;
 	uint16_t ms_wink;
 	uint16_t ms_grad;
@@ -174,19 +172,6 @@ int16_t main(void) {
 	atecc_setup_init(appdata.tmp);
 
 	rgb_hex(0);
-
-	dump_hex(0xf800);
-
-	// void eeprom_read(uint16_t addr, uint8_t * buf, uint8_t len);
-	for(eaddr = 0xf800; eaddr < 0xfbbf+1; eaddr+=4)
-	{
-		eeprom_read(eaddr, &testd, 4);
-		u2f_putx((uint32_t) *((uint8_t*)&testd));
-		u2f_putx((uint32_t) *((uint8_t*)&testd+1));
-		u2f_putx((uint32_t) *((uint8_t*)&testd+2));
-		u2f_putx((uint32_t) *((uint8_t*)&testd+3));
-
-	}
 
 	while (1) {
 
@@ -232,11 +217,11 @@ int16_t main(void) {
 				break;
 			case APP_HID_MSG:
 				// HID msg received, pass to protocols
-//				if (custom_command(hid_msg))
-//				{
-//
-//				}
-//				else
+				if (custom_command(hid_msg))
+				{
+
+				}
+				else
 				{
 					u2f_hid_request(hid_msg);
 				}
@@ -244,35 +229,35 @@ int16_t main(void) {
 				if (state == APP_HID_MSG)
 					state = APP_NOTHING;
 				break;
-//			case APP_WINK:
-//				// Do wink pattern for USB HID wink request
-//				rgb_hex(winkc);
-//				light = 1;
-//				ms_wink = get_ms();
-//				state = _APP_WINK;
-//				break;
-//			case _APP_WINK:
-//
-//				if (ms_since(ms_wink,150))
-//				{
-//					if (light)
-//					{
-//						light = 0;
-//						rgb_hex(winkc);
-//					}
-//					else
-//					{
-//						light = 1;
-//						rgb_hex(0);
-//					}
-//					winks++;
-//				}
-//				if (winks == 5)
-//				{
-//					winks = 0;
-//					state = APP_NOTHING;
-//				}
-//				break;
+			case APP_WINK:
+				// Do wink pattern for USB HID wink request
+				rgb_hex(winkc);
+				light = 1;
+				ms_wink = get_ms();
+				state = _APP_WINK;
+				break;
+			case _APP_WINK:
+
+				if (ms_since(ms_wink,150))
+				{
+					if (light)
+					{
+						light = 0;
+						rgb_hex(winkc);
+					}
+					else
+					{
+						light = 1;
+						rgb_hex(0);
+					}
+					winks++;
+				}
+				if (winks == 5)
+				{
+					winks = 0;
+					state = APP_NOTHING;
+				}
+				break;
 		}
 
 		if (error)

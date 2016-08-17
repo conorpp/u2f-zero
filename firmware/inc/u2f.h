@@ -71,6 +71,9 @@
 #define U2F_SW_CLASS_NOT_SUPPORTED          0x6E00
 #define U2F_SW_WRONG_PAYLOAD	            0x6a80
 
+// Delay in milliseconds to wait for user input
+#define U2F_MS_USER_INPUT_WAIT				4850
+
 struct u2f_request_apdu
 {
     uint8_t cla;

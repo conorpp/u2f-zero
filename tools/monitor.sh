@@ -11,6 +11,10 @@ export setup=setup_device.sh
 export starting_SN=CAFEBABE00000000
 setup_SNs=(0 CAFEBABEFFFFFFF0 CAFEBABEFFFFFFF1 CAFEBABEFFFFFFF2)
 
+if [[ -n "$1" ]] ; then
+    starting_SN=$((0x$starting_SN + $1))
+fi
+
 function inc_hex {
     a=$((0x$1 + 1))
     a=$(printf "%x\n" $a)
@@ -29,6 +33,13 @@ function is_running {
     pwd
     echo "$sn still running"
     return 0
+
+}
+
+function remove_lock {
+
+    sn=$1
+    touch workers/$sn/worker/.finished 
 
 }
 
@@ -91,6 +102,8 @@ echo $starting_SN
 
 #exit 0
 
+c_stack=(0 0 0 0)
+
 for (( ; ; ))
 do
 
@@ -102,6 +115,31 @@ do
         continue
 
     fi
+    
+    # 3 element queue
+    c_stack+=($j)
+    c_stack=("${c_stack[@]:1}")
+
+    if [[ "${c_stack[1]}" -eq "${c_stack[2]}" ]] ; then
+
+        if [[ "${c_stack[2]}" -eq "${c_stack[3]}" ]] ; then
+
+            # if entered 3 times in a row, remove lock
+            remove_lock ${adapters[$j]}
+            c_stack=(0 0 0 0)
+            echo
+            echo
+            echo "restarting $j: ${adapters[$j]}"
+            echo
+            echo
+
+        fi
+
+    fi
+
+    jobs
+
+
 
     is_running ${adapters[$j]}
 

@@ -158,6 +158,7 @@ void u2f_config_request();
 #define u2f_hid_set_len(x)
 #define u2f_hid_flush(x)
 #define u2f_hid_writeback(x)
+#define u2f_hid_check_timeouts(x)
 #define u2f_wipe_keys(x)	1
 
 #else

@@ -149,7 +149,14 @@ static int16_t u2f_authenticate(struct u2f_authenticate_request * req, uint8_t c
 	if (control == U2F_AUTHENTICATE_CHECK)
 	{
 		u2f_hid_set_len(2);
-		return U2F_SW_CONDITIONS_NOT_SATISFIED;
+		if (u2f_load_key(req->kh) == 0 && u2f_appid_eq(req->kh, req->app) == 0)
+		{
+			return U2F_SW_CONDITIONS_NOT_SATISFIED;
+		}
+		else
+		{
+			return U2F_SW_WRONG_DATA;
+		}
 	}
 	if 		(
 			control != U2F_AUTHENTICATE_SIGN ||

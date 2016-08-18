@@ -193,9 +193,9 @@ int16_t main(void) {
 		{
 			case APP_NOTHING:
 				// Flash gradient on LED
-				if (ms_since(ms_grad, 110))
+				if (ms_since(ms_grad, 150))
 				{
-					if (light == 19)
+					if (light == 16)
 					{
 						grad_dir = 0;
 					}

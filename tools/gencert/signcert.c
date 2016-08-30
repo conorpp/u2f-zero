@@ -26,10 +26,11 @@
 int generate_cert(EVP_PKEY * signer, EVP_PKEY * pubkey, X509 ** outcert)
 {
     int ret;
-    X509 * x509;
-    X509_NAME * name;
+    X509 * x509, * x509_issuer;
+    X509_NAME * name, * issuer_name;
 
     x509 = X509_new();
+    x509_issuer = X509_new();
 
 
     if (!ASN1_INTEGER_set(X509_get_serialNumber(x509), 1))
@@ -44,13 +45,23 @@ int generate_cert(EVP_PKEY * signer, EVP_PKEY * pubkey, X509 ** outcert)
     
     name = X509_get_subject_name(x509);
     X509_NAME_add_entry_by_txt(name, "C",  MBSTRING_ASC,
-            (unsigned char *)"VA", -1, -1, 0);
+            (unsigned char *)"US", -1, -1, 0);
     X509_NAME_add_entry_by_txt(name, "O",  MBSTRING_ASC,
-            (unsigned char *)"ConorCo LLC", -1, -1, 0);
+            (unsigned char *)"U2F Zero", -1, -1, 0);
     X509_NAME_add_entry_by_txt(name, "CN", MBSTRING_ASC,
             (unsigned char *)"u2fzero.com", -1, -1, 0);
+    
+    issuer_name = X509_get_subject_name(x509_issuer);
+    X509_NAME_add_entry_by_txt(issuer_name, "C",  MBSTRING_ASC,
+            (unsigned char *)"US", -1, -1, 0);
+    X509_NAME_add_entry_by_txt(issuer_name, "ST",  MBSTRING_ASC,
+    X509_NAME_add_entry_by_txt(issuer_name, "L",  MBSTRING_ASC,
+    X509_NAME_add_entry_by_txt(issuer_name, "O",  MBSTRING_ASC,
+    X509_NAME_add_entry_by_txt(issuer_name, "OU",  MBSTRING_ASC,
+    X509_NAME_add_entry_by_txt(issuer_name, "CN", MBSTRING_ASC,
+ 
 
-    if (!X509_set_issuer_name(x509, name))
+    if (!X509_set_issuer_name(x509, issuer_name))
     {   return 0;  }
 
     if (!X509_sign(x509, signer, EVP_sha256()))

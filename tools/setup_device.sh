@@ -109,6 +109,7 @@ done
 [[ "$?" -ne "0" ]] && exit 1
 
 echo "waiting to unplug"
+sleep 0.2
 
 while [[ "$?" -eq 0 ]] ; do
 

@@ -55,10 +55,15 @@ int generate_cert(EVP_PKEY * signer, EVP_PKEY * pubkey, X509 ** outcert)
     X509_NAME_add_entry_by_txt(issuer_name, "C",  MBSTRING_ASC,
             (unsigned char *)"US", -1, -1, 0);
     X509_NAME_add_entry_by_txt(issuer_name, "ST",  MBSTRING_ASC,
+            (unsigned char *)"Some state", -1, -1, 0);
     X509_NAME_add_entry_by_txt(issuer_name, "L",  MBSTRING_ASC,
+            (unsigned char *)"Some city", -1, -1, 0);
     X509_NAME_add_entry_by_txt(issuer_name, "O",  MBSTRING_ASC,
+            (unsigned char *)"Some company", -1, -1, 0);
     X509_NAME_add_entry_by_txt(issuer_name, "OU",  MBSTRING_ASC,
+            (unsigned char *)"Some department", -1, -1, 0);
     X509_NAME_add_entry_by_txt(issuer_name, "CN", MBSTRING_ASC,
+            (unsigned char *)"conorpp.com", -1, -1, 0);
  
 
     if (!X509_set_issuer_name(x509, issuer_name))

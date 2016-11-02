@@ -169,7 +169,7 @@ def do_configure(h,output):
     print( 'crc is ', [hex(x) for x in crc])
     h.write([0,commands.U2F_CONFIG_LOCK] + crc)
     data = read_n_tries(h,5,64,1000)
-    
+
     if data[1] == 1:
         print( 'locked eeprom with crc ',crc)
     else:
@@ -228,7 +228,7 @@ def do_seed(h):
 def do_wipe(h):
     cmd = cmd_prefix + [ commands.U2F_CUSTOM_WIPE, 0,0]
     h.write(cmd)
-    print( 'Press U2F button until the LED is no longer red.')
+    print( 'Press U2F button repeatedly until the LED is no longer red.')
     res = None
     while not res:
         res = h.read(64, 10000)
@@ -236,7 +236,7 @@ def do_wipe(h):
         print( 'Wipe failed')
     else:
         print( 'Wipe succeeded')
-        
+
 
     h.close()
 

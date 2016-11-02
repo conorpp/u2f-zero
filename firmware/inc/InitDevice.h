@@ -21,6 +21,7 @@ extern void VREG_0_enter_DefaultMode_from_RESET(void);
 extern void PORTS_0_enter_DefaultMode_from_RESET(void);
 extern void PORTS_1_enter_DefaultMode_from_RESET(void);
 extern void PBCFG_0_enter_DefaultMode_from_RESET(void);
+extern void HFOSC_0_enter_DefaultMode_from_RESET(void);
 extern void CIP51_0_enter_DefaultMode_from_RESET(void);
 extern void CLOCK_0_enter_DefaultMode_from_RESET(void);
 extern void TIMER01_0_enter_DefaultMode_from_RESET(void);

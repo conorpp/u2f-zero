@@ -126,8 +126,9 @@ SI_SEGMENT_VARIABLE(configDesc[],
 #define LANG_STRING   htole16( SLAB_USB_LANGUAGE )
 #define MFR_STRING                             "Silicon Labs"
 #define PROD_STRING                            "U2F Zero"
-#define SER_STRING                             "0123456789ABCDEF"
-#define INT0_STRING                            "HID Keyboard"
+#define SER_STRING 							   "CAFEBABEFFFFFFFF"
+#define INT0_STRING                            "U2F Zero"
+
 
 LANGID_STATIC_CONST_STRING_DESC( langDesc[], LANG_STRING );
 UTF16LE_PACKED_STATIC_CONST_STRING_DESC( mfrDesc[], MFR_STRING );

@@ -86,6 +86,31 @@ static void flush_key_store()
 	eeprom_write(U2F_EEPROM_CONFIG, (uint8_t* )&key_store, sizeof(struct key_storage_header));
 }
 
+static void new_app_id(uint8_t slot, uint8_t * appid)
+{
+	// (slot * 32) & ~0x1f
+	eeprom_read(U2F_EEPROM_APP_IDS + ((slot << 5) & 0x1f), appdata.tmp, 64);
+	eeprom_erase(U2F_EEPROM_APP_IDS + (slot << 5));
+	eeprom_write(U2F_EEPROM_APP_IDS + (slot << 5), appid, 32);
+	if (slot & 1)
+	{
+		// restore even aligned id
+		eeprom_write(U2F_EEPROM_APP_IDS + (slot << 5) - 32, appdata.tmp, 32);
+	}
+	else
+	{
+		// restore odd aligned id
+		eeprom_write(U2F_EEPROM_APP_IDS + (slot << 5) + 32, appdata.tmp + 32, 32);
+	}
+}
+
+int8_t u2f_appid_eq(uint8_t * handle, uint8_t * appid)
+{
+	uint8_t slot = ((struct key_handle *)handle)->index - 1;
+	eeprom_read(U2F_EEPROM_APP_IDS + (slot << 5), appdata.tmp, 32);
+	return memcmp(appdata.tmp, appid, 32);
+}
+
 int8_t u2f_wipe_keys()
 {
 	uint8_t presses = 5;
@@ -194,7 +219,7 @@ int8_t u2f_get_user_feedback()
 		{	// yellow
 			rgb_hex(U2F_DEFAULT_COLOR_INPUT);
 		}
-		if (get_ms() - t > 10000)
+		if (get_ms() - t > U2F_MS_USER_INPUT_WAIT)
 			break;
 		watchdog();
 	}
@@ -290,7 +315,7 @@ int8_t u2f_ecdsa_sign(uint8_t * dest, uint8_t * handle)
 }
 
 // bad if this gets interrupted
-int8_t u2f_new_keypair(uint8_t * handle, uint8_t * pubkey)
+int8_t u2f_new_keypair(uint8_t * handle, uint8_t * appid, uint8_t * pubkey)
 {
 	struct atecc_response res;
 	struct key_handle k;
@@ -317,6 +342,7 @@ int8_t u2f_new_keypair(uint8_t * handle, uint8_t * pubkey)
 	memmove(handle, &k, U2F_KEY_HANDLE_SIZE);
 	key_store.num_issued++;
 	flush_key_store();
+	new_app_id(keyslot, appid);
 
 	return 0;
 }

@@ -63,7 +63,9 @@ pubkey.c.txt
 *.__i
 *.__ia
 release/
+workers/
 *~
+*.DS_Store
 
 # hardware
 *.gbr

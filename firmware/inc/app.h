@@ -39,22 +39,27 @@
 // application settings
 #define U2F_ATTESTATION_KEY_SLOT	15
 //#define ATECC_SETUP_DEVICE
-#define U2F_PRINT
+//#define U2F_PRINT
+//#define U2F_BLINK_ERRORS
 
 // efm8ub1 application eeprom memory mappings
 #define U2F_KEY_HEADER_ADDR		0xF800
-#define U2F_EEPROM_CONFIG		(0xF800 + 128)
-#define U2F_APP_CONFIG			(0xF800 + 256)
+#define U2F_EEPROM_CONFIG		(U2F_KEY_HEADER_ADDR + 128)
+#define U2F_EEPROM_APP_IDS		(U2F_EEPROM_CONFIG + 64)
+
+#if ((U2F_ATTESTATION_KEY_SLOT * 32) > 768)
+#error "not enough eeprom"
+#endif
 
 //								{blue(0), green(0x5a), red(0)}
 #define U2F_DEFAULT_BRIGHTNESS					90
-#define U2F_COLOR 								0x005a00
-#define U2F_DEFAULT_COLOR_PRIME 				0x5a0000
-#define U2F_DEFAULT_COLOR_ERROR 				0x0000c8
-#define U2F_DEFAULT_COLOR_INPUT 				0x008080
-#define U2F_DEFAULT_COLOR_INPUT_SUCCESS			0x809600
-#define U2F_COLOR_WINK 							0x960000
-#define U2F_DEFAULT_COLOR_WINK_OUT_OF_SPACE 	0x0f0f96
+#define U2F_COLOR 								0x001300
+#define U2F_DEFAULT_COLOR_PRIME 				0x130000
+#define U2F_DEFAULT_COLOR_ERROR 				0x000038
+#define U2F_DEFAULT_COLOR_INPUT 				0x000603
+#define U2F_DEFAULT_COLOR_INPUT_SUCCESS			0x251200
+#define U2F_COLOR_WINK 							0x120000
+#define U2F_DEFAULT_COLOR_WINK_OUT_OF_SPACE 	0x030312
 
 #define U2F_DEFAULT_COLOR_PERIOD				20
 
@@ -128,7 +133,7 @@ uint8_t get_app_state();
 void set_app_state(APP_STATE s);
 
 void rgb(uint8_t r, uint8_t g, uint8_t b);
-#define rgb_hex(c) (rgb((c),(c)>>8,(c)>>16))
+#define rgb_hex(c) (rgb((c)&0xff,((c)>>8)&0xff,((c)>>16)&0xff))
 
 void app_wink(uint32_t color);
 
@@ -153,6 +158,7 @@ void u2f_config_request();
 #define u2f_hid_set_len(x)
 #define u2f_hid_flush(x)
 #define u2f_hid_writeback(x)
+#define u2f_hid_check_timeouts(x)
 #define u2f_wipe_keys(x)	1
 
 #else

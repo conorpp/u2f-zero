@@ -60,32 +60,41 @@ class commands:
     U2F_CUSTOM_RNG = 0x21
     U2F_CUSTOM_SEED = 0x22
     U2F_CUSTOM_WIPE = 0x23
+    U2F_CUSTOM_WINK = 0x24
 
-    U2F_CUSTOM_PULSE = 0x24
-    U2F_CUSTOM_IDLE_COLOR = 0x25
-    U2F_CUSTOM_IDLE_COLORP = 0x26
 
-if len(sys.argv) not in [2,3,4]:
-    print('usage: %s <action> [<arguments>]' % sys.argv[0])
+if len(sys.argv) not in [2,3,4,5,6]:
+    print('usage: %s <action> [<arguments>] [-s serial-number]' % sys.argv[0])
     print('actions: ')
     print('     configure <output-file>: setup the device configuration.  must specify pubkey output.')
     print('     rng: Continuously dump random numbers from the devices hardware RNG.')
     print('     seed: update the hardware RNG seed with input from stdin')
     print('     wipe: wipe all registered keys on U2F Zero.  Must also press button 5 times.  Not reversible.')
+    print('     list: list all connected U2F Zero tokens.')
+    print('     wink: blink the LED')
     sys.exit(1)
 
-def open_u2f():
+def open_u2f(SN=None):
     h = hid.device()
     try:
-        h.open(0x10c4,0x8acf)
+        h.open(0x10c4,0x8acf,SN if SN is None else unicode(SN))
+        print('opened ', SN)
     except IOError as ex:
-        try:
-            h.open(0x10c4,0x8acf)
-        except:
-            print( ex)
-            print( 'U2F Zero not found')
-            sys.exit(1)
+        print( ex)
+        if SN is None: print( 'U2F Zero not found')
+        else: print ('U2F Zero %s not found' % SN)
+        sys.exit(1)
     return h
+
+
+def do_list():
+    for d in hid.enumerate(0x10c4, 0x8acf):
+        keys = d.keys()
+        keys.sort()
+        for key in keys:
+            print("%s : %s" % (key, d[key]))
+    print('')
+
 
 def die(msg):
     print( msg)
@@ -191,6 +200,7 @@ def do_rng(h):
             else:
                 data = array.array('B',rng[6+1:6+1+32]).tostring()
                 sys.stdout.write(data)
+                sys.stdout.flush()
 
 def do_seed(h):
     cmd = cmd_prefix + [ commands.U2F_CUSTOM_SEED, 0,20]
@@ -234,58 +244,50 @@ def hexcode2bytes(color):
     h = [ord(x) for x in color.replace('#','').decode('hex')]
     return h
 
-def set_idle_color(h,color):
-    cmd = cmd_prefix + [ commands.U2F_CUSTOM_IDLE_COLOR, 0,4,0]
-    h.write(cmd + hexcode2bytes(color) + [0])
-    res = h.read(64, 10000)
+def do_wink(h):
+    cmd = cmd_prefix + [ commands.U2F_CUSTOM_WINK, 0,0]
+    h.write(cmd)
 
-    if res[7] != 1:
-        print('Set color failed')
 
-    h.close()
-
-def set_button_color(h,color):
-    cmd = cmd_prefix + [ commands.U2F_CUSTOM_IDLE_COLORP, 0,4,0]
-    h.write(cmd + hexcode2bytes(color))
-    res = h.read(64, 10000)
-
-    if res[7] != 1:
-        print('Set color failed')
-
-    h.close()
-
-def set_led_pulse(h,s):
-    cmd = cmd_prefix + [ commands.U2F_CUSTOM_PULSE, 0,2]
-
-    ms = int(s)
-
-    h.write(cmd + [ms>>8,ms])
-
-    res = h.read(64, 10000)
-
-    if res[7] != 1:
-        print('Set color failed')
-
-    h.close()
 
 
 if __name__ == '__main__':
     action = sys.argv[1].lower()
-    h = open_u2f()
+    h = None
+    SN = None
+    if '-s' in sys.argv:
+        if sys.argv.index('-s') + 1 > len(sys.argv):
+            print('need serial number')
+            sys.exit(1)
+        SN = sys.argv[sys.argv.index('-s') + 1]
+
     if action == 'configure':
-        if len(sys.argv) != 3:
+        h = open_u2f(SN)
+        if len(sys.argv) not in [3,5]:
             print( 'error: need output file')
             h.close()
             sys.exit(1)
         do_configure(h, sys.argv[2])
     elif action == 'rng':
+        h = open_u2f(SN)
         do_rng(h)
     elif action == 'seed':
+        h = open_u2f(SN)
         do_seed(h)
     elif action == 'wipe':
+        h = open_u2f(SN)
         do_wipe(h)
+    elif action == 'list':
+        do_list()
+    elif action == 'wink':
+        h = open_u2f(SN)
+        do_wink(h)
     else:
         print( 'error: invalid action: ', action)
-        h.close()
         sys.exit(1)
-    h.close()
+
+    if h is not None: h.close()
+
+
+
+

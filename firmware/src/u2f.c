@@ -50,25 +50,55 @@ static int16_t u2f_authenticate(struct u2f_authenticate_request * req, uint8_t c
 void u2f_request(struct u2f_request_apdu * req)
 {
     uint16_t * rcode = (uint16_t *)req;
+    uint32_t len = ((req->LC3) | ((uint32_t)req->LC2 << 8) | ((uint32_t)req->LC1 << 16));
+
     u2f_response_start();
+
+    if (req->cla != 0)
+    {
+    	u2f_hid_set_len(2);
+    	*rcode = U2F_SW_CLASS_NOT_SUPPORTED;
+    	goto end;
+    }
+
     switch(req->ins)
     {
         case U2F_REGISTER:
-            *rcode = u2f_register((struct u2f_register_request*)req->payload);
+        	if (len != 64)
+        	{
+            	u2f_hid_set_len(2);
+            	*rcode = U2F_SW_WRONG_LENGTH;
+        	}
+        	else
+        	{
+        		*rcode = u2f_register((struct u2f_register_request*)req->payload);
+        	}
             break;
         case U2F_AUTHENTICATE:
         	 *rcode = u2f_authenticate((struct u2f_authenticate_request*)req->payload, req->p1);
         	break;
         case U2F_VERSION:
-        	*rcode =u2f_version();
+        	if (len)
+        	{
+            	u2f_hid_set_len(2);
+            	*rcode = U2F_SW_WRONG_LENGTH;
+        	}
+        	else
+        	{
+        		*rcode = u2f_version();
+        	}
         	break;
         case U2F_VENDOR_FIRST:
-        	break;
         case U2F_VENDOR_LAST:
+        	*rcode = U2F_SW_NO_ERROR;
         	break;
         default:
+        	u2f_hid_set_len(2);
+        	*rcode = U2F_SW_INS_NOT_SUPPORTED;
         	break;
     }
+
+    end:
     u2f_response_writeback((uint8_t*)rcode,2);
     u2f_response_flush();
 }
@@ -115,16 +145,31 @@ static int16_t u2f_authenticate(struct u2f_authenticate_request * req, uint8_t c
 
 	uint8_t up = 1;
 	uint32_t count;
-	if (u2f_load_key(req->kh) != 0)
+
+	if (control == U2F_AUTHENTICATE_CHECK)
 	{
 		u2f_hid_set_len(2);
-		return U2F_SW_WRONG_DATA;
+		if (u2f_load_key(req->kh) == 0 && u2f_appid_eq(req->kh, req->app) == 0)
+		{
+			return U2F_SW_CONDITIONS_NOT_SATISFIED;
+		}
+		else
+		{
+			return U2F_SW_WRONG_DATA;
+		}
 	}
-	else if (control == U2F_AUTHENTICATE_CHECK)
+	if 		(
+			control != U2F_AUTHENTICATE_SIGN ||
+			req->khl != U2F_KEY_HANDLE_SIZE  ||
+			u2f_load_key(req->kh) != 0       ||
+			u2f_appid_eq(req->kh, req->app) != 0
+			)
 	{
 		u2f_hid_set_len(2);
-		return U2F_SW_CONDITIONS_NOT_SATISFIED;
+		return U2F_SW_WRONG_PAYLOAD;
 	}
+
+
 
 	if (u2f_get_user_feedback())
 	{
@@ -144,7 +189,7 @@ static int16_t u2f_authenticate(struct u2f_authenticate_request * req, uint8_t c
 
     if (u2f_ecdsa_sign((uint8_t*)req, req->kh) == -1)
 	{
-    	return U2F_SW_WRONG_DATA;
+    	return U2F_SW_WRONG_DATA+0x20;
 	}
 
     u2f_hid_set_len(7 + get_signature_length((uint8_t*)req));
@@ -168,12 +213,14 @@ static int16_t u2f_register(struct u2f_register_request * req)
 
     if (u2f_get_user_feedback())
     {
+    	u2f_hid_set_len(2);
         return U2F_SW_CONDITIONS_NOT_SATISFIED;
     }
 
-    if ( u2f_new_keypair(key_handle, pubkey) == -1)
+    if ( u2f_new_keypair(key_handle, req->app, pubkey) == -1)
     {
-    	return U2F_SW_CONDITIONS_NOT_SATISFIED;
+    	u2f_hid_set_len(2);
+    	return U2F_SW_INSUFFICIENT_MEMORY;
     }
 
     u2f_sha256_start();

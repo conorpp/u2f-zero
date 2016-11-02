@@ -48,7 +48,7 @@ data struct APP_DATA appdata;
 
 uint8_t error;
 uint8_t state;
-uint8_t winkc;
+uint32_t winkc;
 struct u2f_hid_msg * hid_msg;
 
 static void init(struct APP_DATA* ap)
@@ -143,11 +143,12 @@ int16_t main(void) {
 	uint16_t ms_heart;
 	uint16_t ms_wink;
 	uint16_t ms_grad;
-	uint8_t winks = 0, light, grad_dir = 0;
+	uint8_t winks = 0, light = 1, grad_dir = 0;
 	int8_t grad_inc = 0;
+	int8_t ii;
 
 	enter_DefaultMode_from_RESET();
-
+	rgb_hex(0);
 
 	// ~200 ms interval watchdog
 	WDTCN = 4;
@@ -170,8 +171,7 @@ int16_t main(void) {
 
 	atecc_setup_init(appdata.tmp);
 
-	rgb_hex(U2F_COLOR);
-
+	rgb_hex(0);
 
 	while (1) {
 
@@ -187,17 +187,19 @@ int16_t main(void) {
 			USBD_Read(EP1OUT, hidmsgbuf, sizeof(hidmsgbuf), true);
 		}
 
+		u2f_hid_check_timeouts();
+
 		switch(state)
 		{
 			case APP_NOTHING:
 				// Flash gradient on LED
-				if (ms_since(ms_grad, 10))
+				if (ms_since(ms_grad, 150))
 				{
-					if (light == 90)
+					if (light == 16)
 					{
 						grad_dir = 0;
 					}
-					else if (light == 0)
+					else if (light == 1)
 					{
 						grad_dir = 1;
 					}
@@ -261,13 +263,33 @@ int16_t main(void) {
 		if (error)
 		{
 			u2f_printx("error: ", 1, (uint16_t)error);
-			error = 0;
+#ifdef U2F_BLINK_ERRORS
+			for (ii=0; ii < 8; ii++)
+			{
+				if (error & (1<<ii))
+				{
+					rgb_hex(U2F_DEFAULT_COLOR_INPUT_SUCCESS);
+				}
+				else
+				{
+					rgb_hex(U2F_DEFAULT_COLOR_ERROR);
+				}
+				u2f_delay(400);
+				rgb_hex(0);
+				u2f_delay(100);
+
+			}
+#else
 			rgb_hex(U2F_DEFAULT_COLOR_ERROR);
-			while(!ms_since(ms_heart,2000))
+#endif
+			error = 0;
+			while(!ms_since(ms_heart,500))
 			{
 				watchdog();
 			}
 		}
+
+
 
 
 	}

@@ -45,6 +45,8 @@ void u2f_delay(uint32_t ms) {
 void usb_write(uint8_t* buf, uint8_t len)
 {
 	uint8_t errors = 0;
+	u2f_prints("<< ");
+	dump_hex(buf,len);
 	while (USB_STATUS_OK != (USBD_Write(EP1IN, buf, len, false)))
 	{
 		u2f_delay(2);

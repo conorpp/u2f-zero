@@ -37,10 +37,10 @@ extern void enter_DefaultMode_from_RESET(void) {
 	TIMER16_2_enter_DefaultMode_from_RESET();
 	TIMER16_3_enter_DefaultMode_from_RESET();
 	TIMER_SETUP_0_enter_DefaultMode_from_RESET();
-	PCA_0_enter_DefaultMode_from_RESET();
-	PCACH_0_enter_DefaultMode_from_RESET();
-	PCACH_1_enter_DefaultMode_from_RESET();
-	PCACH_2_enter_DefaultMode_from_RESET();
+//	PCA_0_enter_DefaultMode_from_RESET();
+//	PCACH_0_enter_DefaultMode_from_RESET();
+//	PCACH_1_enter_DefaultMode_from_RESET();
+//	PCACH_2_enter_DefaultMode_from_RESET();
 	SMBUS_0_enter_DefaultMode_from_RESET();
 	UART_0_enter_DefaultMode_from_RESET();
 	INTERRUPT_0_enter_DefaultMode_from_RESET();

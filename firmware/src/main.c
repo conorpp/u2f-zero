@@ -103,35 +103,35 @@ void set_app_u2f_hid_msg(struct u2f_hid_msg * msg )
 void rgb(uint8_t r, uint8_t g, uint8_t b)
 {
 
-	if (r)
-	{
-		PCA0CPM2 |= PCA0CPM2_PWM__ENABLED;
-		LED_R(r);
-	}
-	else
-	{
-		PCA0CPM2 &= ~PCA0CPM2_PWM__ENABLED;
-	}
-
-	if (b)
-	{
-		PCA0CPM0 |= PCA0CPM0_PWM__ENABLED;
-		LED_B(b);
-	}
-	else
-	{
-		PCA0CPM0 &= ~PCA0CPM0_PWM__ENABLED;
-	}
-
-	if (g)
-	{
-		PCA0CPM1 |= PCA0CPM1_PWM__ENABLED;
-		LED_G(g);
-	}
-	else
-	{
-		PCA0CPM1 &= ~PCA0CPM1_PWM__ENABLED;
-	}
+//	if (r)
+//	{
+//		PCA0CPM2 |= PCA0CPM2_PWM__ENABLED;
+//		LED_R(r);
+//	}
+//	else
+//	{
+//		PCA0CPM2 &= ~PCA0CPM2_PWM__ENABLED;
+//	}
+//
+//	if (b)
+//	{
+//		PCA0CPM0 |= PCA0CPM0_PWM__ENABLED;
+//		LED_B(b);
+//	}
+//	else
+//	{
+//		PCA0CPM0 &= ~PCA0CPM0_PWM__ENABLED;
+//	}
+//
+//	if (g)
+//	{
+//		PCA0CPM1 |= PCA0CPM1_PWM__ENABLED;
+//		LED_G(g);
+//	}
+//	else
+//	{
+//		PCA0CPM1 &= ~PCA0CPM1_PWM__ENABLED;
+//	}
 
 }
 
@@ -148,7 +148,7 @@ int16_t main(void) {
 	int8_t ii;
 
 	enter_DefaultMode_from_RESET();
-	rgb_hex(0);
+	//rgb_hex(0);
 
 	// ~200 ms interval watchdog
 	WDTCN = 4;
@@ -158,9 +158,9 @@ int16_t main(void) {
 
 	// Enable interrupts
 	IE_EA = 1;
-	watchdog();
+	//watchdog();
 
-	u2f_prints("U2F ZERO\r\n");
+	//u2f_prints("U2F ZERO\r\n");
 
 	if (RSTSRC & RSTSRC_WDTRSF__SET)
 	{
@@ -171,16 +171,16 @@ int16_t main(void) {
 
 	atecc_setup_init(appdata.tmp);
 
-	rgb_hex(0);
+	//rgb_hex(0);
 
 	while (1) {
 
 		watchdog();
 
-		if (ms_since(ms_heart,500))
-		{
-			u2f_printl("ms ", 1, get_ms());
-		}
+//		if (ms_since(ms_heart,500))
+//		{
+//			u2f_printl("ms ", 1, get_ms());
+//		}
 
 		if (!USBD_EpIsBusy(EP1OUT) && !USBD_EpIsBusy(EP1IN) && state != APP_HID_MSG)
 		{
@@ -193,35 +193,35 @@ int16_t main(void) {
 		{
 			case APP_NOTHING:
 				// Flash gradient on LED
-				if (ms_since(ms_grad, 150))
-				{
-					if (light == 16)
-					{
-						grad_dir = 0;
-					}
-					else if (light == 1)
-					{
-						grad_dir = 1;
-					}
-					if (grad_dir)
-						if (U2F_BUTTON_IS_PRESSED())
-							rgb(0,0,light++);
-						else
-							rgb(0,light++,0);
-					else
-						if (U2F_BUTTON_IS_PRESSED())
-							rgb(0,0,light--);
-						else
-							rgb(0,light--,0);
-				}
+//				if (ms_since(ms_grad, 150))
+//				{
+////					if (light == 16)
+////					{
+////						grad_dir = 0;
+////					}
+////					else if (light == 1)
+////					{
+////						grad_dir = 1;
+////					}
+////					if (grad_dir)
+////						if (U2F_BUTTON_IS_PRESSED())
+////							rgb(0,0,light++);
+////						else
+////							rgb(0,light++,0);
+////					else
+////						if (U2F_BUTTON_IS_PRESSED())
+////							rgb(0,0,light--);
+////						else
+////							rgb(0,light--,0);
+//				}
 				break;
 			case APP_HID_MSG:
 				// HID msg received, pass to protocols
-				if (custom_command(hid_msg))
-				{
-
-				}
-				else
+//				if (custom_command(hid_msg))
+//				{
+//
+//				}
+//				else
 				{
 					u2f_hid_request(hid_msg);
 				}
@@ -280,7 +280,7 @@ int16_t main(void) {
 
 			}
 #else
-			rgb_hex(U2F_DEFAULT_COLOR_ERROR);
+			//rgb_hex(U2F_DEFAULT_COLOR_ERROR);
 #endif
 			error = 0;
 			while(!ms_since(ms_heart,500))

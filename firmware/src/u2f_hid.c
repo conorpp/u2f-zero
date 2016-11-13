@@ -378,41 +378,41 @@ static uint8_t hid_u2f_parse(struct u2f_hid_msg* req)
 			break;
 		case U2FHID_PING:
 
-
-			if (hid_layer.bytes_buffered == 0)
-			{
-				start_buffering(req);
-				u2f_hid_set_len(U2FHID_LEN(req));
-				if (hid_layer.bytes_buffered >= U2FHID_LEN(req))
-				{
-					u2f_hid_writeback(hid_layer.buffer,hid_layer.bytes_buffered);
-					u2f_hid_flush();
-				}
-				else
-				{
-					return 1;
-				}
-			}
-			else
-			{
-				if (hid_layer.bytes_buffered + U2FHID_CONT_PAYLOAD_SIZE > BUFFER_SIZE)
-				{
-					u2f_hid_writeback(hid_layer.buffer,hid_layer.bytes_buffered);
-					hid_layer.bytes_buffered = 0;
-
-				}
-
-				buffer_request(req);
-				if (hid_layer.bytes_buffered + hid_layer.bytes_written >= hid_layer.req_len)
-				{
-					u2f_hid_writeback(hid_layer.buffer,hid_layer.bytes_buffered);
-					u2f_hid_flush();
-				}
-				else
-				{
-					return 1;
-				}
-			}
+//
+//			if (hid_layer.bytes_buffered == 0)
+//			{
+//				start_buffering(req);
+//				u2f_hid_set_len(U2FHID_LEN(req));
+//				if (hid_layer.bytes_buffered >= U2FHID_LEN(req))
+//				{
+//					u2f_hid_writeback(hid_layer.buffer,hid_layer.bytes_buffered);
+//					u2f_hid_flush();
+//				}
+//				else
+//				{
+//					return 1;
+//				}
+//			}
+//			else
+//			{
+//				if (hid_layer.bytes_buffered + U2FHID_CONT_PAYLOAD_SIZE > BUFFER_SIZE)
+//				{
+//					u2f_hid_writeback(hid_layer.buffer,hid_layer.bytes_buffered);
+//					hid_layer.bytes_buffered = 0;
+//
+//				}
+//
+//				buffer_request(req);
+//				if (hid_layer.bytes_buffered + hid_layer.bytes_written >= hid_layer.req_len)
+//				{
+//					u2f_hid_writeback(hid_layer.buffer,hid_layer.bytes_buffered);
+//					u2f_hid_flush();
+//				}
+//				else
+//				{
+//					return 1;
+//				}
+//			}
 
 
 			break;
@@ -428,42 +428,42 @@ static uint8_t hid_u2f_parse(struct u2f_hid_msg* req)
 			u2f_hid_flush();
 			app_wink(U2F_COLOR_WINK);
 			break;
-		case U2FHID_LOCK:
-
-			secs = req->pkt.init.payload[0];
-			if (secs > 10)
-			{
-				stamp_error(hid_layer.current_cid, ERR_INVALID_PAR);
-			}
-			else
-			{
-				if (secs)
-				{
-					_hid_lock_cid = hid_layer.current_cid;
-					_hid_lockt = get_ms() + 1000 * secs;
-
-				}
-				else
-				{
-					_hid_lockt = get_ms();
-					_hid_lock_cid = 0;
-				}
-				hid_layer.current_cmd = U2FHID_LOCK;
-				u2f_hid_set_len(0);
-				u2f_hid_writeback(NULL, 0);
-				u2f_hid_flush();
-			}
-			break;
+//		case U2FHID_LOCK:
+//
+//			secs = req->pkt.init.payload[0];
+//			if (secs > 10)
+//			{
+//				stamp_error(hid_layer.current_cid, ERR_INVALID_PAR);
+//			}
+//			else
+//			{
+//				if (secs)
+//				{
+//					_hid_lock_cid = hid_layer.current_cid;
+//					_hid_lockt = get_ms() + 1000 * secs;
+//
+//				}
+//				else
+//				{
+//					_hid_lockt = get_ms();
+//					_hid_lock_cid = 0;
+//				}
+//				hid_layer.current_cmd = U2FHID_LOCK;
+//				u2f_hid_set_len(0);
+//				u2f_hid_writeback(NULL, 0);
+//				u2f_hid_flush();
+//			}
+//			break;
 		default:
 			set_app_error(ERROR_HID_INVALID_CMD);
 			stamp_error(hid_layer.current_cid, ERR_INVALID_CMD);
-			u2f_printb("invalid cmd: ",1,hid_layer.current_cmd);
+			//u2f_printb("invalid cmd: ",1,hid_layer.current_cmd);
 	}
 
 	return u2f_hid_busy();
 
 	fail:
-		u2f_prints("U2F HID FAIL\r\n");
+		//u2f_prints("U2F HID FAIL\r\n");
 	return 0;
 }
 
@@ -474,7 +474,7 @@ void u2f_hid_check_timeouts()
 	{
 		if (CIDS[i].busy && ((get_ms() - CIDS[i].last_used) >= 750))
 		{
-			u2f_printlx("timeout cid ",2,CIDS[i].cid,get_ms());
+			//u2f_printlx("timeout cid ",2,CIDS[i].cid,get_ms());
 			stamp_error(CIDS[i].cid, ERR_MSG_TIMEOUT);
 			del_cid(CIDS[i].cid);
 			u2f_hid_reset_packet();

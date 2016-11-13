@@ -157,7 +157,6 @@ void u2f_init()
 							sizeof(appdata.tmp), &res);
 			if (ec != 0)
 			{
-				u2f_printb("atecc_send_recv failed ",2,i,-ec);
 
 				// erase eeprom
 				eeprom_erase(U2F_EEPROM_CONFIG);

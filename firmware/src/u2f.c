@@ -211,6 +211,12 @@ static int16_t u2f_register(struct u2f_register_request * req)
 
     const uint16_t attest_size = u2f_attestation_cert_size();
 
+    u2f_prints("REG req\r\n");
+    u2f_prints("chal: ");
+    dump_hex(req->chal, 32);
+    u2f_prints("app: ");
+    dump_hex(req->app, 32);
+
     if (u2f_get_user_feedback())
     {
     	u2f_hid_set_len(2);
@@ -222,6 +228,9 @@ static int16_t u2f_register(struct u2f_register_request * req)
     	u2f_hid_set_len(2);
     	return U2F_SW_INSUFFICIENT_MEMORY;
     }
+
+    u2f_prints("new handle:\r\n");
+    dump_hex(key_handle, U2F_KEY_HANDLE_SIZE);
 
     u2f_sha256_start();
     u2f_sha256_update(i,1);
@@ -236,6 +245,7 @@ static int16_t u2f_register(struct u2f_register_request * req)
     
     if (u2f_ecdsa_sign((uint8_t*)req, U2F_ATTESTATION_HANDLE) == -1)
 	{
+    	u2f_prints("FAIL\r\n");
     	return U2F_SW_WRONG_DATA;
 	}
 
@@ -251,7 +261,7 @@ static int16_t u2f_register(struct u2f_register_request * req)
 
     dump_signature_der((uint8_t*)req);
 
-
+    u2f_prints("WIN\r\n");
     return U2F_SW_NO_ERROR;
 }
 

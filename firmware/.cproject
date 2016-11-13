@@ -49,7 +49,7 @@
 									<listOptionValue builtIn="false" value="&quot;${StudioSdkPath}/Device/EFM8UB1/peripheral_driver/inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${StudioSdkPath}/Lib/efm8_assert&quot;"/>
 								</option>
-								<option id="com.silabs.ide.si8051.keil.compiler.category.general.code.389376290" name="Code size" superClass="com.silabs.ide.si8051.keil.compiler.category.general.code" value="com.silabs.ide.si8051.keil.compiler.category.general.code.large" valueType="enumerated"/>
+								<option id="com.silabs.ide.si8051.keil.compiler.category.general.code.389376290" name="Code size" superClass="com.silabs.ide.si8051.keil.compiler.category.general.code" value="com.silabs.ide.si8051.keil.compiler.category.general.code.compact" valueType="enumerated"/>
 								<option id="com.silabs.ide.si8051.keil.compiler.category.misc.extraflags.762226691" name="Additional Flags" superClass="com.silabs.ide.si8051.keil.compiler.category.misc.extraflags" value="" valueType="string"/>
 								<inputType id="com.silabs.ide.si8051.keil.compiler.inputType.261436307" superClass="com.silabs.ide.si8051.keil.compiler.inputType"/>
 							</tool>

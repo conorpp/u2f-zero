@@ -207,7 +207,6 @@ SI_INTERRUPT (SMBUS0_ISR, SMBUS0_IRQn)
 	return;
 
 	fail:
-		u2f_printb("smbus fail ",1,bus);
 		restart_bus();
 		SMB0CN0_SI = 0;
 }

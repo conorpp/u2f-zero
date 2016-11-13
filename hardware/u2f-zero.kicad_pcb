@@ -1,11 +1,11 @@
-(kicad_pcb (version 4) (host pcbnew 4.0.2-4+6225~38~ubuntu14.04.1-stable)
+(kicad_pcb (version 4) (host pcbnew 4.0.3-stable)
 
   (general
     (links 28)
     (no_connects 0)
-    (area 35.070238 27.125 76.550001 44.075)
+    (area 35.145238 27.275 76.550001 44.175)
     (thickness 2)
-    (drawings 35)
+    (drawings 51)
     (tracks 141)
     (zones 0)
     (modules 16)
@@ -37,7 +37,7 @@
   )
 
   (setup
-    (last_trace_width 0.16)
+    (last_trace_width 0.25)
     (user_trace_width 0.16)
     (user_trace_width 0.2)
     (trace_clearance 0.2)
@@ -561,6 +561,32 @@
       (solder_mask_margin 1.016) (clearance 1.016))
   )
 
+  (gr_line (start 64.09 32.44) (end 63.582 32.44) (angle 90) (layer B.SilkS) (width 0.2))
+  (gr_line (start 64.598 32.44) (end 64.09 32.44) (angle 90) (layer B.SilkS) (width 0.2))
+  (gr_line (start 64.598 37.52) (end 64.598 32.44) (angle 90) (layer B.SilkS) (width 0.2))
+  (gr_line (start 64.09 37.52) (end 64.598 37.52) (angle 90) (layer B.SilkS) (width 0.2))
+  (gr_text "C2CK\n" (at 62.82 36.25) (layer B.SilkS)
+    (effects (font (size 0.8 0.8) (thickness 0.2)) (justify mirror))
+  )
+  (gr_text C2D (at 62.82 33.71) (layer B.SilkS)
+    (effects (font (size 0.8 0.8) (thickness 0.2)) (justify mirror))
+  )
+  (gr_text RX (at 56.47 38.79) (layer B.SilkS)
+    (effects (font (size 0.8 0.8) (thickness 0.2)) (justify mirror))
+  )
+  (gr_text TX (at 56.47 36.25) (layer B.SilkS)
+    (effects (font (size 0.8 0.8) (thickness 0.2)) (justify mirror))
+  )
+  (gr_text GND (at 56.47 33.71) (layer B.SilkS)
+    (effects (font (size 0.8 0.8) (thickness 0.2)) (justify mirror))
+  )
+  (gr_line (start 55.2 32.44) (end 56.47 32.44) (angle 90) (layer B.SilkS) (width 0.2))
+  (gr_line (start 55.2 40.06) (end 55.2 32.44) (angle 90) (layer B.SilkS) (width 0.2))
+  (gr_line (start 60.28 40.06) (end 55.2 40.06) (angle 90) (layer B.SilkS) (width 0.2))
+  (gr_line (start 60.28 37.52) (end 60.28 40.06) (angle 90) (layer B.SilkS) (width 0.2))
+  (gr_line (start 64.09 37.52) (end 60.28 37.52) (angle 90) (layer B.SilkS) (width 0.2))
+  (gr_line (start 62.82 32.44) (end 64.09 32.44) (angle 90) (layer B.SilkS) (width 0.2))
+  (gr_line (start 56.47 32.44) (end 62.82 32.44) (angle 90) (layer B.SilkS) (width 0.2))
   (gr_circle (center 61.25 41.4) (end 61.375 41.275) (layer F.SilkS) (width 0.2))
   (gr_circle (center 54.75 35.025) (end 54.675 35.075) (layer F.SilkS) (width 0.2))
   (gr_circle (center 47.625 36.25) (end 47.625 36.225) (layer F.SilkS) (width 0.2))
@@ -757,7 +783,7 @@
     (fill yes (arc_segments 16) (thermal_gap 0.508) (thermal_bridge_width 0.508))
     (polygon
       (pts
-        (xy 74.75 33.75) (xy 66.55 33.75) (xy 66.55 31.75) (xy 74.75 31.75) (xy 74.75 33.75)
+        (xy 74.75 33.75) (xy 66.55 33.75) (xy 66.55 31.75) (xy 74.75 31.75)
       )
     )
     (filled_polygon
@@ -772,7 +798,7 @@
     (fill yes (arc_segments 16) (thermal_gap 0.508) (thermal_bridge_width 0.508))
     (polygon
       (pts
-        (xy 74.25 38.4) (xy 66.55 38.4) (xy 66.55 36.4) (xy 74.25 36.4) (xy 74.25 38.4)
+        (xy 74.25 38.4) (xy 66.55 38.4) (xy 66.55 36.4) (xy 74.25 36.4)
       )
     )
     (filled_polygon
@@ -817,7 +843,7 @@
     (fill yes (arc_segments 16) (thermal_gap 0.508) (thermal_bridge_width 0.508))
     (polygon
       (pts
-        (xy 74.25 36.1) (xy 66.55 36.1) (xy 66.55 34.1) (xy 74.25 34.1) (xy 74.25 36.1)
+        (xy 74.25 36.1) (xy 66.55 36.1) (xy 66.55 34.1) (xy 74.25 34.1)
       )
     )
     (filled_polygon
@@ -832,7 +858,7 @@
     (fill yes (arc_segments 16) (thermal_gap 0.508) (thermal_bridge_width 0.508))
     (polygon
       (pts
-        (xy 74.25 36.1) (xy 66.55 36.1) (xy 66.55 34.1) (xy 74.25 34.1) (xy 74.25 36.1)
+        (xy 74.25 36.1) (xy 66.55 36.1) (xy 66.55 34.1) (xy 74.25 34.1)
       )
     )
     (filled_polygon
@@ -864,7 +890,7 @@
       (pts
         (xy 64.15 30.35) (xy 66 30.35) (xy 66 38.75) (xy 74.75 38.75) (xy 74.75 40.75)
         (xy 66 40.75) (xy 66 42.15) (xy 64.15 42.15) (xy 64.15 43.4) (xy 35.35 43.4)
-        (xy 35.35 29.1) (xy 64.15 29.1) (xy 64.15 30.35)
+        (xy 35.35 29.1) (xy 64.15 29.1)
       )
     )
     (filled_polygon

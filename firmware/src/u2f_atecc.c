@@ -323,6 +323,9 @@ int8_t u2f_new_keypair(uint8_t * handle, uint8_t * appid, uint8_t * pubkey)
 	if (keyslot > U2F_NUM_KEYS-1)
 	{
 		app_wink(U2F_DEFAULT_COLOR_WINK_OUT_OF_SPACE);
+		// rewind to keyslot 0
+		keyslot = 0;
+		key_store.num_issued = 0;
 		return -1;
 	}
 	watchdog();

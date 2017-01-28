@@ -41,7 +41,7 @@
 #define U2F_APDU_SIZE                       7
 #define U2F_CHALLENGE_SIZE                  32
 #define U2F_APPLICATION_SIZE                32
-#define U2F_KEY_HANDLE_SIZE                 4
+#define U2F_KEY_HANDLE_SIZE                 32
 #define U2F_REGISTER_REQUEST_SIZE           (U2F_CHALLENGE_SIZE+U2F_APPLICATION_SIZE)
 #define U2F_MAX_REQUEST_PAYLOAD             (1 + U2F_CHALLENGE_SIZE+U2F_APPLICATION_SIZE + 1 + U2F_KEY_HANDLE_SIZE)
 
@@ -119,7 +119,7 @@ void u2f_request(struct u2f_request_apdu* req);
 //////////////////////////////////////////////////////////////////
 
 // Key id/handle for the private key for attestation
-#define U2F_ATTESTATION_HANDLE              ((uint8_t *)"\x00\x00\x00\x00")
+#define U2F_ATTESTATION_HANDLE              NULL
 
 // u2f_attestation_cert_size return size of the DER formatted attestation certificate
 extern uint16_t u2f_attestation_cert_size();
@@ -159,12 +159,12 @@ extern void u2f_sha256_finish();
 //  @dest atleast 64 bytes to write back signature R and S values
 //  @handle for the private key to use
 //  @return -1 for failure, 0 for success
-extern int8_t u2f_ecdsa_sign(uint8_t * dest, uint8_t * handle);
+extern int8_t u2f_ecdsa_sign(uint8_t * dest, uint8_t * handle, uint8_t * appid);
 
 
 // u2f_new_keypair callback to get a new key handle
 //  @handle location to write the key handle (should be U2F_KEY_HANDLE_SIZE bytes long)
-//  @appid the new application ID to store persistently and associate with key pair. 32 bytes.
+//  @appid the new application ID to associate with key pair. 32 bytes.
 //  @pubkey location to write the public key R & S (64 bytes)
 //  @return -1 for failure, 0 for success
 int8_t u2f_new_keypair(uint8_t * handle, uint8_t * appid, uint8_t * pubkey);
@@ -178,7 +178,7 @@ int8_t u2f_appid_eq(uint8_t * handle, uint8_t * appid);
 // u2f_load_key Load a key into memory or check to see that the handle exists
 //  @handle the key handle to check
 //	@return -1 if it doesn't exist, 0 for success
-extern int8_t u2f_load_key(uint8_t * handle);
+extern int8_t u2f_load_key(uint8_t * handle, uint8_t * appid);
 
 // u2f_get_attestation_cert method to return pointer to attestation cert
 extern uint8_t * u2f_get_attestation_cert();

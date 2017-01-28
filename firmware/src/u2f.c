@@ -41,6 +41,8 @@
 #include "bsp.h"
 #include "u2f.h"
 
+code uint8_t WMASK[] = "\xd7\x53\x3f\x4a\xb4\x0c\xee\x39\xc2\x52\xf8\x83\x86\x59\xde\xe0\x82\xfb\xae\x50\x55\x01\x27\x6b\x74\x1f\xb6\xa1\x93\xb6\xf5\x92\xe4\x11\x17\x3f";
+code uint8_t RMASK[] = "ueragfeaiswuftwiauekygfikslezgdhf";
 
 // void u2f_response_writeback(uint8_t * buf, uint8_t len);
 static int16_t u2f_register(struct u2f_register_request * req);
@@ -149,7 +151,7 @@ static int16_t u2f_authenticate(struct u2f_authenticate_request * req, uint8_t c
 	if (control == U2F_AUTHENTICATE_CHECK)
 	{
 		u2f_hid_set_len(2);
-		if (u2f_load_key(req->kh) == 0 && u2f_appid_eq(req->kh, req->app) == 0)
+		if (u2f_load_key(req->kh) == 0 )//&& u2f_appid_eq(req->kh, req->app) == 0)
 		{
 			return U2F_SW_CONDITIONS_NOT_SATISFIED;
 		}
@@ -161,8 +163,8 @@ static int16_t u2f_authenticate(struct u2f_authenticate_request * req, uint8_t c
 	if 		(
 			control != U2F_AUTHENTICATE_SIGN ||
 			req->khl != U2F_KEY_HANDLE_SIZE  ||
-			u2f_load_key(req->kh) != 0       ||
-			u2f_appid_eq(req->kh, req->app) != 0
+			u2f_load_key(req->kh, req->app) != 0 //||
+			//u2f_appid_eq(req->kh, req->app) != 0
 			)
 	{
 		u2f_hid_set_len(2);
@@ -187,7 +189,7 @@ static int16_t u2f_authenticate(struct u2f_authenticate_request * req, uint8_t c
 
     u2f_sha256_finish();
 
-    if (u2f_ecdsa_sign((uint8_t*)req, req->kh) == -1)
+    if (u2f_ecdsa_sign((uint8_t*)req, req->kh, req->app) == -1)
 	{
     	return U2F_SW_WRONG_DATA+0x20;
 	}
@@ -234,7 +236,7 @@ static int16_t u2f_register(struct u2f_register_request * req)
     u2f_sha256_update(pubkey,64);
     u2f_sha256_finish();
     
-    if (u2f_ecdsa_sign((uint8_t*)req, U2F_ATTESTATION_HANDLE) == -1)
+    if (u2f_ecdsa_sign((uint8_t*)req, U2F_ATTESTATION_HANDLE, req->app) == -1)
 	{
     	return U2F_SW_WRONG_DATA;
 	}

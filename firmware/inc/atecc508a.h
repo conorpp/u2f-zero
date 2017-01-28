@@ -50,6 +50,9 @@
 	#define ATECC_SHA_START 			0x0
 	#define ATECC_SHA_UPDATE 			0x1
 	#define ATECC_SHA_END 				0x2
+	#define ATECC_SHA_HMACSTART			0x4
+	#define ATECC_SHA_HMACEND			0x5
+	// P2 is keyslot ID for hmac and message length otherwise
 
 #define ATECC_CMD_READ 					0x02
 	// P1
@@ -60,7 +63,7 @@
 	// P2 read addr
 
 #define ATECC_CMD_WRITE 				0x12
-	// P1 same for read
+	// P1 same as for read
 	// P2 write addr
 
 	#define ATECC_EEPROM_SLOT(x) 		(0x5 + ((x)>>1))
@@ -70,6 +73,8 @@
 	#define ATECC_EEPROM_KEY(x) 		(24 + ((x)>>1))
 	#define ATECC_EEPROM_KEY_OFFSET(x) 	( (x) & 1 ? 2 : 0 )
 	#define ATECC_EEPROM_KEY_SIZE 0x2
+
+	#define ATECC_EEPROM_DATA_SLOT(x) 		(x<<3)
 
 	#define ATECC_EEPROM_B2A(b) 		((b)>>2)
 	#define ATECC_EEPROM_B2O(b) 		((b)&0x3)
@@ -86,6 +91,7 @@
 #define ATECC_CMD_GENKEY 				0x40
 	// P1
 	#define ATECC_GENKEY_PRIVATE 		0x04
+	#define ATECC_GENKEY_PUBLIC 		0x00
 	#define ATECC_GENKEY_PUBDIGEST 		0x08
 	#define ATECC_GENKEY_PUBDIGEST2 	0x10
 	// P2 is keyid
@@ -101,6 +107,24 @@
 	#define ATECC_SIGN_INTERNAL 		0x00
 	#define ATECC_SIGN_EXTERNAL 		0x80
 	// P2 is keyid
+
+#define ATECC_CMD_GENDIG				0x15
+	// P1 same as for read
+	// P2 is keyid
+
+#define ATECC_CMD_INFO					0x30
+	// P1 same as for read
+	#define ATECC_INFO_REVISION 		0x00
+	#define ATECC_INFO_KEYVALID 		0x01
+	#define ATECC_INFO_STATE 			0x02
+	#define ATECC_INFO_GPIO 			0x03
+	// P2 is keyid
+
+#define ATECC_CMD_PRIVWRITE				0x46
+	// P1
+	#define ATECC_PRIVWRITE_ENC			0x40
+	// P2 is keyid
+
 
 struct atecc_response
 {

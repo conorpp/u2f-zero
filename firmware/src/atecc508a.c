@@ -209,7 +209,89 @@ int8_t atecc_write_eeprom(uint8_t base, uint8_t offset, uint8_t* srcbuf, uint8_t
 
 #ifdef ATECC_SETUP_DEVICE
 
-static int is_locked(uint8_t * buf)
+static uint8_t shabuf[70];
+static uint8_t shaoffset = 0;
+uint8_t SHA_FLAGS = 0;
+uint8_t SHA_HMAC_KEY = 0;
+static struct atecc_response res_digest;
+
+void u2f_sha256_start()
+{
+	shaoffset = 0;
+	atecc_send_recv(ATECC_CMD_SHA,
+			SHA_FLAGS, SHA_HMAC_KEY,NULL,0,
+			appdata.tmp, sizeof(appdata.tmp), NULL);
+	SHA_HMAC_KEY = 0;
+}
+
+
+void u2f_sha256_update(uint8_t * buf, uint8_t len)
+{
+	uint8_t i = 0;
+	watchdog();
+	while(len--)
+	{
+		shabuf[shaoffset++] = *buf++;
+		if (shaoffset == 64)
+		{
+			atecc_send_recv(ATECC_CMD_SHA,
+					ATECC_SHA_UPDATE, 64,shabuf,64,
+					appdata.tmp, sizeof(appdata.tmp), NULL);
+			shaoffset = 0;
+		}
+	}
+}
+
+
+void u2f_sha256_finish()
+{
+	if (SHA_FLAGS == 0) SHA_FLAGS = ATECC_SHA_END;
+	atecc_send_recv(ATECC_CMD_SHA,
+			SHA_FLAGS, shaoffset,shabuf,shaoffset,
+			shabuf, sizeof(shabuf), &res_digest);
+	SHA_FLAGS = 0;
+}
+
+static uint8_t get_signature_length(uint8_t * sig)
+{
+	return 0x46 + ((sig[32] & 0x80) == 0x80) + ((sig[0] & 0x80) == 0x80);
+}
+
+static void dump_signature_der(uint8_t * sig)
+{
+    uint8_t pad_s = (sig[32] & 0x80) == 0x80;
+    uint8_t pad_r = (sig[0] & 0x80) == 0x80;
+    uint8_t i[] = {0x30, 0x44};
+    uint8_t sigbuf[120];
+    i[1] += (pad_s + pad_r);
+
+
+    // DER encoded signature
+    // write der sequence
+    // has to be minimum distance and padded with 0x00 if MSB is a 1.
+    memmove(sigbuf,i,2);
+    i[1] = 0;
+
+    // length of R value plus 0x00 pad if necessary
+    memmove(sigbuf+2,"\x02",1);
+    i[0] = 0x20 + pad_r;
+    memmove(sigbuf+3,i,1 + pad_r);
+
+    // R value
+    memmove(sigbuf+3+1+pad_r,sig, 32);
+
+    // length of S value plus 0x00 pad if necessary
+    memmove(sigbuf+3+1+pad_r+32,"\x02",1);
+    i[0] = 0x20 + pad_s;
+    memmove(sigbuf+3+1+pad_r+32+1,i,1 + pad_s);
+
+    // S value
+    memmove(sigbuf+3+1+pad_r+32+1+1+pad_s,sig+32, 32);
+    u2f_prints("signature-der: "); dump_hex(sigbuf, get_signature_length(sig));
+}
+
+
+static int is_config_locked(uint8_t * buf)
 {
 	struct atecc_response res;
 	atecc_send_recv(ATECC_CMD_READ,
@@ -221,7 +303,18 @@ static int is_locked(uint8_t * buf)
 	else
 		return 0;
 }
-
+static int is_data_locked(uint8_t * buf)
+{
+	struct atecc_response res;
+	atecc_send_recv(ATECC_CMD_READ,
+					ATECC_RW_CONFIG,86/4, NULL, 0,
+					buf, 36, &res);
+	dump_hex(res.buf, res.len);
+	if (res.buf[86 % 4] == 0)
+		return 1;
+	else
+		return 0;
+}
 
 static void dump_config(uint8_t* buf)
 {
@@ -230,9 +323,12 @@ static void dump_config(uint8_t* buf)
 	struct atecc_response res;
 	for (i=0; i < 4; i++)
 	{
-		atecc_send_recv(ATECC_CMD_READ,
+		if ( atecc_send_recv(ATECC_CMD_READ,
 				ATECC_RW_CONFIG | ATECC_RW_EXT, i << 3, NULL, 0,
-				buf, 40, &res);
+				buf, 40, &res) != 0)
+		{
+			u2f_prints("read failed\r\n");
+		}
 		for(j = 0; j < res.len; j++)
 		{
 			crc = feed_crc(crc,res.buf[j]);
@@ -245,68 +341,207 @@ static void dump_config(uint8_t* buf)
 
 static void atecc_setup_config(uint8_t* buf)
 {
-	struct atecc_response res;
 	uint8_t i;
 
-	struct atecc_slot_config sc;
-	struct atecc_key_config kc;
-	memset(&sc, 0, sizeof(struct atecc_slot_config));
-	memset(&kc, 0, sizeof(struct atecc_key_config));
-	sc.readkey = 3;
-	sc.secret = 1;
-	sc.writeconfig = 0xa;
 
-	// set up read/write permissions for keys
+	uint8_t * slot_configs = "\x83\x71\x81\x01\x83\x71\xC1\x01\x83\x71"
+							 "\x83\x71\x83\x71\xC1\x71\x01\x01\x83\x71"
+							 "\x83\x71\xC1\x71\x83\x71\x83\x71\x83\x71"
+							 "\x83\xa0";
+
+	uint8_t * key_configs = "\x13\x00\x3C\x00\x13\x00\x3C\x00\x13\x00"
+							"\x3C\x00\x13\x00\x3C\x00\x3C\x00\x3C\x00"
+							"\x13\x00\x3C\x00\x13\x00\x3C\x00\x13\x00"
+							"\x33\x00";
+
+	// write configuration
 	for (i = 0; i < 16; i++)
 	{
-		if ( atecc_write_eeprom(ATECC_EEPROM_SLOT(i), ATECC_EEPROM_SLOT_OFFSET(i), &sc, ATECC_EEPROM_SLOT_SIZE) != 0)
+		if ( atecc_write_eeprom(ATECC_EEPROM_SLOT(i), ATECC_EEPROM_SLOT_OFFSET(i), slot_configs+i*2, ATECC_EEPROM_SLOT_SIZE) != 0)
 		{
 			u2f_printb("1 atecc_write_eeprom failed ",1, i);
 		}
 
-	}
-
-
-	kc.private = 1;
-	kc.pubinfo = 1;
-	kc.keytype = 0x4;
-	kc.lockable = 0;
-
-	// set up config for keys
-	for (i = 0; i < 16; i++)
-	{
-		if (i==15)
+		if ( atecc_write_eeprom(ATECC_EEPROM_KEY(i), ATECC_EEPROM_KEY_OFFSET(i), key_configs+i*2, ATECC_EEPROM_KEY_SIZE) != 0)
 		{
-			kc.lockable = 1;
-		}
-		if ( atecc_write_eeprom(ATECC_EEPROM_KEY(i), ATECC_EEPROM_KEY_OFFSET(i), &kc, ATECC_EEPROM_KEY_SIZE) != 0)
-		{
-			u2f_printb("3 atecc_write_eeprom failed " ,1,i);
+			u2f_printb("2 atecc_write_eeprom failed " ,1,i);
 		}
 
 	}
+
 
 	dump_config(buf);
 }
 
-// write a message to the otp memory before locking
-static void atecc_write_otp(uint8_t * buf)
+static uint8_t trans_key[32];
+
+static void atecc_setup_transport_keys()
 {
-	code char msg[] = "conorpp's u2f token.\r\n\0\0\0\0";
-	int i;
-	for (i=0; i<sizeof(msg); i+=4)
+
+	struct atecc_response res;
+
+	atecc_send_recv(ATECC_CMD_RNG,ATECC_RNG_P1,ATECC_RNG_P2,
+					NULL, 0,
+					appdata.tmp,
+					sizeof(appdata.tmp), &res);
+
+	memmove(trans_key, res.buf, 32);
+
+}
+
+
+void atecc_test_enc_read(uint8_t * buf)
+{
+	struct atecc_response res;
+	memset(trans_key,0x5a,sizeof(trans_key));
+	u2f_prints("plaintext: "); dump_hex(trans_key, 32);
+
+	if( atecc_send_recv(ATECC_CMD_WRITE,
+			ATECC_RW_DATA|ATECC_RW_EXT, ATECC_EEPROM_DATA_SLOT(3), trans_key, 32,
+			buf, 40, &res) != 0)
 	{
-		atecc_send_recv(ATECC_CMD_WRITE,
-				ATECC_RW_OTP, ATECC_EEPROM_B2A(i), msg+i, 4,
-				buf, sizeof(buf), NULL);
+		u2f_prints("writing test key failed\r\n");
+		return;
 	}
+
+	atecc_prep_encryption();
+
+	if (atecc_send_recv(ATECC_CMD_READ,
+			ATECC_RW_DATA | ATECC_RW_EXT, ATECC_EEPROM_DATA_SLOT(3), NULL, 0,
+			buf, 40, &res) != 0)
+	{
+		u2f_prints("READ slot 3 failed\r\n");
+		return;
+	}
+	else
+	{
+		u2f_prints("ciphertext: "); dump_hex(res.buf, 32);
+	}
+}
+
+void atecc_test_signature(int keyslot, uint8_t * buf)
+{
+	struct atecc_response res;
+	if ( atecc_send_recv(ATECC_CMD_GENKEY,
+			ATECC_GENKEY_PUBLIC, keyslot, NULL, 0,
+			appdata.tmp, 70, &res) != 0)
+	{
+		u2f_prints("GENKEY public failed\r\n");
+		return;
+	}
+
+	u2f_prints("pubkey: "); dump_hex(res.buf, 64);
+
+	u2f_prints("signing input: "); dump_hex(res_digest.buf, 32);
+
+	if( atecc_send_recv(ATECC_CMD_NONCE,ATECC_NONCE_TEMP_UPDATE,0,
+								res_digest.buf, 32,
+								buf, 40, &res) != 0 )
+	{
+		u2f_prints("signing pass through to tempkey failed\r\n");
+		return;
+	}
+
+	if( atecc_send_recv(ATECC_CMD_SIGN,
+			ATECC_SIGN_EXTERNAL, keyslot, NULL, 0,
+			appdata.tmp, 70, &res) != 0)
+	{
+		u2f_prints("signing failed\r\n");
+		return;
+	}
+
+	dump_signature_der(res.buf);
+}
+
+
+int atecc_prep_encryption()
+{
+	struct atecc_response res;
+	memset(appdata.tmp,0,32);
+	if( atecc_send_recv(ATECC_CMD_NONCE,ATECC_NONCE_TEMP_UPDATE,0,
+								appdata.tmp, 32,
+								appdata.tmp, 40, &res) != 0 )
+	{
+		u2f_prints("pass through to tempkey failed\r\n");
+		return -1;
+	}
+	if( atecc_send_recv(ATECC_CMD_GENDIG,
+			ATECC_RW_DATA, U2F_MASTER_KEY_SLOT, NULL, 0,
+			appdata.tmp, 40, &res) != 0)
+	{
+		u2f_prints("GENDIG failed\r\n");
+		return -1;
+	}
+
+	return 0;
+}
+
+int atecc_privwrite(int keyslot, uint8_t * key, uint8_t * mask, uint8_t * digest)
+{
+	struct atecc_response res;
+	uint8_t i;
+
+
+
+	atecc_prep_encryption();
+
+	for (i=0; i<36; i++)
+	{
+		appdata.tmp[i] = key[i] ^ mask[i];
+	}
+	memmove(appdata.tmp+36, digest, 32);
+
+	if( atecc_send_recv(ATECC_CMD_PRIVWRITE,
+			ATECC_PRIVWRITE_ENC, keyslot, appdata.tmp, 68,
+			appdata.tmp, 40, &res) != 0)
+	{
+		u2f_prints("PRIVWRITE failed\r\n");
+		return -1;
+	}
+	return 0;
+}
+
+static void compute_key_hash(uint8_t * key, uint8_t * mask)
+{
+	// key must start with 4 zeros
+	memset(appdata.tmp,0,28);
+	memmove(appdata.tmp + 28, key, 36);
+
+	u2f_sha256_start();
+
+	u2f_sha256_update(mask,32);
+
+
+	appdata.tmp[0] = ATECC_CMD_PRIVWRITE;
+	appdata.tmp[1] = ATECC_PRIVWRITE_ENC;
+	appdata.tmp[2] = 2;
+	appdata.tmp[3] = 0;
+	appdata.tmp[4] = 0xee;
+	appdata.tmp[5] = 0x01;
+	appdata.tmp[6] = 0x23;
+
+	u2f_sha256_update(appdata.tmp,28 + 36);
+	u2f_sha256_finish();
 }
 
 void atecc_setup_init(uint8_t * buf)
 {
+	struct atecc_response res;
+	uint8_t * wmask =    "\x61\xd2\x71\xd7\x18\x10\x99\x99\xef\xb8\x91\x56\x76\x14\xbd\x64\xbb\x7c\x6a\x41\x84\x21\x10\xeb\xfd\x05\x73\x60\xc8\x7e\x6c\xf9\x09\xdd\x16\x46";
+	uint8_t * rmask =    "cjsuivmfduxz6ewhvijksdisdfwer5ighsrdg";
+	uint8_t private_key[36];
+	uint8_t * appid = "regohrsdighrediFlghvdsfhergregegerhg";
+	uint8_t masked_key[36];
+	int i;
+
 	// 13s watchdog
 	WDTCN = 7;
-	if (!is_locked(buf))
+	dump_config(buf);
+	atecc_setup_transport_keys();
+	u2f_prints("transport key:");
+	dump_hex(trans_key,32);
+
+	if (!is_config_locked(buf))
 	{
 		u2f_prints("setting up config...\r\n");
 		atecc_setup_config(buf);
@@ -315,6 +550,37 @@ void atecc_setup_init(uint8_t * buf)
 	{
 		u2f_prints("already locked\r\n");
 	}
+
+	// test secure read from atecc508a
+
+	//
+	// now test priv write
+
+	SHA_HMAC_KEY = U2F_MASTER_KEY_SLOT;
+	SHA_FLAGS = ATECC_SHA_HMACSTART;
+	u2f_sha256_start();
+	u2f_sha256_update(appid,32);
+	SHA_FLAGS = ATECC_SHA_HMACEND;
+	u2f_sha256_finish();
+
+	// new key generated
+	u2f_prints("hmac: "); dump_hex(res_digest.buf,32);
+
+
+	memset(private_key,0,4);
+	memmove(private_key+4, res_digest.buf, 32);
+	for (i=4; i<36; i++)
+	{
+		private_key[i] ^= rmask[i];
+	}
+
+	compute_key_hash(private_key,  wmask);
+	atecc_privwrite(U2F_TEMP_KEY_SLOT, private_key, wmask, res_digest.buf);
+
+
+	atecc_test_signature(U2F_TEMP_KEY_SLOT, buf);
+
+	//
 }
 
 // buf should be at least 40 bytes
@@ -324,6 +590,7 @@ void atecc_setup_device(struct config_msg * msg)
 	struct config_msg usbres;
 
 	static uint16_t crc = 0;
+	int i;
 	uint8_t buf[40];
 
 	memset(&usbres, 0, sizeof(struct config_msg));
@@ -341,6 +608,28 @@ void atecc_setup_device(struct config_msg * msg)
 			usbres.buf[0] = 15;
 			break;
 
+		case U2F_CONFIG_LOAD_TRANS_KEY:
+			u2f_prints("U2F_CONFIG_LOAD_TRANS_KEY\r\n");
+
+
+
+			memmove(trans_key,msg->buf,32);
+			u2f_prints("master key: "); dump_hex(trans_key,32);
+
+			usbres.buf[0] = 1;
+
+			if( atecc_send_recv(ATECC_CMD_WRITE,
+					ATECC_RW_DATA|ATECC_RW_EXT, ATECC_EEPROM_DATA_SLOT(1), trans_key, 32,
+					buf, sizeof(buf), &res) != 0)
+			{
+				usbres.buf[0] = 0;
+				u2f_prints("writing master key failed\r\n");
+			}
+
+			memset(appdata.tmp,0,32);
+
+			break;
+
 		case U2F_CONFIG_IS_BUILD:
 			u2f_prints("U2F_CONFIG_IS_BUILD\r\n");
 			usbres.buf[0] = 1;
@@ -354,19 +643,34 @@ void atecc_setup_device(struct config_msg * msg)
 			usbres.buf[0] = 1;
 			u2f_printx("got crc: ",1,crc);
 
-			if (!is_locked(buf))
+			if (!is_config_locked(buf))
 			{
 				if (atecc_send_recv(ATECC_CMD_LOCK,
 						ATECC_LOCK_CONFIG, crc, NULL, 0,
 						buf, sizeof(buf), NULL))
 				{
-					u2f_prints("ATECC_CMD_LOCK failed\r\n");
+					u2f_prints("ATECC_CMD_LOCK config failed\r\n");
 					return;
 				}
 			}
 			else
 			{
-				u2f_prints("already locked\r\n");
+				u2f_prints("config already locked\r\n");
+			}
+
+			if (!is_data_locked(buf))
+			{
+				if (atecc_send_recv(ATECC_CMD_LOCK,
+						ATECC_LOCK_DATA_OTP | 0x80, crc, NULL, 0,
+						buf, sizeof(buf), NULL))
+				{
+					u2f_prints("ATECC_CMD_LOCK data failed\r\n");
+					return;
+				}
+			}
+			else
+			{
+				u2f_prints("data already locked\r\n");
 			}
 			break;
 		case U2F_CONFIG_GENKEY:

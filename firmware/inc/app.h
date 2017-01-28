@@ -38,6 +38,8 @@
 
 // application settings
 #define U2F_ATTESTATION_KEY_SLOT	15
+#define U2F_MASTER_KEY_SLOT			1
+#define U2F_TEMP_KEY_SLOT			2
 //#define ATECC_SETUP_DEVICE
 //#define U2F_PRINT
 //#define U2F_BLINK_ERRORS
@@ -109,6 +111,7 @@ struct APP_DATA
 #define U2F_CONFIG_IS_CONFIGURED		0x82
 #define U2F_CONFIG_LOCK					0x83
 #define U2F_CONFIG_GENKEY				0x84
+#define U2F_CONFIG_LOAD_TRANS_KEY		0x85
 
 struct config_msg
 {
@@ -119,8 +122,9 @@ struct config_msg
 
 
 extern uint8_t hidmsgbuf[64];
-
 extern data struct APP_DATA appdata;
+extern code uint8_t WMASK[];
+extern code uint8_t RMASK[];
 
 void set_app_u2f_hid_msg(struct u2f_hid_msg * msg );
 

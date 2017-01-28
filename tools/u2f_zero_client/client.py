@@ -36,7 +36,7 @@
 #
 #
 from __future__ import print_function
-import time, os, sys, array, binascii, signal
+import time, os, sys, array, binascii, signal, random, hashlib
 
 try:
     import hid
@@ -56,6 +56,7 @@ class commands:
     U2F_CONFIG_IS_CONFIGURED = 0x82
     U2F_CONFIG_LOCK = 0x83
     U2F_CONFIG_GENKEY = 0x84
+    U2F_CONFIG_LOAD_TRANS_KEY = 0x85
 
     U2F_CUSTOM_RNG = 0x21
     U2F_CUSTOM_SEED = 0x22
@@ -138,53 +139,75 @@ def read_n_tries(dev,tries,num,wait):
             pass
     return dev.read(num,wait)
 
+def get_write_mask(key):
+    m = hashlib.new('sha256')
+    m.update(key + '\x15\x02\x01\x00\xee\x01\x23' + ('\x00'*57))
+    h1 = m.hexdigest()
+    m = hashlib.new('sha256')
+    m.update(binascii.unhexlify(h1))
+    h2 = m.hexdigest()
+
+    return h1 + h2[:8]
+
+
 
 def do_configure(h,output):
-    config = "\x01\x23\x6d\x10\x00\x00\x50\x00\xd7\x2c\xa5\x71\xee\xc0\x85\x00\xc0\x00\x55\x00\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\x83\xa0\xff\xff\xff\xff\x00\x00\x00\x00\xff\xff\xff\xff\x00\x00\x00\x00\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\x00\x00\x55\x55\xff\xff\x00\x00\x00\x00\x00\x00\x13\x00\x13\x00\x13\x00\x13\x00\x13\x00\x13\x00\x13\x00\x13\x00\x13\x00\x13\x00\x13\x00\x13\x00\x13\x00\x13\x00\x13\x00\x33\x00";
+    config = "\x01\x23\x6d\x10\x00\x00\x50\x00\xd7\x2c\xa5\x71\xee\xc0\x85\x00\xc0\x00\x55\x00\x83\x71\x81\x01\x83\x71\xC1\x01\x83\x71\x83\x71\x83\x71\xC1\x71\x01\x01\x83\x71\x83\x71\xC1\x71\x83\x71\x83\x71\x83\x71\x83\xa0\xff\xff\xff\xff\x00\x00\x00\x00\xff\xff\xff\xff\x00\x00\x00\x00\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\x00\x00\x55\x55\xff\xff\x00\x00\x00\x00\x00\x00\x13\x00\x3C\x00\x13\x00\x3C\x00\x13\x00\x3C\x00\x13\x00\x3C\x00\x3c\x00\x3C\x00\x13\x00\x3C\x00\x13\x00\x3C\x00\x13\x00\x33\x00"
 
 
-    h.write([0,commands.U2F_CONFIG_IS_BUILD])
-    data = h.read(64,1000)
-    if data[1] == 1:
-        print( 'Device is configured.')
-    else:
-        die('Device not configured')
+    if 1:
+        h.write([0,commands.U2F_CONFIG_IS_BUILD])
+        data = h.read(64,1000)
+        if data[1] == 1:
+            print( 'Device is configured.')
+        else:
+            die('Device not configured')
 
-    time.sleep(0.250)
+        time.sleep(0.250)
 
-    h.write([0,commands.U2F_CONFIG_GET_SERIAL_NUM])
-    while True:
+        h.write([0,commands.U2F_CONFIG_GET_SERIAL_NUM])
+        while True:
+            data = read_n_tries(h,5,64,1000)
+            l = data[1]
+            print( 'read %i bytes' % l)
+            if data[0] == commands.U2F_CONFIG_GET_SERIAL_NUM:
+                break
+        print( data)
+        config = array.array('B',data[2:2+l]).tostring() + config[l:]
+        print( 'conf: ', binascii.hexlify(config))
+        time.sleep(0.250)
+
+
+        crc = get_crc(config)
+        print( 'crc is ', [hex(x) for x in crc])
+        h.write([0,commands.U2F_CONFIG_LOCK] + crc)
         data = read_n_tries(h,5,64,1000)
-        l = data[1]
-        print( 'read %i bytes' % l)
-        if data[0] == commands.U2F_CONFIG_GET_SERIAL_NUM:
-            break
-    print( data)
-    config = array.array('B',data[2:2+l]).tostring() + config[l:]
-    print( 'conf: ', binascii.hexlify(config))
-    time.sleep(0.250)
+
+        if data[1] == 1:
+            print( 'locked eeprom with crc ',crc)
+        else:
+            die('not locked')
+
+        time.sleep(0.250)
+
+        h.write([0,commands.U2F_CONFIG_GENKEY])
+        data = read_n_tries(h,5,64,1000)
+        data = array.array('B',data).tostring()
+        data = binascii.hexlify(data)
+        print( 'generated key:')
+        print( data)
+        open(output,'w+').write(data)
 
 
-    crc = get_crc(config)
-    print( 'crc is ', [hex(x) for x in crc])
-    h.write([0,commands.U2F_CONFIG_LOCK] + crc)
-    data = read_n_tries(h,5,64,1000)
+    trans_key = [random.randint(0,255)&0xff for x in range(0,32)]
+    h.write([0,commands.U2F_CONFIG_LOAD_TRANS_KEY]+trans_key)
 
-    if data[1] == 1:
-        print( 'locked eeprom with crc ',crc)
-    else:
-        die('not locked')
-
-    time.sleep(0.250)
-
-    h.write([0,commands.U2F_CONFIG_GENKEY])
-    data = read_n_tries(h,5,64,1000)
-    data = array.array('B',data).tostring()
-    data = binascii.hexlify(data)
-    print( 'generated key:')
-    print( data)
-    open(output,'w+').write(data)
+    mask = get_write_mask(''.join([chr(x) for x in trans_key]))
+    print('write mask: ', mask)
+    open(output+'_mask','w+').write(mask)
     print( 'Done')
+
+
 
 def do_rng(h):
     cmd = [0,0xff,0xff,0xff,0xff, commands.U2F_CUSTOM_RNG, 0,0]

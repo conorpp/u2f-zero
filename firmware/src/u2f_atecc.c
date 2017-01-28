@@ -65,124 +65,11 @@ static uint8_t* resbuf = (uint8_t*)&res;
 static uint8_t resseq = 0;
 static uint8_t serious = 0;
 
-// 0 if same, 1 otherwise
-static uint8_t key_same(struct key_handle * k1, struct key_handle * k2)
-{
-	uint8_t i;
-	if (k1->index != k2->index) return 1;
-	for (i=0; i < U2F_KEY_HANDLE_SIZE-1; i++)
-	{
-		if (k1->entropy[i] != k2->entropy[i])
-		{
-			return 1;
-		}
-	}
-	return 0;
-}
 
-static void flush_key_store()
-{
-	eeprom_erase(U2F_EEPROM_CONFIG);
-	eeprom_write(U2F_EEPROM_CONFIG, (uint8_t* )&key_store, sizeof(struct key_storage_header));
-}
 
-static void new_app_id(uint8_t slot, uint8_t * appid)
-{
-	// (slot * 32) & ~0x1f
-	eeprom_read(U2F_EEPROM_APP_IDS + ((slot << 5) & 0x1f), appdata.tmp, 64);
-	eeprom_erase(U2F_EEPROM_APP_IDS + (slot << 5));
-	eeprom_write(U2F_EEPROM_APP_IDS + (slot << 5), appid, 32);
-	if (slot & 1)
-	{
-		// restore even aligned id
-		eeprom_write(U2F_EEPROM_APP_IDS + (slot << 5) - 32, appdata.tmp, 32);
-	}
-	else
-	{
-		// restore odd aligned id
-		eeprom_write(U2F_EEPROM_APP_IDS + (slot << 5) + 32, appdata.tmp + 32, 32);
-	}
-}
-
-int8_t u2f_appid_eq(uint8_t * handle, uint8_t * appid)
-{
-	uint8_t slot = ((struct key_handle *)handle)->index - 1;
-	eeprom_read(U2F_EEPROM_APP_IDS + (slot << 5), appdata.tmp, 32);
-	return memcmp(appdata.tmp, appid, 32);
-}
-
-int8_t u2f_wipe_keys()
-{
-	uint8_t presses = 5;
-	serious = 1;
-	while(presses--)
-	{
-		if (u2f_get_user_feedback() != 0)
-		{
-			goto nowipe;
-		}
-	}
-
-	// wipe
-	serious = 0;
-	eeprom_erase(U2F_EEPROM_CONFIG);
-	u2f_init();
-	return 0;
-
-	nowipe:
-	serious = 0;
-	return -1;
-}
 
 void u2f_init()
 {
-	int8_t i,ec;
-	data uint8_t xdata * clear = 0;
-	struct atecc_response res;
-
-	eeprom_read(U2F_EEPROM_CONFIG, (uint8_t* )&key_store, sizeof(struct key_storage_header));
-
-	// initialize key handles
-	if (key_store.num_keys != U2F_NUM_KEYS)
-	{
-		watchdog();
-
-
-		for (i=0; i < U2F_NUM_KEYS; i++)
-		{
-			watchdog();
-			ec = atecc_send_recv(ATECC_CMD_RNG,ATECC_RNG_P1,ATECC_RNG_P2,
-							NULL, 0,
-							appdata.tmp,
-							sizeof(appdata.tmp), &res);
-			if (ec != 0)
-			{
-				u2f_printb("atecc_send_recv failed ",2,i,-ec);
-
-				// erase eeprom
-				eeprom_erase(U2F_EEPROM_CONFIG);
-
-				// erase ram
-				for (i=0; i<0x400;i++)
-				{
-					*(clear++) = 0x0;
-				}
-				// reset
-				reboot();
-			}
-			res.buf[0] = i+1;
-
-
-			eeprom_write(U2F_KEYS_ADDR + i * U2F_KEY_HANDLE_SIZE,
-							res.buf, U2F_KEY_HANDLE_SIZE);
-		}
-
-		key_store.num_keys = U2F_NUM_KEYS;
-		key_store.valid_keys = 0;
-		key_store.num_issued = 0;
-		flush_key_store();
-
-	}
 
 }
 
@@ -239,14 +126,17 @@ int8_t u2f_get_user_feedback()
 
 static uint8_t shabuf[70];
 static uint8_t shaoffset = 0;
+uint8_t SHA_FLAGS = 0;
+uint8_t SHA_HMAC_KEY = 0;
 static struct atecc_response res_digest;
 
 void u2f_sha256_start()
 {
 	shaoffset = 0;
 	atecc_send_recv(ATECC_CMD_SHA,
-			ATECC_SHA_START, 0,NULL,0,
+			SHA_FLAGS, SHA_HMAC_KEY,NULL,0,
 			appdata.tmp, sizeof(appdata.tmp), NULL);
+	SHA_HMAC_KEY = 0;
 }
 
 
@@ -270,98 +160,168 @@ void u2f_sha256_update(uint8_t * buf, uint8_t len)
 
 void u2f_sha256_finish()
 {
+	if (SHA_FLAGS == ATECC_SHA_START) SHA_FLAGS = ATECC_SHA_END;
 	atecc_send_recv(ATECC_CMD_SHA,
-			ATECC_SHA_END, shaoffset,shabuf,shaoffset,
+			SHA_FLAGS, shaoffset,shabuf,shaoffset,
 			shabuf, sizeof(shabuf), &res_digest);
+	SHA_FLAGS = ATECC_SHA_START;
 }
 
-
-int8_t u2f_ecdsa_sign(uint8_t * dest, uint8_t * handle)
+static int atecc_prep_encryption()
 {
 	struct atecc_response res;
-	struct key_handle k;
-	uint16_t keyslot = (uint16_t)((struct key_handle *)handle)->index;
-	watchdog();
-	if (keyslot > U2F_NUM_KEYS)
+	memset(appdata.tmp,0,32);
+	if( atecc_send_recv(ATECC_CMD_NONCE,ATECC_NONCE_TEMP_UPDATE,0,
+								appdata.tmp, 32,
+								appdata.tmp, 40, &res) != 0 )
 	{
+		u2f_prints("pass through to tempkey failed\r\n");
 		return -1;
 	}
-	if (keyslot == 0)
+	if( atecc_send_recv(ATECC_CMD_GENDIG,
+			ATECC_RW_DATA, U2F_MASTER_KEY_SLOT, NULL, 0,
+			appdata.tmp, 40, &res) != 0)
 	{
-		keyslot = U2F_ATTESTATION_KEY_SLOT;
+		u2f_prints("GENDIG failed\r\n");
+		return -1;
 	}
-	else
-	{
-		keyslot--;
-	}
-
-	atecc_send_recv(ATECC_CMD_SIGN,
-			ATECC_SIGN_EXTERNAL, keyslot, NULL, 0,
-			appdata.tmp, sizeof(appdata.tmp), &res);
-
-	if (keyslot != U2F_ATTESTATION_KEY_SLOT)
-	{
-		eeprom_read(U2F_KEY_ADDR(keyslot), (uint8_t* )&k, U2F_KEY_HANDLE_SIZE);
-
-		if (key_same((struct key_handle *)handle, &k) != 0)
-		{
-			return -1;
-		}
-	}
-
-	memmove(dest, res.buf, 64);
 
 	return 0;
 }
+
+static void compute_key_hash(uint8_t * key, uint8_t * mask)
+{
+	// key must start with 4 zeros
+	memset(appdata.tmp,0,28);
+	memmove(appdata.tmp + 28, key, 36);
+
+	u2f_sha256_start();
+
+	u2f_sha256_update(mask,32);
+
+
+	appdata.tmp[0] = ATECC_CMD_PRIVWRITE;
+	appdata.tmp[1] = ATECC_PRIVWRITE_ENC;
+	appdata.tmp[2] = 2;
+	appdata.tmp[3] = 0;
+	appdata.tmp[4] = 0xee;
+	appdata.tmp[5] = 0x01;
+	appdata.tmp[6] = 0x23;
+
+	u2f_sha256_update(appdata.tmp,28 + 36);
+	u2f_sha256_finish();
+}
+
+static int atecc_privwrite(int keyslot, uint8_t * key, uint8_t * mask, uint8_t * digest)
+{
+	struct atecc_response res;
+	uint8_t i;
+
+
+
+	atecc_prep_encryption();
+
+	for (i=0; i<36; i++)
+	{
+		appdata.tmp[i] = key[i] ^ mask[i];
+	}
+	memmove(appdata.tmp+36, digest, 32);
+
+	if( atecc_send_recv(ATECC_CMD_PRIVWRITE,
+			ATECC_PRIVWRITE_ENC, keyslot, appdata.tmp, 68,
+			appdata.tmp, 40, &res) != 0)
+	{
+		u2f_prints("PRIVWRITE failed\r\n");
+		return -1;
+	}
+	return 0;
+}
+
+
+int8_t u2f_ecdsa_sign(uint8_t * dest, uint8_t * handle, uint8_t * appid)
+{
+	struct atecc_response res;
+	uint16_t slot = U2F_TEMP_KEY_SLOT;
+	if (handle == U2F_ATTESTATION_HANDLE)
+	{
+		slot = U2F_ATTESTATION_KEY_SLOT;
+	}
+
+	if( atecc_send_recv(ATECC_CMD_SIGN,
+			ATECC_SIGN_EXTERNAL, slot, NULL, 0,
+			appdata.tmp, 70, &res) != 0)
+	{
+		return -1;
+	}
+	memmove(dest, res.buf, 64);
+	return 0;
+}
+
 
 // bad if this gets interrupted
 int8_t u2f_new_keypair(uint8_t * handle, uint8_t * appid, uint8_t * pubkey)
 {
 	struct atecc_response res;
-	struct key_handle k;
-	uint8_t keyslot = key_store.num_issued;
-	if (keyslot > U2F_NUM_KEYS-1)
+	uint8_t private_key[36];
+	int i;
+
+	SHA_HMAC_KEY = U2F_MASTER_KEY_SLOT;
+	SHA_FLAGS = ATECC_SHA_HMACSTART;
+	u2f_sha256_start();
+	u2f_sha256_update(appid,32);
+	SHA_FLAGS = ATECC_SHA_HMACEND;
+	u2f_sha256_finish();
+
+
+	memset(private_key,0,4);
+	memmove(private_key+4, res_digest.buf, 32);
+
+	for (i=4; i<36; i++)
 	{
-		app_wink(U2F_DEFAULT_COLOR_WINK_OUT_OF_SPACE);
+		private_key[i] ^= RMASK[i];
+	}
+
+	compute_key_hash(private_key,  WMASK);
+	memmove(handle, res_digest.buf, 32);  // size of key handle must be 32
+
+	if ( atecc_privwrite(U2F_TEMP_KEY_SLOT, private_key, WMASK, handle) != 0)
+	{
 		return -1;
 	}
-	watchdog();
-	atecc_send_recv(ATECC_CMD_GENKEY,
-			ATECC_GENKEY_PRIVATE, keyslot, NULL, 0,
-			appdata.tmp, sizeof(appdata.tmp), &res);
+
+	if ( atecc_send_recv(ATECC_CMD_GENKEY,
+			ATECC_GENKEY_PUBLIC, U2F_TEMP_KEY_SLOT, NULL, 0,
+			appdata.tmp, 70, &res) != 0)
+	{
+		return -1;
+	}
 
 	memmove(pubkey, res.buf, 64);
-
-	eeprom_read(U2F_KEY_ADDR(keyslot), (uint8_t* )&k, U2F_KEY_HANDLE_SIZE);
-	if (k.index-1 != keyslot)
-	{
-
-		k.index = keyslot;
-		set_app_error(ERROR_BAD_KEY_STORE);
-	}
-	memmove(handle, &k, U2F_KEY_HANDLE_SIZE);
-	key_store.num_issued++;
-	flush_key_store();
-	new_app_id(keyslot, appid);
 
 	return 0;
 }
 
-int8_t u2f_load_key(uint8_t * handle)
+int8_t u2f_load_key(uint8_t * handle, uint8_t * appid)
 {
-	struct key_handle k;
-	uint8_t keyslot = handle[0]-1;
-	if (keyslot >= U2F_NUM_KEYS)
-	{
-		return -1;
-	}
-	eeprom_read(U2F_KEY_ADDR(keyslot), (uint8_t* )&k, U2F_KEY_HANDLE_SIZE);
+	struct atecc_response res;
+	uint8_t private_key[36];
+	int i;
 
-	if (key_same((struct key_handle *)handle, &k) != 0)
+	SHA_HMAC_KEY = U2F_MASTER_KEY_SLOT;
+	SHA_FLAGS = ATECC_SHA_HMACSTART;
+	u2f_sha256_start();
+	u2f_sha256_update(appid,32);
+	SHA_FLAGS = ATECC_SHA_HMACEND;
+	u2f_sha256_finish();
+
+	memset(private_key,0,4);
+	memmove(private_key+4, res_digest.buf, 32);
+	for (i=4; i<36; i++)
 	{
-		return -1;
+		private_key[i] ^= RMASK[i];
 	}
-	return 0;
+
+	return atecc_privwrite(U2F_TEMP_KEY_SLOT, private_key, WMASK, handle);
 }
 
 uint32_t u2f_count()

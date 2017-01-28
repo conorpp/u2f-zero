@@ -82,8 +82,10 @@ static struct hid_layer_param
 
 } hid_layer;
 
+#ifdef U2F_SUPPORT_HID_LOCK
 uint32_t _hid_lockt = 0;
 uint32_t _hid_lock_cid = 0;
+#endif
 
 static struct CID CIDS[5];
 
@@ -330,7 +332,16 @@ static uint8_t hid_u2f_parse(struct u2f_hid_msg* req)
 			init_res->version_major = 2;
 			init_res->version_minor = 0;
 			init_res->version_build = 0;
+
+#ifdef U2F_SUPPORT_WINK && CAPABILITY_LOCK
 			init_res->cflags = CAPABILITY_WINK | CAPABILITY_LOCK;
+#elif U2F_SUPPORT_WINK
+			init_res->cflags = CAPABILITY_WINK;
+#elif CAPABILITY_LOCK
+			init_res->cflags = CAPABILITY_LOCK;
+#else
+			init_res->cflags = 0;
+#endif
 
 			// write back the same data nonce
 			u2f_hid_writeback(req->pkt.init.payload, 8);
@@ -413,7 +424,7 @@ static uint8_t hid_u2f_parse(struct u2f_hid_msg* req)
 
 
 			break;
-
+#ifdef U2F_SUPPORT_WINK
 		case U2FHID_WINK:
 			if (U2FHID_LEN(req) != 0)
 			{
@@ -425,6 +436,8 @@ static uint8_t hid_u2f_parse(struct u2f_hid_msg* req)
 			u2f_hid_flush();
 			app_wink(U2F_COLOR_WINK);
 			break;
+#endif
+#ifdef U2F_SUPPORT_HID_LOCK
 		case U2FHID_LOCK:
 
 			secs = req->pkt.init.payload[0];
@@ -451,6 +464,7 @@ static uint8_t hid_u2f_parse(struct u2f_hid_msg* req)
 				u2f_hid_flush();
 			}
 			break;
+#endif
 		default:
 			set_app_error(ERROR_HID_INVALID_CMD);
 			stamp_error(hid_layer.current_cid, ERR_INVALID_CMD);
@@ -553,6 +567,7 @@ void u2f_hid_request(struct u2f_hid_msg* req)
 
 
 	// ignore if we locked to a different cid
+#ifdef U2F_SUPPORT_HID_LOCK
 	if(hid_is_locked() && req->pkt.init.cmd != U2FHID_INIT)
 	{
 		if (!hid_is_lock_cid(req->cid))
@@ -561,6 +576,7 @@ void u2f_hid_request(struct u2f_hid_msg* req)
 			return;
 		}
 	}
+#endif
 
 	if ((req->pkt.init.cmd & TYPE_INIT) && !cid->busy)
 	{

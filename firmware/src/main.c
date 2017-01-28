@@ -50,14 +50,11 @@ struct u2f_hid_msg * hid_msg;
 
 static void init(struct APP_DATA* ap)
 {
-	memset(ap,0, sizeof(struct APP_DATA));
+
 	u2f_hid_init();
 	smb_init();
 	atecc_idle();
-#ifndef ATECC_SETUP_DEVICE
-	eeprom_init();
 
-#endif
 	U2F_BUTTON_VAL = 1;
 	state = APP_NOTHING;
 	error = ERROR_NOTHING;
@@ -85,8 +82,10 @@ void set_app_state(APP_STATE s)
 
 void app_wink(uint32_t c)
 {
+#ifdef U2F_SUPPORT_WINK
 	winkc = c;
 	set_app_state(APP_WINK);
+#endif
 }
 
 void set_app_u2f_hid_msg(struct u2f_hid_msg * msg )
@@ -143,6 +142,8 @@ int16_t main(void) {
 	uint8_t winks = 0, light = 1, grad_dir = 0;
 	int8_t grad_inc = 0;
 	int8_t ii;
+	data uint8_t xdata * clear = 0;
+	int8_t i;
 
 	enter_DefaultMode_from_RESET();
 	rgb_hex(0);
@@ -173,11 +174,6 @@ int16_t main(void) {
 	while (1) {
 
 		watchdog();
-
-		if (ms_since(ms_heart,500))
-		{
-			u2f_printl("ms ", 1, get_ms());
-		}
 
 		if (!USBD_EpIsBusy(EP1OUT) && !USBD_EpIsBusy(EP1IN) && state != APP_HID_MSG)
 		{
@@ -226,6 +222,7 @@ int16_t main(void) {
 				if (state == APP_HID_MSG)
 					state = APP_NOTHING;
 				break;
+#ifdef U2F_SUPPORT_WINK
 			case APP_WINK:
 				// Do wink pattern for USB HID wink request
 				rgb_hex(winkc);
@@ -255,6 +252,7 @@ int16_t main(void) {
 					state = APP_NOTHING;
 				}
 				break;
+#endif
 		}
 
 		if (error)
@@ -278,6 +276,11 @@ int16_t main(void) {
 			}
 #else
 			rgb_hex(U2F_DEFAULT_COLOR_ERROR);
+			// wipe ram
+			for (i=0; i<0x400;i++)
+			{
+				*(clear++) = 0x0;
+			}
 #endif
 			error = 0;
 			while(!ms_since(ms_heart,500))

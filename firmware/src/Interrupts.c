@@ -205,7 +205,7 @@ SI_INTERRUPT (SMBUS0_ISR, SMBUS0_IRQn)
 
 	fail:
 		u2f_printb("smbus fail ",1,bus);
-		restart_bus();
+		//restart_bus();
 		SMB0CN0_SI = 0;
 }
 
@@ -214,7 +214,7 @@ SI_INTERRUPT (SMBUS0_ISR, SMBUS0_IRQn)
 // The SMBus is disabled and re-enabled here
 SI_INTERRUPT (TIMER3_ISR, TIMER3_IRQn)
 {
-	restart_bus();
+	//restart_bus();
 }
 
 

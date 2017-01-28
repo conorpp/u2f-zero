@@ -22,7 +22,7 @@
 //==============================================================================
 // enter_DefaultMode_from_RESET
 //==============================================================================
-extern void enter_DefaultMode_from_RESET(void) {
+void enter_DefaultMode_from_RESET(void) {
 	// $[Config Calls]
 	// Save the SFRPAGE
 	uint8_t SFRPAGE_save = SFRPAGE;
@@ -54,7 +54,7 @@ extern void enter_DefaultMode_from_RESET(void) {
 //================================================================================
 // WDT_0_enter_DefaultMode_from_RESET
 //================================================================================
-extern void WDT_0_enter_DefaultMode_from_RESET(void) {
+static void WDT_0_enter_DefaultMode_from_RESET(void) {
 	// $[WDTCN - Watchdog Timer Control]
 	SFRPAGE = 0x00;
 	// [WDTCN - Watchdog Timer Control]$
@@ -64,7 +64,7 @@ extern void WDT_0_enter_DefaultMode_from_RESET(void) {
 //================================================================================
 // VREG_0_enter_DefaultMode_from_RESET
 //================================================================================
-extern void VREG_0_enter_DefaultMode_from_RESET(void) {
+static void VREG_0_enter_DefaultMode_from_RESET(void) {
 	// $[REG0CN - Voltage Regulator 0 Control]
 	// [REG0CN - Voltage Regulator 0 Control]$
 
@@ -85,7 +85,7 @@ extern void VREG_0_enter_DefaultMode_from_RESET(void) {
 //================================================================================
 // PORTS_0_enter_DefaultMode_from_RESET
 //================================================================================
-extern void PORTS_0_enter_DefaultMode_from_RESET(void) {
+static void PORTS_0_enter_DefaultMode_from_RESET(void) {
 	// $[P0 - Port 0 Pin Latch]
 	// [P0 - Port 0 Pin Latch]$
 
@@ -136,7 +136,7 @@ extern void PORTS_0_enter_DefaultMode_from_RESET(void) {
 //================================================================================
 // PORTS_1_enter_DefaultMode_from_RESET
 //================================================================================
-extern void PORTS_1_enter_DefaultMode_from_RESET(void) {
+static void PORTS_1_enter_DefaultMode_from_RESET(void) {
 	// $[P1 - Port 1 Pin Latch]
 	// [P1 - Port 1 Pin Latch]$
 
@@ -173,7 +173,7 @@ extern void PORTS_1_enter_DefaultMode_from_RESET(void) {
 //================================================================================
 // PORTS_2_enter_DefaultMode_from_RESET
 //================================================================================
-extern void PORTS_2_enter_DefaultMode_from_RESET(void) {
+static void PORTS_2_enter_DefaultMode_from_RESET(void) {
 	// $[P2 - Port 2 Pin Latch]
 	/*
 	 // B0 (Port 2 Bit 0 Latch) = HIGH (P2.0 is high. Set P2.0 to drive or
@@ -228,7 +228,7 @@ extern void PORTS_2_enter_DefaultMode_from_RESET(void) {
 //================================================================================
 // PBCFG_0_enter_DefaultMode_from_RESET
 //================================================================================
-extern void PBCFG_0_enter_DefaultMode_from_RESET(void) {
+static void PBCFG_0_enter_DefaultMode_from_RESET(void) {
 	// $[XBR2 - Port I/O Crossbar 2]
 	/*
 	 // Weak Pullups enabled 
@@ -278,7 +278,7 @@ extern void PBCFG_0_enter_DefaultMode_from_RESET(void) {
 //================================================================================
 // CIP51_0_enter_DefaultMode_from_RESET
 //================================================================================
-extern void CIP51_0_enter_DefaultMode_from_RESET(void) {
+static void CIP51_0_enter_DefaultMode_from_RESET(void) {
 	// $[PFE0CN - Prefetch Engine Control]
 	/*
 	 // Enable the prefetch engine 
@@ -293,7 +293,7 @@ extern void CIP51_0_enter_DefaultMode_from_RESET(void) {
 //================================================================================
 // CLOCK_0_enter_DefaultMode_from_RESET
 //================================================================================
-extern void CLOCK_0_enter_DefaultMode_from_RESET(void) {
+static void CLOCK_0_enter_DefaultMode_from_RESET(void) {
 	// $[HFOSC1 Setup]
 	// Ensure SYSCLK is > 24 MHz before switching to HFOSC1
 	SFRPAGE = 0x00;
@@ -317,7 +317,7 @@ extern void CLOCK_0_enter_DefaultMode_from_RESET(void) {
 //================================================================================
 // TIMER01_0_enter_DefaultMode_from_RESET
 //================================================================================
-extern void TIMER01_0_enter_DefaultMode_from_RESET(void) {
+static void TIMER01_0_enter_DefaultMode_from_RESET(void) {
 	// $[Timer Initialization]
 	//Save Timer Configuration
 	uint8_t TCON_save;
@@ -781,8 +781,3 @@ extern void PCACH_2_enter_DefaultMode_from_RESET(void) {
 	// [PCA0 Settings Restore]$
 
 }
-
-extern void LFOSC_0_enter_DefaultMode_from_RESET(void) {
-
-}
-

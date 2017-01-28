@@ -43,6 +43,7 @@ uint8_t custom_command(struct u2f_hid_msg * msg)
 
 	switch(msg->pkt.init.cmd)
 	{
+#ifdef U2F_SUPPORT_RNG_CUSTOM
 		case U2F_CUSTOM_GET_RNG:
 			if (atecc_send_recv(ATECC_CMD_RNG,ATECC_RNG_P1,ATECC_RNG_P2,
 				NULL, 0,
@@ -60,6 +61,8 @@ uint8_t custom_command(struct u2f_hid_msg * msg)
 			}
 
 			break;
+#endif
+#ifdef U2F_SUPPORT_SEED_CUSTOM
 		case U2F_CUSTOM_SEED_RNG:
 			ec = atecc_send_recv(ATECC_CMD_NONCE,ATECC_NONCE_RNG_UPDATE,0,
 							msg->pkt.init.payload, 20,
@@ -69,13 +72,14 @@ uint8_t custom_command(struct u2f_hid_msg * msg)
 			msg->pkt.init.payload[0] = ec == 0 ? 1 : 0;
 			usb_write((uint8_t*)msg, 64);
 			break;
-
+#endif
+#ifdef U2F_SUPPORT_WINK
 		case U2F_CUSTOM_WINK:
 
 			app_wink(U2F_COLOR_WINK);
 
 			break;
-
+#endif
 		default:
 			return 0;
 	}

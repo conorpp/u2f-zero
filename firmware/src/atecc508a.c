@@ -174,6 +174,9 @@ int8_t atecc_send_recv(uint8_t cmd, uint8_t p1, uint16_t p2,
 	return 0;
 }
 
+
+#ifdef ATECC_SETUP_DEVICE
+
 int8_t atecc_write_eeprom(uint8_t base, uint8_t offset, uint8_t* srcbuf, uint8_t len)
 {
 	uint8_t buf[7];
@@ -204,7 +207,7 @@ int8_t atecc_write_eeprom(uint8_t base, uint8_t offset, uint8_t* srcbuf, uint8_t
 	return 0;
 }
 
-#ifdef ATECC_SETUP_DEVICE
+
 
 static uint8_t shabuf[70];
 static uint8_t shaoffset = 0;

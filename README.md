@@ -3,7 +3,7 @@
 U2F Zero
 ========
 
-U2F Zero is an open source U2F token for 2 factor authentication.  It is implemented securely.  It works with Google accounts, Github, Duo, and anything else supporting U2F.  It can be used with 15 services at a time.
+U2F Zero is an open source U2F token for 2 factor authentication.  It is implemented securely.  It works with Google accounts, Github, Duo, and anything else supporting U2F.  The latest version uses key derivation and has no limit on registrations.
 
 ![](http://i.imgur.com/dQpo9wC.jpg "The door keys are not used")
 

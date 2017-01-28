@@ -47,6 +47,15 @@ except:
     print('     pip install hidapi')
     sys.exit(1)
 
+try:
+    import ecdsa
+except:
+    print('python ecdsa module is required')
+    print('try running: ')
+    print('     pip install ecdsa')
+    sys.exit(1)
+
+
 
 cmd_prefix = [0, 0xff,0xff,0xff,0xff]
 
@@ -57,6 +66,8 @@ class commands:
     U2F_CONFIG_LOCK = 0x83
     U2F_CONFIG_GENKEY = 0x84
     U2F_CONFIG_LOAD_TRANS_KEY = 0x85
+    U2F_CONFIG_LOAD_WRITE_KEY = 0x86
+    U2F_CONFIG_LOAD_ATTEST_KEY = 0x87
 
     U2F_CUSTOM_RNG = 0x21
     U2F_CUSTOM_SEED = 0x22
@@ -67,7 +78,9 @@ class commands:
 if len(sys.argv) not in [2,3,4,5,6]:
     print('usage: %s <action> [<arguments>] [-s serial-number]' % sys.argv[0])
     print('actions: ')
-    print('     configure <output-file>: setup the device configuration.  must specify pubkey output.')
+    print("""   configure <ecc-private-key> <output-file>: setup the device configuration.  Specify ECC P-256 private
+                                                           key for token attestation.  Specify temporary output file for
+                                                           generated keys.""")
     print('     rng: Continuously dump random numbers from the devices hardware RNG.')
     print('     seed: update the hardware RNG seed with input from stdin')
     print('     wipe: wipe all registered keys on U2F Zero.  Must also press button 5 times.  Not reversible.')
@@ -151,8 +164,8 @@ def get_write_mask(key):
 
 
 
-def do_configure(h,output):
-    config = "\x01\x23\x6d\x10\x00\x00\x50\x00\xd7\x2c\xa5\x71\xee\xc0\x85\x00\xc0\x00\x55\x00\x83\x71\x81\x01\x83\x71\xC1\x01\x83\x71\x83\x71\x83\x71\xC1\x71\x01\x01\x83\x71\x83\x71\xC1\x71\x83\x71\x83\x71\x83\x71\x83\xa0\xff\xff\xff\xff\x00\x00\x00\x00\xff\xff\xff\xff\x00\x00\x00\x00\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\x00\x00\x55\x55\xff\xff\x00\x00\x00\x00\x00\x00\x13\x00\x3C\x00\x13\x00\x3C\x00\x13\x00\x3C\x00\x13\x00\x3C\x00\x3c\x00\x3C\x00\x13\x00\x3C\x00\x13\x00\x3C\x00\x13\x00\x33\x00"
+def do_configure(h,pemkey,output):
+    config = "\x01\x23\x6d\x10\x00\x00\x50\x00\xd7\x2c\xa5\x71\xee\xc0\x85\x00\xc0\x00\x55\x00\x83\x71\x81\x01\x83\x71\xC1\x01\x83\x71\x83\x71\x83\x71\xC1\x71\x01\x01\x83\x71\x83\x71\xC1\x71\x83\x71\x83\x71\x83\x71\x83\x71\xff\xff\xff\xff\x00\x00\x00\x00\xff\xff\xff\xff\x00\x00\x00\x00\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\x00\x00\x55\x55\xff\xff\x00\x00\x00\x00\x00\x00\x13\x00\x3C\x00\x13\x00\x3C\x00\x13\x00\x3C\x00\x13\x00\x3C\x00\x3c\x00\x3C\x00\x13\x00\x3C\x00\x13\x00\x3C\x00\x13\x00\x33\x00"
 
 
     h.write([0,commands.U2F_CONFIG_IS_BUILD])
@@ -192,18 +205,39 @@ def do_configure(h,output):
     h.write([0,commands.U2F_CONFIG_GENKEY])
     data = read_n_tries(h,5,64,1000)
     data = array.array('B',data).tostring()
-    data = binascii.hexlify(data)
+    pubkey = binascii.hexlify(data)
 
     wkey = [random.randint(0,255)&0xff for x in range(0,32)]
     rkey = [random.randint(0,255)&0xff for x in range(0,32)]
     h.write([0,commands.U2F_CONFIG_LOAD_TRANS_KEY]+wkey)
+    data = read_n_tries(h,5,64,1000)
+    if data[1] != 1:
+        die('failed writing master key')
+
 
     wkey = get_write_mask(''.join([chr(x) for x in wkey]))
     rkey = get_write_mask(''.join([chr(x) for x in rkey]))[:64]
 
+
+    h.write([0,commands.U2F_CONFIG_LOAD_WRITE_KEY]+[ord(x) for x in binascii.unhexlify(wkey)])
+    data = read_n_tries(h,5,64,1000)
+    if data[1] != 1:
+        die('failed loading write key')
+
+    attestkey = ecdsa.SigningKey.from_pem(open(pemkey).read())
+    if len(attestkey.to_string()) != 32:
+        die('Incorrect key type.  Must be prime256v1 ECC private key in PEM format.')
+
+
+    h.write([0,commands.U2F_CONFIG_LOAD_ATTEST_KEY] + [ord(x) for x in attestkey.to_string()])
+    data = read_n_tries(h,5,64,1000)
+    if data[1] != 1:
+        die('failed loading attestation key')
+
+
     print('writing keys to ', output)
     print(data)
-    open(output,'w+').write(data +'\n' + wkey + '\n' + rkey)
+    open(output,'w+').write(pubkey +'\n' + wkey + '\n' + rkey)
 
     print( 'Done')
 
@@ -286,11 +320,11 @@ if __name__ == '__main__':
 
     if action == 'configure':
         h = open_u2f(SN)
-        if len(sys.argv) not in [3,5]:
-            print( 'error: need output file')
+        if len(sys.argv) not in [4,6]:
+            print( 'error: need ecc private key and an output file')
             h.close()
             sys.exit(1)
-        do_configure(h, sys.argv[2])
+        do_configure(h, sys.argv[2],sys.argv[3])
     elif action == 'rng':
         h = open_u2f(SN)
         do_rng(h)

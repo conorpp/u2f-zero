@@ -347,7 +347,7 @@ static void atecc_setup_config(uint8_t* buf)
 	uint8_t * slot_configs = "\x83\x71\x81\x01\x83\x71\xC1\x01\x83\x71"
 							 "\x83\x71\x83\x71\xC1\x71\x01\x01\x83\x71"
 							 "\x83\x71\xC1\x71\x83\x71\x83\x71\x83\x71"
-							 "\x83\xa0";
+							 "\x83\x71";
 
 	uint8_t * key_configs = "\x13\x00\x3C\x00\x13\x00\x3C\x00\x13\x00"
 							"\x3C\x00\x13\x00\x3C\x00\x3C\x00\x3C\x00"
@@ -373,21 +373,8 @@ static void atecc_setup_config(uint8_t* buf)
 	dump_config(buf);
 }
 
-static uint8_t trans_key[32];
-
-static void atecc_setup_transport_keys()
-{
-
-	struct atecc_response res;
-
-	atecc_send_recv(ATECC_CMD_RNG,ATECC_RNG_P1,ATECC_RNG_P2,
-					NULL, 0,
-					appdata.tmp,
-					sizeof(appdata.tmp), &res);
-
-	memmove(trans_key, res.buf, 32);
-
-}
+static uint8_t trans_key[36];
+static uint8_t write_key[36];
 
 
 void atecc_test_enc_read(uint8_t * buf)
@@ -476,7 +463,7 @@ int atecc_prep_encryption()
 	return 0;
 }
 
-int atecc_privwrite(int keyslot, uint8_t * key, uint8_t * mask, uint8_t * digest)
+int atecc_privwrite(uint16_t keyslot, uint8_t * key, uint8_t * mask, uint8_t * digest)
 {
 	struct atecc_response res;
 	uint8_t i;
@@ -501,7 +488,7 @@ int atecc_privwrite(int keyslot, uint8_t * key, uint8_t * mask, uint8_t * digest
 	return 0;
 }
 
-static void compute_key_hash(uint8_t * key, uint8_t * mask)
+static void compute_key_hash(uint8_t * key, uint8_t * mask, int slot)
 {
 	// key must start with 4 zeros
 	memset(appdata.tmp,0,28);
@@ -514,7 +501,7 @@ static void compute_key_hash(uint8_t * key, uint8_t * mask)
 
 	appdata.tmp[0] = ATECC_CMD_PRIVWRITE;
 	appdata.tmp[1] = ATECC_PRIVWRITE_ENC;
-	appdata.tmp[2] = 2;
+	appdata.tmp[2] = slot;
 	appdata.tmp[3] = 0;
 	appdata.tmp[4] = 0xee;
 	appdata.tmp[5] = 0x01;
@@ -526,21 +513,9 @@ static void compute_key_hash(uint8_t * key, uint8_t * mask)
 
 void atecc_setup_init(uint8_t * buf)
 {
-	struct atecc_response res;
-	uint8_t * wmask =    "\x61\xd2\x71\xd7\x18\x10\x99\x99\xef\xb8\x91\x56\x76\x14\xbd\x64\xbb\x7c\x6a\x41\x84\x21\x10\xeb\xfd\x05\x73\x60\xc8\x7e\x6c\xf9\x09\xdd\x16\x46";
-	uint8_t * rmask =    "cjsuivmfduxz6ewhvijksdisdfwer5ighsrdg";
-	uint8_t private_key[36];
-	uint8_t * appid = "regohrsdighrediFlghvdsfhergregegerhg";
-	uint8_t masked_key[36];
-	int i;
-
 	// 13s watchdog
 	WDTCN = 7;
-	dump_config(buf);
-	atecc_setup_transport_keys();
-	u2f_prints("transport key:");
-	dump_hex(trans_key,32);
-
+	//dump_config(buf);
 	if (!is_config_locked(buf))
 	{
 		u2f_prints("setting up config...\r\n");
@@ -551,36 +526,6 @@ void atecc_setup_init(uint8_t * buf)
 		u2f_prints("already locked\r\n");
 	}
 
-	// test secure read from atecc508a
-
-	//
-	// now test priv write
-
-	SHA_HMAC_KEY = U2F_MASTER_KEY_SLOT;
-	SHA_FLAGS = ATECC_SHA_HMACSTART;
-	u2f_sha256_start();
-	u2f_sha256_update(appid,32);
-	SHA_FLAGS = ATECC_SHA_HMACEND;
-	u2f_sha256_finish();
-
-	// new key generated
-	u2f_prints("hmac: "); dump_hex(res_digest.buf,32);
-
-
-	memset(private_key,0,4);
-	memmove(private_key+4, res_digest.buf, 32);
-	for (i=4; i<36; i++)
-	{
-		private_key[i] ^= rmask[i];
-	}
-
-	compute_key_hash(private_key,  wmask);
-	atecc_privwrite(U2F_TEMP_KEY_SLOT, private_key, wmask, res_digest.buf);
-
-
-	atecc_test_signature(U2F_TEMP_KEY_SLOT, buf);
-
-	//
 }
 
 // buf should be at least 40 bytes
@@ -595,6 +540,7 @@ void atecc_setup_device(struct config_msg * msg)
 
 	memset(&usbres, 0, sizeof(struct config_msg));
 	usbres.cmd = msg->cmd;
+	dump_hex(msg,64);
 
 	switch(msg->cmd)
 	{
@@ -685,8 +631,32 @@ void atecc_setup_device(struct config_msg * msg)
 			memmove((uint8_t*)&usbres, res.buf, 64);
 
 			break;
+		case U2F_CONFIG_LOAD_WRITE_KEY:
+			u2f_prints("U2F_CONFIG_LOAD_WRITE_KEY\r\n");
+			memmove(write_key,msg->buf,36);
+			usbres.buf[0] = 1;
+
+			break;
+		case U2F_CONFIG_LOAD_ATTEST_KEY:
+			u2f_prints("U2F_CONFIG_LOAD_ATTEST_KEY\r\n");
+
+			memset(trans_key,0,36);
+			memmove(trans_key+4,msg->buf,32);
+			usbres.buf[0] = 1;
+			compute_key_hash(trans_key,  write_key, U2F_ATTESTATION_KEY_SLOT);
+
+			dump_hex(write_key,36);
+
+			if (atecc_privwrite(U2F_ATTESTATION_KEY_SLOT, trans_key, write_key, res_digest.buf) != 0)
+			{
+				u2f_prints("load attest key failed\r\n");
+				usbres.buf[0] = 0;
+			}
+
+			break;
 		default:
 			u2f_printb("invalid command: ",1,msg->cmd);
+			usbres.buf[0] = 0;
 	}
 
 	usb_write((uint8_t*)&usbres, HID_PACKET_SIZE);

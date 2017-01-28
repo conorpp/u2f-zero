@@ -72,14 +72,6 @@ uint8_t custom_command(struct u2f_hid_msg * msg)
 			msg->pkt.init.payload[0] = ec == 0 ? 1 : 0;
 			usb_write((uint8_t*)msg, 64);
 			break;
-//		case U2F_CUSTOM_WIPE_KEYS:
-//
-//			U2FHID_SET_LEN(msg, 1);
-//			ec=u2f_wipe_keys();
-//			msg->pkt.init.payload[0] = ec == 0 ? 1 : 0;
-//			usb_write((uint8_t*)msg, 64);
-//
-//			break;
 
 		case U2F_CUSTOM_WINK:
 

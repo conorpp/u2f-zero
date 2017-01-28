@@ -112,6 +112,8 @@ struct APP_DATA
 #define U2F_CONFIG_LOCK					0x83
 #define U2F_CONFIG_GENKEY				0x84
 #define U2F_CONFIG_LOAD_TRANS_KEY		0x85
+#define U2F_CONFIG_LOAD_WRITE_KEY		0x86
+#define U2F_CONFIG_LOAD_ATTEST_KEY		0x87
 
 struct config_msg
 {

@@ -40,32 +40,12 @@
 #include "eeprom.h"
 #include "atecc508a.h"
 
-struct key_handle
-{
-	uint8_t index;
-	uint8_t entropy[3];
-};
 
-struct key_storage_header
-{
-	uint8_t num_keys;
-	uint16_t valid_keys;
-	uint8_t num_issued;
-} key_store;
-
-#define U2F_NUM_KEYS 			U2F_ATTESTATION_KEY_SLOT
-#define U2F_KEYS_ADDR			(0xF800)
-#define U2F_KEY_ADDR(k)			(U2F_KEYS_ADDR + ((k)*U2F_KEY_HANDLE_SIZE))
-
-
-#define IS_KEY_VALID(mask,key)	((~mask) & (1<<key))
 
 static struct u2f_hid_msg res;
 static uint8_t* resbuf = (uint8_t*)&res;
 static uint8_t resseq = 0;
 static uint8_t serious = 0;
-
-
 
 
 void u2f_init()

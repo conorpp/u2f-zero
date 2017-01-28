@@ -3,7 +3,8 @@
 
 export PATH=$PATH:`pwd`/flashing:../../../u2f_zero_client:../../../gencert
 
-export key=gencert/ca/key.pem
+export attest_priv=gencert/ca/key.pem
+export attest_pub=gencert/ca/cert.der
 adapters[0]=0
 num_adapters=0
 firmware=../firmware
@@ -49,7 +50,7 @@ function start_programming {
     setupf=$2
     setup_sn=$3
     rm -f workers/$sn/worker/.finished
-    cd workers/$sn/worker && ./$setup ../../../$key $sn $starting_SN $setupf $setup_sn \
+    cd workers/$sn/worker && ./$setup ../../../$attest_priv ../../../$attest_pub $sn $starting_SN $setupf $setup_sn \
         && touch .finished && cd ../../.. &
     export starting_SN=$(inc_hex $starting_SN)
 

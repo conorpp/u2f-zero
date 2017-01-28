@@ -41,8 +41,6 @@
 #include "bsp.h"
 #include "u2f.h"
 
-code uint8_t WMASK[] = "\xd7\x53\x3f\x4a\xb4\x0c\xee\x39\xc2\x52\xf8\x83\x86\x59\xde\xe0\x82\xfb\xae\x50\x55\x01\x27\x6b\x74\x1f\xb6\xa1\x93\xb6\xf5\x92\xe4\x11\x17\x3f";
-code uint8_t RMASK[] = "ueragfeaiswuftwiauekygfikslezgdhf";
 
 // void u2f_response_writeback(uint8_t * buf, uint8_t len);
 static int16_t u2f_register(struct u2f_register_request * req);

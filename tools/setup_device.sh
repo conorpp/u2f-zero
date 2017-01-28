@@ -67,9 +67,20 @@ done
 
 
 echo "generate attestation certificate..."
-gencert.sh "$1" "$(cat pubkey.hex)" attest.der > ../firmware/src/cert.c
-
+gencert.sh "$1" "$(cat pubkey.hex|head -n 1)" attest.der > ../firmware/src/cert.c
 [[ "$?" -ne "0" ]] && exit 1
+
+wkey=$(cbytes.py "$(cat pubkey.hex|head -n 2|tail -n1)" -s)
+[[ "$?" -ne "0" ]] && exit 1
+
+rkey=$(cbytes.py "$(cat pubkey.hex|tail -n 1)" -s)
+[[ "$?" -ne "0" ]] && exit 1
+
+
+echo "" >> ../firmware/src/cert.c
+echo "code uint8_t WMASK[] = $wkey;" >> ../firmware/src/cert.c
+echo "code uint8_t RMASK[] = $rkey;" >> ../firmware/src/cert.c
+
 
 if [[ -n $SN_build ]] ; then
     echo "setting SN to $SN_build"

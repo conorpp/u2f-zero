@@ -112,7 +112,7 @@ void u2f_sha256_start()
 	shaoffset = 0;
 	atecc_send_recv(ATECC_CMD_SHA,
 			SHA_FLAGS, SHA_HMAC_KEY,NULL,0,
-			appdata.tmp, sizeof(appdata.tmp), NULL);
+			shabuf, sizeof(shabuf), NULL);
 	SHA_HMAC_KEY = 0;
 }
 
@@ -128,7 +128,7 @@ void u2f_sha256_update(uint8_t * buf, uint8_t len)
 		{
 			atecc_send_recv(ATECC_CMD_SHA,
 					ATECC_SHA_UPDATE, 64,shabuf,64,
-					appdata.tmp, sizeof(appdata.tmp), NULL);
+					shabuf, sizeof(shabuf), NULL);
 			shaoffset = 0;
 		}
 	}
@@ -194,8 +194,6 @@ static int atecc_privwrite(int keyslot, uint8_t * key, uint8_t * mask, uint8_t *
 	struct atecc_response res;
 	uint8_t i;
 
-
-
 	atecc_prep_encryption();
 
 	for (i=0; i<36; i++)
@@ -242,13 +240,23 @@ int8_t u2f_new_keypair(uint8_t * handle, uint8_t * appid, uint8_t * pubkey)
 	uint8_t private_key[36];
 	int i;
 
+	if (atecc_send_recv(ATECC_CMD_RNG,ATECC_RNG_P1,ATECC_RNG_P2,
+		NULL, 0,
+		appdata.tmp,
+		sizeof(appdata.tmp), &res) != 0 )
+	{
+		return -1;
+	}
+
 	SHA_HMAC_KEY = U2F_MASTER_KEY_SLOT;
 	SHA_FLAGS = ATECC_SHA_HMACSTART;
 	u2f_sha256_start();
 	u2f_sha256_update(appid,32);
+	u2f_sha256_update(res.buf,4);
 	SHA_FLAGS = ATECC_SHA_HMACEND;
 	u2f_sha256_finish();
 
+	memmove(handle, res.buf, 4);  // size of key handle must be 36
 
 	memset(private_key,0,4);
 	memmove(private_key+4, res_digest.buf, 32);
@@ -259,9 +267,10 @@ int8_t u2f_new_keypair(uint8_t * handle, uint8_t * appid, uint8_t * pubkey)
 	}
 
 	compute_key_hash(private_key,  WMASK);
-	memmove(handle, res_digest.buf, 32);  // size of key handle must be 32
+	memmove(handle+4, res_digest.buf, 32);  // size of key handle must be 36
 
-	if ( atecc_privwrite(U2F_TEMP_KEY_SLOT, private_key, WMASK, handle) != 0)
+
+	if ( atecc_privwrite(U2F_TEMP_KEY_SLOT, private_key, WMASK, handle+4) != 0)
 	{
 		return -1;
 	}
@@ -288,6 +297,7 @@ int8_t u2f_load_key(uint8_t * handle, uint8_t * appid)
 	SHA_FLAGS = ATECC_SHA_HMACSTART;
 	u2f_sha256_start();
 	u2f_sha256_update(appid,32);
+	u2f_sha256_update(handle,4);
 	SHA_FLAGS = ATECC_SHA_HMACEND;
 	u2f_sha256_finish();
 
@@ -298,7 +308,33 @@ int8_t u2f_load_key(uint8_t * handle, uint8_t * appid)
 		private_key[i] ^= RMASK[i];
 	}
 
-	return atecc_privwrite(U2F_TEMP_KEY_SLOT, private_key, WMASK, handle);
+	return atecc_privwrite(U2F_TEMP_KEY_SLOT, private_key, WMASK, handle+4);
+}
+
+int8_t u2f_appid_eq(uint8_t * handle, uint8_t * appid)
+{
+//	struct atecc_response res;
+//	uint8_t private_key[36];
+//	int i;
+//
+//	SHA_HMAC_KEY = U2F_MASTER_KEY_SLOT;
+//	SHA_FLAGS = ATECC_SHA_HMACSTART;
+//	u2f_sha256_start();
+//	u2f_sha256_update(appid,32);
+//	SHA_FLAGS = ATECC_SHA_HMACEND;
+//	u2f_sha256_finish();
+//
+//	memset(private_key,0,4);
+//	memmove(private_key+4, res_digest.buf, 32);
+//
+//	for (i=4; i<36; i++)
+//	{
+//		private_key[i] ^= RMASK[i];
+//	}
+//
+//	compute_key_hash(private_key,  WMASK);
+//	return memcmp(handle, res_digest.buf, U2F_KEY_HANDLE_SIZE);
+	return 0;
 }
 
 uint32_t u2f_count()

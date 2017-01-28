@@ -38,7 +38,7 @@
 #define U2F_APDU_SIZE                       7
 #define U2F_CHALLENGE_SIZE                  32
 #define U2F_APPLICATION_SIZE                32
-#define U2F_KEY_HANDLE_SIZE                 32
+#define U2F_KEY_HANDLE_SIZE                 36
 #define U2F_REGISTER_REQUEST_SIZE           (U2F_CHALLENGE_SIZE+U2F_APPLICATION_SIZE)
 #define U2F_MAX_REQUEST_PAYLOAD             (1 + U2F_CHALLENGE_SIZE+U2F_APPLICATION_SIZE + 1 + U2F_KEY_HANDLE_SIZE)
 
@@ -70,7 +70,7 @@
 #define U2F_SW_INSUFFICIENT_MEMORY          0x9210
 
 // Delay in milliseconds to wait for user input
-#define U2F_MS_USER_INPUT_WAIT				4850
+#define U2F_MS_USER_INPUT_WAIT				3000
 
 struct u2f_request_apdu
 {

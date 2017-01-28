@@ -212,7 +212,7 @@ def do_configure(h,pemkey,output):
 
 
     wkey = get_write_mask(''.join([chr(x) for x in wkey]))
-    rkey = get_write_mask(''.join([chr(x) for x in rkey]))[:64]
+    rkey = get_write_mask(''.join([chr(x) for x in rkey]))
 
 
     h.write([0,commands.U2F_CONFIG_LOAD_WRITE_KEY]+[ord(x) for x in binascii.unhexlify(wkey)])

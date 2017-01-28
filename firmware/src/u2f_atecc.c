@@ -233,12 +233,15 @@ int8_t u2f_ecdsa_sign(uint8_t * dest, uint8_t * handle, uint8_t * appid)
 }
 
 
+
 // bad if this gets interrupted
 int8_t u2f_new_keypair(uint8_t * handle, uint8_t * appid, uint8_t * pubkey)
 {
 	struct atecc_response res;
 	uint8_t private_key[36];
 	int i;
+
+	watchdog();
 
 	if (atecc_send_recv(ATECC_CMD_RNG,ATECC_RNG_P1,ATECC_RNG_P2,
 		NULL, 0,
@@ -265,7 +268,7 @@ int8_t u2f_new_keypair(uint8_t * handle, uint8_t * appid, uint8_t * pubkey)
 	{
 		private_key[i] ^= RMASK[i];
 	}
-
+	watchdog();
 	compute_key_hash(private_key,  WMASK);
 	memmove(handle+4, res_digest.buf, 32);  // size of key handle must be 36
 
@@ -274,6 +277,8 @@ int8_t u2f_new_keypair(uint8_t * handle, uint8_t * appid, uint8_t * pubkey)
 	{
 		return -1;
 	}
+
+	memset(private_key,0,36);
 
 	if ( atecc_send_recv(ATECC_CMD_GENKEY,
 			ATECC_GENKEY_PUBLIC, U2F_TEMP_KEY_SLOT, NULL, 0,

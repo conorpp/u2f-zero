@@ -217,7 +217,7 @@ void u2f_sha256_start()
 	shaoffset = 0;
 	atecc_send_recv(ATECC_CMD_SHA,
 			SHA_FLAGS, SHA_HMAC_KEY,NULL,0,
-			appdata.tmp, sizeof(appdata.tmp), NULL);
+			shabuf, sizeof(shabuf), NULL);
 	SHA_HMAC_KEY = 0;
 }
 
@@ -233,7 +233,7 @@ void u2f_sha256_update(uint8_t * buf, uint8_t len)
 		{
 			atecc_send_recv(ATECC_CMD_SHA,
 					ATECC_SHA_UPDATE, 64,shabuf,64,
-					appdata.tmp, sizeof(appdata.tmp), NULL);
+					shabuf, sizeof(shabuf), NULL);
 			shaoffset = 0;
 		}
 	}

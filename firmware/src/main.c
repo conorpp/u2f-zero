@@ -56,7 +56,7 @@ static void init(struct APP_DATA* ap)
 	atecc_idle();
 #ifndef ATECC_SETUP_DEVICE
 	eeprom_init();
-	u2f_init();
+
 #endif
 	U2F_BUTTON_VAL = 1;
 	state = APP_NOTHING;

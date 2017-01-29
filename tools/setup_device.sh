@@ -51,9 +51,9 @@ fi
 echo "configuring..."
 
 if [[ -n $SN_setup ]] ; then
-    client.py configure $attest_priv pubkey.hex -s $SN_setup >/dev/null
+    client.py configure $attest_priv pubkey.hex -s $SN_setup #>/dev/null
 else
-    client.py configure $attest_priv pubkey.hex >/dev/null
+    client.py configure $attest_priv pubkey.hex #>/dev/null
 fi
 
 while [[ "$?" -ne "0" ]] ; do
@@ -72,7 +72,7 @@ echo "generate attestation certificate..."
 cbytes.py $attest_pub > ../firmware/src/cert.c
 [[ "$?" -ne "0" ]] && exit 1
 
-wkey=$(cbytes.py "$(cat pubkey.hex|head -n 2|tail -n1)" -s)
+wkey=$(cbytes.py "$(cat pubkey.hex|head -n 1)" -s)
 [[ "$?" -ne "0" ]] && exit 1
 
 rkey=$(cbytes.py "$(cat pubkey.hex|tail -n 1)" -s)

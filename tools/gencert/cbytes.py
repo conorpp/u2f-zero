@@ -17,7 +17,9 @@ buf = None
 try:
     buf = bytearray(open(sys.argv[1], 'rb').read())
 except:
-    buf = bytearray(binascii.unhexlify(sys.argv[1]))
+    n = sys.argv[1].replace('\n','')
+    n = sys.argv[1].replace('\r','')
+    buf = bytearray(binascii.unhexlify(n))
 
 c_str = ''
 size = len(buf)

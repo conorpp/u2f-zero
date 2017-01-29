@@ -38,11 +38,15 @@
 #define U2F_MASTER_KEY_SLOT			1
 #define U2F_TEMP_KEY_SLOT			2
 
+// Uncomment these to fit firmware with a bootloader.
 #define U2F_SUPPORT_WINK
 #define U2F_SUPPORT_HID_LOCK
 #define U2F_SUPPORT_RNG_CUSTOM
 #define U2F_SUPPORT_SEED_CUSTOM
+
+// Uncomment this to make configuration firmware
 //#define ATECC_SETUP_DEVICE
+
 //#define U2F_PRINT
 //#define U2F_BLINK_ERRORS
 
@@ -116,6 +120,8 @@ struct APP_DATA
 #define U2F_CONFIG_LOAD_TRANS_KEY		0x85
 #define U2F_CONFIG_LOAD_WRITE_KEY		0x86
 #define U2F_CONFIG_LOAD_ATTEST_KEY		0x87
+#define U2F_CONFIG_BOOTLOADER			0x88
+#define U2F_CONFIG_BOOTLOADER_DESTROY	0x89
 
 struct config_msg
 {

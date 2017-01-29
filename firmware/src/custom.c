@@ -39,8 +39,6 @@ uint8_t custom_command(struct u2f_hid_msg * msg)
 	struct atecc_response res;
 	uint8_t ec;
 
-	if (msg->cid != U2FHID_BROADCAST) return 0;
-
 	switch(msg->pkt.init.cmd)
 	{
 #ifdef U2F_SUPPORT_RNG_CUSTOM
@@ -80,6 +78,29 @@ uint8_t custom_command(struct u2f_hid_msg * msg)
 
 			break;
 #endif
+		case U2F_CONFIG_BOOTLOADER:
+
+			atecc_send_recv(ATECC_CMD_READ,
+					ATECC_RW_DATA, ATECC_EEPROM_DATA_SLOT(8), NULL, 0,
+					appdata.tmp, sizeof(appdata.tmp), &res);
+
+			if (res.buf[0] == 0xff)
+			{
+				*((uint8_t SI_SEG_DATA *)0x00) = 0xA5;
+				RSTSRC = RSTSRC_SWRSF__SET | RSTSRC_PORSF__SET;
+			}
+
+
+			break;
+		case U2F_CONFIG_BOOTLOADER_DESTROY:
+
+			memset(appdata.tmp,0,4);
+
+			atecc_send_recv(ATECC_CMD_WRITE,
+					ATECC_RW_DATA, ATECC_EEPROM_DATA_SLOT(8), appdata.tmp, 4,
+					appdata.tmp, sizeof(appdata.tmp), &res);
+
+			break;
 		default:
 			return 0;
 	}

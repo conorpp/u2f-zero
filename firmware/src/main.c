@@ -143,7 +143,7 @@ int16_t main(void) {
 	int8_t grad_inc = 0;
 	int8_t ii;
 	data uint8_t xdata * clear = 0;
-	int8_t i;
+	data int8_t i;
 
 	enter_DefaultMode_from_RESET();
 	rgb_hex(0);

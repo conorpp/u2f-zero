@@ -64,6 +64,8 @@ class commands:
     U2F_CONFIG_LOAD_TRANS_KEY = 0x85
     U2F_CONFIG_LOAD_WRITE_KEY = 0x86
     U2F_CONFIG_LOAD_ATTEST_KEY = 0x87
+    U2F_CONFIG_BOOTLOADER = 0x88
+    U2F_CONFIG_BOOTLOADER_DESTROY = 0x89
 
     U2F_CUSTOM_RNG = 0x21
     U2F_CUSTOM_SEED = 0x22
@@ -82,6 +84,8 @@ if len(sys.argv) not in [2,3,4,5,6]:
     print('     wipe: wipe all registered keys on U2F Zero.  Must also press button 5 times.  Not reversible.')
     print('     list: list all connected U2F Zero tokens.')
     print('     wink: blink the LED')
+    print('     bootloader: put device in bootloader mode')
+    print('     bootloader-destroy: permanently disable the bootloader')
     sys.exit(1)
 
 def open_u2f(SN=None):
@@ -198,10 +202,10 @@ def do_configure(h,pemkey,output):
 
     time.sleep(0.250)
 
-    h.write([0,commands.U2F_CONFIG_GENKEY])
-    data = read_n_tries(h,5,64,1000)
-    data = array.array('B',data).tostring()
-    pubkey = binascii.hexlify(data)
+    #h.write([0,commands.U2F_CONFIG_GENKEY])
+    #data = read_n_tries(h,5,64,1000)
+    #data = array.array('B',data).tostring()
+    #pubkey = binascii.hexlify(data)
 
     wkey = [random.randint(0,255)&0xff for x in range(0,32)]
     rkey = [random.randint(0,255)&0xff for x in range(0,32)]
@@ -212,6 +216,7 @@ def do_configure(h,pemkey,output):
 
 
     wkey = get_write_mask(''.join([chr(x) for x in wkey]))
+    print('wkey',wkey)
     rkey = get_write_mask(''.join([chr(x) for x in rkey]))
 
 
@@ -232,10 +237,26 @@ def do_configure(h,pemkey,output):
 
 
     print('writing keys to ', output)
-    print(data)
-    open(output,'w+').write(pubkey +'\n' + wkey + '\n' + rkey)
+    open(output,'w+').write(wkey + '\n' + rkey)
 
-    print( 'Done')
+    print( 'Done.  Putting device in bootloader mode.')
+    h.write([0,commands.U2F_CONFIG_BOOTLOADER])
+    data = read_n_tries(h,5,64,1000)
+    if data[1] != 1:
+        die('failed to put device in bootloader mode.')
+
+def bootloader(h):
+    h.write([0,commands.U2F_CONFIG_BOOTLOADER])
+    h.write([0,0xff,0xff,0xff,0xff,commands.U2F_CONFIG_BOOTLOADER])
+    print('If this device has an enabled bootloader, the LED should be turned off.')
+
+
+def bootloader_destroy(h):
+    h.write([0,commands.U2F_CONFIG_BOOTLOADER_DESTROY])
+    h.write([0,0xff,0xff,0xff,0xff,commands.U2F_CONFIG_BOOTLOADER_DESTROY])
+    print('Device bootloader mode removed.  Please double check by running bootloader command.')
+
+
 
 
 
@@ -335,6 +356,12 @@ if __name__ == '__main__':
     elif action == 'wink':
         h = open_u2f(SN)
         do_wink(h)
+    elif action == 'bootloader':
+        h = open_u2f(SN)
+        bootloader(h)
+    elif action == 'bootloader-destroy':
+        h = open_u2f(SN)
+        bootloader_destroy(h)
     else:
         print( 'error: invalid action: ', action)
         sys.exit(1)

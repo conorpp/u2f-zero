@@ -38,7 +38,7 @@
 #define U2F_MASTER_KEY_SLOT			1
 #define U2F_TEMP_KEY_SLOT			2
 
-// Uncomment these to fit firmware with a bootloader.
+// Comment these out to fit firmware with a bootloader.
 #define U2F_SUPPORT_WINK
 #define U2F_SUPPORT_HID_LOCK
 #define U2F_SUPPORT_RNG_CUSTOM

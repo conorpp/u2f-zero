@@ -7,7 +7,7 @@ SN=
 SN_build=
 SN_setup=
 
-if [[ $# != "2" ]] && [[ $# != "5" ]]
+if [[ $# != "2" ]] && [[ $# != "6" ]]
 then
 
     echo "usage: $0 <attestation-private-key> <attestation-public-key.der> [debugger-SN new-SN-for-U2F-token setup-hex-file setup-SN]"
@@ -69,7 +69,9 @@ done
 
 
 echo "generate attestation certificate..."
+echo "for file $attest_pub"
 cbytes.py $attest_pub > ../firmware/src/cert.c
+
 [[ "$?" -ne "0" ]] && exit 1
 
 wkey=$(cbytes.py "$(cat pubkey.hex|head -n 1)" -s)

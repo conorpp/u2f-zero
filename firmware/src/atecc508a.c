@@ -515,7 +515,7 @@ void atecc_setup_init(uint8_t * buf)
 {
 	// 13s watchdog
 	WDTCN = 7;
-	//dump_config(buf);
+	dump_config(buf);
 	if (!is_config_locked(buf))
 	{
 		u2f_prints("setting up config...\r\n");
@@ -573,6 +573,7 @@ void atecc_setup_device(struct config_msg * msg)
 			}
 
 			memset(appdata.tmp,0,32);
+			memset(trans_key,0,32);
 
 			break;
 
@@ -653,6 +654,27 @@ void atecc_setup_device(struct config_msg * msg)
 				usbres.buf[0] = 0;
 			}
 
+			break;
+		case U2F_CONFIG_BOOTLOADER:
+			u2f_prints("U2F_CONFIG_BOOTLOADER\r\n");
+
+			memset(trans_key,0xff,4);
+			if( atecc_send_recv(ATECC_CMD_WRITE,
+					ATECC_RW_DATA, ATECC_EEPROM_DATA_SLOT(8), trans_key, 4,
+					buf, sizeof(buf), &res) != 0)
+			{
+				usbres.buf[0] = 0;
+				u2f_prints("writing unlocked bootloader failed\r\n");
+			}
+			else
+			{
+				usbres.buf[0] = 1;
+				usb_write((uint8_t*)&usbres, HID_PACKET_SIZE);
+				u2f_delay(20);
+				 // Write R0 and issue a software reset
+				 *((uint8_t SI_SEG_DATA *)0x00) = 0xA5;
+				 RSTSRC = RSTSRC_SWRSF__SET | RSTSRC_PORSF__SET;
+			}
 			break;
 		default:
 			u2f_printb("invalid command: ",1,msg->cmd);

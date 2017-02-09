@@ -301,7 +301,7 @@ void run_tests()
 {
 	int rc;
 
-#ifdef SHA_TEST
+#ifdef TEST_SHA
 	PRINT("--- STARTING SHA TEST ---\r\n");
 	rc = test_sha();
 	if (rc == 0)

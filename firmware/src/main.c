@@ -142,8 +142,8 @@ int16_t main(void) {
 	uint8_t winks = 0, light = 1, grad_dir = 0;
 	int8_t grad_inc = 0;
 	int8_t ii;
+	uint16_t i;
 	data uint8_t xdata * clear = 0;
-	data int8_t i;
 
 	enter_DefaultMode_from_RESET();
 	rgb_hex(0);
@@ -280,6 +280,7 @@ int16_t main(void) {
 			for (i=0; i<0x400;i++)
 			{
 				*(clear++) = 0x0;
+				watchdog();
 			}
 #endif
 			error = 0;

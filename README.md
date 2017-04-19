@@ -13,7 +13,7 @@ It ends up being $35 for programmer and ~$5/board.  The token should be durable 
 
 Check out [the wiki](https://github.com/conorpp/u2f-zero/wiki) for more on how to [build your own](https://github.com/conorpp/u2f-zero/wiki/Building-a-U2F-Token).
 
-![](http://i.imgur.com/s8VcUNT.jpg)
+
 
 Security Overview
 -----------------

@@ -24,6 +24,11 @@ However, side channel leakage is an unsolved problem in industry and academia.  
 
 For more information about U2F Zero's secure implementation and the problem of side channels, check out [the wiki](https://github.com/conorpp/u2f-zero/wiki/Security-Overview).
 
+Support
+--------
+
+Support this project by purchasing or sharing [U2F Zero on Amazon](https://www.amazon.com/U2F-Zero/dp/B01L9DUPK6/ref=lp_15603989011_1_1?srs=15603989011&ie=UTF8&qid=1501811252&sr=8-1).
+
 
 License
 -------

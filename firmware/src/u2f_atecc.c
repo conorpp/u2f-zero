@@ -40,7 +40,7 @@
 #include "atecc508a.h"
 
 
-static void gen_u2f_zero_tag(uint8_t * dst, uint8_t * appid);
+static void gen_u2f_zero_tag(uint8_t * dst, uint8_t * appid, uint8_t * handle);
 
 static struct u2f_hid_msg res;
 static uint8_t* resbuf = (uint8_t*)&res;
@@ -155,14 +155,14 @@ static int atecc_prep_encryption()
 								appdata.tmp, 32,
 								appdata.tmp, 40, &res) != 0 )
 	{
-//		u2f_prints("pass through to tempkey failed\r\n");
+		u2f_prints("pass through to tempkey failed\r\n");
 		return -1;
 	}
 	if( atecc_send_recv(ATECC_CMD_GENDIG,
 			ATECC_RW_DATA, U2F_MASTER_KEY_SLOT, NULL, 0,
 			appdata.tmp, 40, &res) != 0)
 	{
-//		u2f_prints("GENDIG failed\r\n");
+		u2f_prints("GENDIG failed\r\n");
 		return -1;
 	}
 
@@ -244,8 +244,6 @@ int8_t u2f_new_keypair(uint8_t * handle, uint8_t * appid, uint8_t * pubkey)
 	int i;
 
 	watchdog();
-//	u2f_prints("new key appid,khandle\r\n");
-//	dump_hex(appid,32);
 
 	if (atecc_send_recv(ATECC_CMD_RNG,ATECC_RNG_P1,ATECC_RNG_P2,
 		NULL, 0,
@@ -294,8 +292,7 @@ int8_t u2f_new_keypair(uint8_t * handle, uint8_t * appid, uint8_t * pubkey)
 	memmove(pubkey, res.buf, 64);
 
 	// the + 8
-	gen_u2f_zero_tag(handle + U2F_KEY_HANDLE_KEY_SIZE, appid);
-	//dump_hex(handle,U2F_KEY_HANDLE_SIZE);
+	gen_u2f_zero_tag(handle + U2F_KEY_HANDLE_KEY_SIZE, appid, handle);
 
 	return 0;
 }
@@ -305,9 +302,7 @@ int8_t u2f_load_key(uint8_t * handle, uint8_t * appid)
 	uint8_t private_key[36];
 	int i;
 
-//	u2f_prints("load key appid,rnum\r\n");
-//	dump_hex(appid,32);
-//	dump_hex(handle,4);
+	watchdog();
 	SHA_HMAC_KEY = U2F_MASTER_KEY_SLOT;
 	SHA_FLAGS = ATECC_SHA_HMACSTART;
 	u2f_sha256_start();
@@ -322,18 +317,20 @@ int8_t u2f_load_key(uint8_t * handle, uint8_t * appid)
 	{
 		private_key[i] ^= RMASK[i];
 	}
-
 	return atecc_privwrite(U2F_TEMP_KEY_SLOT, private_key, WMASK, handle+4);
 }
 
-static void gen_u2f_zero_tag(uint8_t * dst, uint8_t * appid)
+static void gen_u2f_zero_tag(uint8_t * dst, uint8_t * appid, uint8_t * handle)
 {
 	const char * u2f_zero_const = "\xc1\xff\x67\x0d\x66\xe5\x55\xbb\xdc\x56\xaf\x7b\x41\x27\x4a\x21";
 	SHA_HMAC_KEY = U2F_MASTER_KEY_SLOT;
 	SHA_FLAGS = ATECC_SHA_HMACSTART;
 	u2f_sha256_start();
-	u2f_sha256_update(appid,32);
+
+	u2f_sha256_update(handle,U2F_KEY_HANDLE_KEY_SIZE);
 	u2f_sha256_update(u2f_zero_const,16);
+	u2f_sha256_update(appid,32);
+
 	SHA_FLAGS = ATECC_SHA_HMACEND;
 	u2f_sha256_finish();
 
@@ -342,7 +339,7 @@ static void gen_u2f_zero_tag(uint8_t * dst, uint8_t * appid)
 
 int8_t u2f_appid_eq(uint8_t * handle, uint8_t * appid)
 {
-	gen_u2f_zero_tag(NULL,appid);
+	gen_u2f_zero_tag(NULL,appid, handle);
 	return memcmp(handle+U2F_KEY_HANDLE_KEY_SIZE, res_digest.buf, U2F_KEY_HANDLE_ID_SIZE);
 }
 

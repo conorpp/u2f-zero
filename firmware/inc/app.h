@@ -44,6 +44,9 @@
 #define U2F_SUPPORT_RNG_CUSTOM
 #define U2F_SUPPORT_SEED_CUSTOM
 
+// comment out this if using bootloader
+//#define U2F_USING_BOOTLOADER
+
 // Uncomment this to make configuration firmware
 //#define ATECC_SETUP_DEVICE
 
@@ -128,8 +131,6 @@ struct config_msg
 	uint8_t cmd;
 	uint8_t buf[HID_PACKET_SIZE-1];
 };
-
-
 
 extern uint8_t hidmsgbuf[64];
 extern data struct APP_DATA appdata;

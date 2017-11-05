@@ -78,6 +78,7 @@ uint8_t custom_command(struct u2f_hid_msg * msg)
 
 			break;
 #endif
+#ifdef U2F_USING_BOOTLOADER
 		case U2F_CONFIG_BOOTLOADER:
 
 			atecc_send_recv(ATECC_CMD_READ,
@@ -101,6 +102,7 @@ uint8_t custom_command(struct u2f_hid_msg * msg)
 					appdata.tmp, sizeof(appdata.tmp), &res);
 
 			break;
+#endif
 		default:
 			return 0;
 	}

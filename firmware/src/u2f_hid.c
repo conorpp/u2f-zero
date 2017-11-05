@@ -77,7 +77,7 @@ static struct hid_layer_param
 	// total length of response in bytes
 	uint16_t res_len;
 
-	#define BUFFER_SIZE (270 - 70)
+	#define BUFFER_SIZE (270)
 	uint8_t buffer[BUFFER_SIZE];
 
 } hid_layer;
@@ -461,7 +461,7 @@ static uint8_t hid_u2f_parse(struct u2f_hid_msg* req)
 			break;
 #endif
 		default:
-			set_app_error(ERROR_HID_INVALID_CMD);
+			//set_app_error(ERROR_HID_INVALID_CMD);
 			stamp_error(hid_layer.current_cid, ERR_INVALID_CMD);
 			u2f_printb("invalid cmd: ",1,hid_layer.current_cmd);
 	}
@@ -496,13 +496,13 @@ void u2f_hid_request(struct u2f_hid_msg* req)
 	struct CID* cid = NULL;
 
 	cid = get_cid(req->cid);
-
 	// Error checking
 	if ((U2FHID_IS_INIT(req->pkt.init.cmd)))
 	{
 		if (U2FHID_LEN(req) > 7609)
 		{
 			stamp_error(req->cid, ERR_INVALID_LEN);
+
 			return;
 		}
 		if (req->pkt.init.cmd != U2FHID_INIT && req->cid != hid_layer.current_cid && u2f_hid_busy())
@@ -516,6 +516,7 @@ void u2f_hid_request(struct u2f_hid_msg* req)
 		// ignore random cont packets
 		return;
 	}
+
 
 	if (!req->cid)
 	{

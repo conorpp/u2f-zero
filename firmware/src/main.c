@@ -156,12 +156,14 @@ int16_t main(void) {
 	IE_EA = 1;
 	watchdog();
 
-	u2f_prints("U2F ZERO\r\n");
+
 
 	if (RSTSRC & RSTSRC_WDTRSF__SET)
 	{
 		//error = ERROR_DAMN_WATCHDOG;
+		u2f_prints("r");
 	}
+	u2f_prints("U2F ZERO\r\n");
 
 	run_tests();
 

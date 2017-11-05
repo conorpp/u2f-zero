@@ -77,7 +77,7 @@ static struct hid_layer_param
 	// total length of response in bytes
 	uint16_t res_len;
 
-	#define BUFFER_SIZE 270
+	#define BUFFER_SIZE (270 - 70)
 	uint8_t buffer[BUFFER_SIZE];
 
 } hid_layer;
@@ -87,7 +87,7 @@ uint32_t _hid_lockt = 0;
 uint32_t _hid_lock_cid = 0;
 #endif
 
-static struct CID CIDS[5];
+static struct CID CIDS[4];
 
 static uint8_t CID_NUM = 0;
 
@@ -149,7 +149,6 @@ void u2f_hid_writeback(uint8_t * payload, uint16_t len)
 
 	do
 	{
-
 		if (_hid_offset == 0)
 		{
 			r->cid = hid_layer.current_cid;
@@ -354,24 +353,19 @@ static uint8_t hid_u2f_parse(struct u2f_hid_msg* req)
 
 			break;
 		case U2FHID_MSG:
-
-			if (U2FHID_LEN(req) < 4)
-			{
-				stamp_error(hid_layer.current_cid, ERR_INVALID_LEN);
-				goto fail;
-			}
-			// buffer 2 payloads (120 bytes) to get full U2F message
-			// assuming key handle is < 45 bytes
-			//		7 bytes for apdu header
-			//		7 + 66 bytes + key handle for authenticate message
-			//      7 + 64 for register message
 			if (hid_layer.bytes_buffered == 0)
 			{
+				if (U2FHID_LEN(req) < 4)
+				{
+					stamp_error(hid_layer.current_cid, ERR_INVALID_LEN);
+					goto fail;
+				}
 				start_buffering(req);
 				if (hid_layer.bytes_buffered >= U2FHID_LEN(req))
 				{
 					u2f_request((struct u2f_request_apdu *)hid_layer.buffer);
 				}
+
 			}
 			else
 			{
@@ -380,6 +374,7 @@ static uint8_t hid_u2f_parse(struct u2f_hid_msg* req)
 				{
 					u2f_request((struct u2f_request_apdu *)hid_layer.buffer);
 				}
+
 			}
 
 

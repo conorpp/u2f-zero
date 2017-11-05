@@ -52,6 +52,9 @@ import logging as log
 import json
 import traceback
 import argparse
+import binascii
+
+from u2flib_server.utils import websafe_encode, websafe_decode
 
 
 def get_origin(environ):
@@ -126,6 +129,10 @@ class U2FServer(object):
         user = self.users[username]
         enroll = user.pop('_u2f_enroll_')
         device, cert = complete_registration(enroll, data, [self.facet])
+        print
+        print 'device, ' , device
+        print 'key handle', binascii.hexlify(websafe_decode(device['keyHandle']))
+        print
         user.setdefault('_u2f_devices_', []).append(device.json)
 
         log.info("U2F device enrolled. Username: %s", username)

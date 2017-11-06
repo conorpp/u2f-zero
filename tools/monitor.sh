@@ -4,12 +4,14 @@
 export PATH=$PATH:`pwd`/flashing:../../../u2f_zero_client:../../../gencert
 
 export attest_priv=gencert/ca/key.pem
-export attest_pub=gencert/ca/cert.der
+export attest_pub=gencert/ca/attest.der
 adapters[0]=0
-num_adapters=0
+adapters[1]=COM3
+adapters[2]=COM4
+num_adapters=2
 firmware=../firmware
 export setup=setup_device.sh
-export starting_SN=CAFEBABE00000000
+export starting_SN=DAFE1E340AB70000
 setup_SNs=(0 CAFEBABEFFFFFFF0 CAFEBABEFFFFFFF1 CAFEBABEFFFFFFF2)
 
 if [[ -n "$1" ]] ; then
@@ -57,17 +59,17 @@ function start_programming {
 }
 
 
-for i in `seq 1 100` ; do
+#for i in `seq 1 100` ; do
 
-    adapters[$i]=$(FlashUtilCL.exe DeviceSN $i)
+    #adapters[$i]=$(FlashUtilCL.exe DeviceSN $i)
 
-    if [[ ${adapters[$i]} = *"out of range"* ]]
-    then
-        break
-    fi
+    #if [[ ${adapters[$i]} = *"out of range"* ]]
+    #then
+        #break
+    #fi
 
-    num_adapters=$(($num_adapters + 1))
-done
+    #num_adapters=$(($num_adapters + 1))
+#done
 
 export num_adapters=$num_adapters
 export adapters=$adapters

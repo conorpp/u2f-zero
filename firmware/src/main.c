@@ -141,8 +141,6 @@ int16_t main(void) {
 	uint16_t ms_grad;
 	uint8_t winks = 0, light = 1, grad_dir = 0;
 	int8_t grad_inc = 0;
-	int8_t ii;
-	uint16_t i;
 	data uint8_t xdata * clear = 0;
 
 	enter_DefaultMode_from_RESET();
@@ -158,12 +156,14 @@ int16_t main(void) {
 	IE_EA = 1;
 	watchdog();
 
-	u2f_prints("U2F ZERO\r\n");
+
 
 	if (RSTSRC & RSTSRC_WDTRSF__SET)
 	{
-		error = ERROR_DAMN_WATCHDOG;
+		//error = ERROR_DAMN_WATCHDOG;
+		u2f_prints("r");
 	}
+	u2f_prints("U2F ZERO\r\n");
 
 	run_tests();
 
@@ -259,9 +259,9 @@ int16_t main(void) {
 		{
 			u2f_printx("error: ", 1, (uint16_t)error);
 #ifdef U2F_BLINK_ERRORS
-			for (ii=0; ii < 8; ii++)
+			for (ms_grad=0; ms_grad < 8; ms_grad++)
 			{
-				if (error & (1<<ii))
+				if (error & (1<<ms_grad))
 				{
 					rgb_hex(U2F_DEFAULT_COLOR_INPUT_SUCCESS);
 				}
@@ -277,17 +277,16 @@ int16_t main(void) {
 #else
 			rgb_hex(U2F_DEFAULT_COLOR_ERROR);
 			// wipe ram
-			for (i=0; i<0x400;i++)
+			for (ms_grad=0; ms_grad<0x400;ms_grad++)
 			{
 				*(clear++) = 0x0;
 				watchdog();
 			}
 #endif
-			error = 0;
-			while(!ms_since(ms_heart,500))
-			{
-				watchdog();
-			}
+
+			// wait for watchdog to reset
+			while(1)
+				;
 		}
 
 

@@ -32,19 +32,17 @@ if [[ $FLASH_TOOLS = 1 ]]
 then
 
     # setup atecc
-    echo "erasing..."
-    erase.sh $SN
-
-    while [[ "$?" -ne "0" ]] ; do
-        echo "$SN is retrying erase ... "
-        sleep 0.2
-        erase.sh $SN
-    done
+    #echo "erasing..."
+    #erase.sh $SN
 
     echo "programming setup..."
     program.sh $SETUP_HEX $SN
-
-    [[ "$?" -ne "0" ]] && exit 1
+    
+    while [[ "$?" -ne "0" ]] ; do
+        echo "$SN is retrying program... "
+        sleep 0.2
+        program.sh $SETUP_HEX $SN
+    done
 
 fi
 

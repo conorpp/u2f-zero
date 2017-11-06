@@ -87,6 +87,7 @@ int8_t atecc_recv(uint8_t * buf, uint8_t buflen, struct atecc_response* res)
 	if (SMB_FLAGS & SMB_READ_TRUNC)
 	{
 		set_app_error(ERROR_READ_TRUNCATED);
+		return -1;
 	}
 
 	if (pkt_len <= buflen && pkt_len >= 4)

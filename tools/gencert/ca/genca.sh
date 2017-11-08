@@ -10,7 +10,7 @@ openssl ecparam -genkey -name "$curve" -out "$keyname"
 # generate a "signing request"
 openssl req -new -key "$keyname" -out "$keyname".csr
 # self sign the request
-openssl x509 -req -days 1825  -in "$keyname".csr -signkey "$keyname" -out "$certname"
+openssl x509 -req -days 18250  -in "$keyname".csr -signkey "$keyname" -out "$certname"
 
 # convert to smaller size format DER
 openssl  x509 -in $certname  -outform der -out $smallcertname

@@ -171,7 +171,7 @@
   )
 
   (module footprints:mousebites (layer F.Cu) (tedit 57749CF7) (tstamp 5A0D1B25)
-    (at 173.5 100.75)
+    (at 173.5 101.15)
     (fp_text reference REF** (at 0 2.5) (layer F.SilkS) hide
       (effects (font (size 1.5 1.5) (thickness 0.25)))
     )
@@ -186,7 +186,7 @@
   )
 
   (module footprints:mousebites (layer F.Cu) (tedit 57749CF7) (tstamp 5A0D1B1D)
-    (at 173.5 103.25)
+    (at 173.5 102.85)
     (fp_text reference REF** (at 0 2.5) (layer F.SilkS) hide
       (effects (font (size 1.5 1.5) (thickness 0.25)))
     )
@@ -201,7 +201,7 @@
   )
 
   (module footprints:mousebites (layer F.Cu) (tedit 57749CF7) (tstamp 5A0D1AFA)
-    (at 173.5 86.75)
+    (at 173.5 86.35)
     (fp_text reference REF** (at 0 2.5) (layer F.SilkS) hide
       (effects (font (size 1.5 1.5) (thickness 0.25)))
     )
@@ -216,7 +216,7 @@
   )
 
   (module footprints:mousebites (layer F.Cu) (tedit 57749CF7) (tstamp 5A0D1AF2)
-    (at 173.5 84.25)
+    (at 173.5 84.65)
     (fp_text reference REF** (at 0 2.5) (layer F.SilkS) hide
       (effects (font (size 1.5 1.5) (thickness 0.25)))
     )

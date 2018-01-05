@@ -103,7 +103,7 @@ def open_u2f(SN=None):
 
 def do_list():
     for d in hid.enumerate(0x10c4, 0x8acf):
-        keys = d.keys()
+        keys = list(d.keys())
         keys.sort()
         for key in keys:
             print("%s : %s" % (key, d[key]))

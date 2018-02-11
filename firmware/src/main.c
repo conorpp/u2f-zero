@@ -54,6 +54,7 @@ static void init(struct APP_DATA* ap)
 	u2f_hid_init();
 	smb_init();
 	atecc_idle();
+	eeprom_init();
 
 	U2F_BUTTON_VAL = 1;
 	state = APP_NOTHING;

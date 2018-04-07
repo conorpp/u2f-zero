@@ -70,11 +70,11 @@ P 5300 5750
 F 0 "C3" H 5325 5850 50  0000 L CNN
 F 1 "0.1uF" H 5325 5650 50  0000 L CNN
 F 2 "Capacitors_SMD:C_0805" H 5338 5600 50  0001 C CNN
-F 3 "http://media.digikey.com/pdf/Data%20Sheets/Samsung%20PDFs/CL_Series_MLCC_ds.pdf" H 5300 5750 50  0001 C CNN
-F 4 "Samsung Electro-Mechanics America, Inc" H 5300 5750 60  0001 C CNN "MFG Name"
-F 5 "CL05A104MP5NNNC" H 5300 5750 60  0001 C CNN "MFG Part Num"
-F 6 "1276-1443-1-ND" H 5300 5750 60  0001 C CNN "Distributer PN"
-F 7 "http://www.digikey.com/product-detail/en/CL05A104MP5NNNC/1276-1443-1-ND/3889529" H 5300 5750 60  0001 C CNN "Distributer Link"
+F 3 "https://search.murata.co.jp/Ceramy/image/img/A01X/G101/ENG/GRM219R71C104MA01-01.pdf" H 5300 5750 50  0001 C CNN
+F 4 "Murata Manufacturing Co., Ltd." H 5300 5750 60  0001 C CNN "MFG Name"
+F 5 "GRM219R71C104MA01J" H 5300 5750 60  0001 C CNN "MFG Part Num"
+F 6 "490-12558-1-ND" H 5300 5750 60  0001 C CNN "Distributer PN"
+F 7 "https://www.digikey.com/product-detail/en/murata-electronics-north-america/GRM219R71C104MA01J/490-12558-1-ND/5797548" H 5300 5750 60  0001 C CNN "Distributer Link"
 	1    5300 5750
 	0    -1   1    0   
 $EndComp
@@ -85,11 +85,11 @@ P 5300 6100
 F 0 "C4" H 5325 6200 50  0000 L CNN
 F 1 "4.7uF" H 5325 6000 50  0000 L CNN
 F 2 "Capacitors_SMD:C_0805" H 5338 5950 50  0001 C CNN
-F 3 "http://media.digikey.com/pdf/Data%20Sheets/Samsung%20PDFs/CL_Series_MLCC_ds.pdf" H 5300 6100 50  0001 C CNN
-F 4 "Samsung Electro-Mechanics America, Inc" H 5300 6100 60  0001 C CNN "MFG Name"
-F 5 "CL10B475KQ8NQNC" H 5300 6100 60  0001 C CNN "MFG Part Num"
-F 6 "1276-2087-1-ND" H 5300 6100 60  0001 C CNN "Distributer PN"
-F 7 "http://www.digikey.com/product-detail/en/CL10B475KQ8NQNC/1276-2087-1-ND/3890173" H 5300 6100 60  0001 C CNN "Distributer Link"
+F 3 "https://search.murata.co.jp/Ceramy/image/img/A01X/G101/ENG/GRM21BR71C475KE51-01.pdf" H 5300 6100 50  0001 C CNN
+F 4 "Murata Manufacturing Co., Ltd." H 5300 6100 60  0001 C CNN "MFG Name"
+F 5 "GRM21BR71C475KE51L" H 5300 6100 60  0001 C CNN "MFG Part Num"
+F 6 "490-14466-1-ND" H 5300 6100 60  0001 C CNN "Distributer PN"
+F 7 "https://www.digikey.com/product-detail/en/murata-electronics-north-america/GRM21BR71C475KE51L/490-14466-1-ND/6606927" H 5300 6100 60  0001 C CNN "Distributer Link"
 	1    5300 6100
 	0    1    1    0   
 $EndComp
@@ -100,13 +100,13 @@ L DF5A5.6JE Z1
 U 1 1 56857EAF
 P 3250 3950
 F 0 "Z1" H 2850 4000 60  0000 C CNN
-F 1 "DF5A5.6JE" H 2700 4100 60  0000 C CNN
+F 1 "DF5A5.6FU" H 2700 4100 60  0000 C CNN
 F 2 "TO_SOT_Packages_SMD:SOT-353_SC-70-5" H 3250 3950 60  0001 C CNN
-F 3 "http://optoelectronics.liteon.com/upload/download/DS22-2008-0044/S_110_LTST-C19HE1WT.pdf" H 3250 3950 60  0001 C CNN
+F 3 "https://toshiba.semicon-storage.com/info/docget.jsp?did=22252&prodName=DF5A5.6FU" H 3250 3950 60  0001 C CNN
 F 4 "Toshiba Semiconductor and Storage" H 3250 3950 60  0001 C CNN "MFG Name"
-F 5 "DF5A5.6JE,LM" H 3250 3950 60  0001 C CNN "MFG Part Num"
-F 6 "DF5A5.6JELMCT-ND" H 3250 3950 60  0001 C CNN "Distributer PN"
-F 7 "http://www.digikey.com/product-detail/en/DF5A5.6JE,LM/DF5A5.6JELMCT-ND/5403466" H 3250 3950 60  0001 C CNN "Distributer Link"
+F 5 "DF5A5.6FUTE85LF" H 3250 3950 60  0001 C CNN "MFG Part Num"
+F 6 "DF5A5.6FUTE85LFCT-ND" H 3250 3950 60  0001 C CNN "Distributer PN"
+F 7 "https://www.digikey.com/product-detail/en/toshiba-semiconductor-and-storage/DF5A5.6FUTE85LF/DF5A5.6FUTE85LFCT-ND/4304119" H 3250 3950 60  0001 C CNN "Distributer Link"
 	1    3250 3950
 	1    0    0    -1  
 $EndComp
@@ -131,9 +131,9 @@ F 1 "100" V 8100 4900 50  0000 C CNN
 F 2 "Resistors_SMD:R_0805" V 8030 4900 50  0001 C CNN
 F 3 "http://www.vishay.com/docs/20035/dcrcwe3.pdf" H 8100 4900 50  0001 C CNN
 F 4 "Vishay Dale" H 8100 4900 60  0001 C CNN "MFG Name"
-F 5 "CRCW0603100RFKEA" H 8100 4900 60  0001 C CNN "MFG Part Num"
-F 6 "541-100HCT-ND" H 8100 4900 60  0001 C CNN "Distributer PN"
-F 7 "http://www.digikey.com/product-detail/en/CRCW0603100RFKEA/541-100HCT-ND/1179695" H 8100 4900 60  0001 C CNN "Distributer Link"
+F 5 "CRCW0805100RFKEA" H 8100 4900 60  0001 C CNN "MFG Part Num"
+F 6 "541-100CCT-ND" H 8100 4900 60  0001 C CNN "Distributer PN"
+F 7 "https://www.digikey.com/product-detail/en/vishay-dale/CRCW0805100RFKEA/541-100CCT-ND/1180669" H 8100 4900 60  0001 C CNN "Distributer Link"
 	1    8100 4900
 	-1   0    0    1   
 $EndComp
@@ -150,11 +150,11 @@ P 7050 4700
 F 0 "RGB1" H 7300 4850 60  0000 C CNN
 F 1 "CA_RGB" H 6950 4850 60  0000 C CNN
 F 2 "LEDs:LED_Cree-PLCC4_3.2x2.8mm_CCW" H 7850 4750 60  0001 C CNN
-F 3 "http://optoelectronics.liteon.com/upload/download/DS22-2008-0044/S_110_LTST-C19HE1WT.pdf" H 7050 4750 60  0001 C CNN
-F 4 "Lite-On Inc" H 7050 4700 60  0001 C CNN "MFG Name"
-F 5 "LTST-C19HE1WT" H 7050 4700 60  0001 C CNN "MFG Part Num"
-F 6 "160-2162-1-ND" H 7050 4700 60  0001 C CNN "Distributer PN"
-F 7 "http://www.digikey.com/product-detail/en/LTST-C19HE1WT/160-2162-1-ND/4866310" H 7050 4700 60  0001 C CNN "Distributer Link"
+F 3 "http://www.cree.com/led-components/media/documents/ds-CLVBA-FKA.pdf" H 7050 4750 60  0001 C CNN
+F 4 "Cree" H 7050 4700 60  0001 C CNN "MFG Name"
+F 5 "CLVBA-FKA" H 7050 4700 60  0001 C CNN "MFG Part Num"
+F 6 "CLVBA-FKA-CAEDH8BBB7A363CT-ND" H 7050 4700 60  0001 C CNN "Distributer PN"
+F 7 "https://www.digikey.com/product-detail/en/cree-inc/CLVBA-FKA-CAEDH8BBB7A363/CLVBA-FKA-CAEDH8BBB7A363CT-ND/2650500" H 7050 4700 60  0001 C CNN "Distributer Link"
 	1    7050 4700
 	1    0    0    1   
 $EndComp

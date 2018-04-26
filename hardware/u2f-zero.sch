@@ -33,6 +33,7 @@ LIBS:siliconlabs
 LIBS:atmel_cryptoauth
 LIBS:discrete
 LIBS:debug
+LIBS:DX07P024AJ1R1500
 LIBS:u2f-zero-cache
 EELAYER 25 0
 EELAYER END
@@ -98,27 +99,27 @@ Text Label 4600 3600 0    60   ~ 0
 $Comp
 L DF5A5.6JE Z1
 U 1 1 56857EAF
-P 3250 3950
-F 0 "Z1" H 2850 4000 60  0000 C CNN
-F 1 "DF5A5.6FU" H 2700 4100 60  0000 C CNN
-F 2 "TO_SOT_Packages_SMD:SOT-353_SC-70-5" H 3250 3950 60  0001 C CNN
-F 3 "https://toshiba.semicon-storage.com/info/docget.jsp?did=22252&prodName=DF5A5.6FU" H 3250 3950 60  0001 C CNN
-F 4 "Toshiba Semiconductor and Storage" H 3250 3950 60  0001 C CNN "MFG Name"
-F 5 "DF5A5.6FUTE85LF" H 3250 3950 60  0001 C CNN "MFG Part Num"
-F 6 "DF5A5.6FUTE85LFCT-ND" H 3250 3950 60  0001 C CNN "Distributer PN"
-F 7 "https://www.digikey.com/product-detail/en/toshiba-semiconductor-and-storage/DF5A5.6FUTE85LF/DF5A5.6FUTE85LFCT-ND/4304119" H 3250 3950 60  0001 C CNN "Distributer Link"
-	1    3250 3950
+P 3225 2150
+F 0 "Z1" H 2825 2200 60  0000 C CNN
+F 1 "DF5A5.6FU" H 2675 2300 60  0000 C CNN
+F 2 "TO_SOT_Packages_SMD:SOT-353_SC-70-5" H 3225 2150 60  0001 C CNN
+F 3 "https://toshiba.semicon-storage.com/info/docget.jsp?did=22252&prodName=DF5A5.6FU" H 3225 2150 60  0001 C CNN
+F 4 "Toshiba Semiconductor and Storage" H 3225 2150 60  0001 C CNN "MFG Name"
+F 5 "DF5A5.6FUTE85LF" H 3225 2150 60  0001 C CNN "MFG Part Num"
+F 6 "DF5A5.6FUTE85LFCT-ND" H 3225 2150 60  0001 C CNN "Distributer PN"
+F 7 "https://www.digikey.com/product-detail/en/toshiba-semiconductor-and-storage/DF5A5.6FUTE85LF/DF5A5.6FUTE85LFCT-ND/4304119" H 3225 2150 60  0001 C CNN "Distributer Link"
+	1    3225 2150
 	1    0    0    -1  
 $EndComp
 Text Label 5850 5750 0    60   ~ 0
 GND
 Text Label 4850 6300 0    60   ~ 0
 +5V
-Text Label 3450 3550 2    60   ~ 0
+Text Label 3425 1725 2    60   ~ 0
 +5V
-Text Label 3250 3550 2    60   ~ 0
+Text Label 3225 1725 2    60   ~ 0
 GND
-Text Label 3750 4500 2    60   ~ 0
+Text Label 4125 4500 2    60   ~ 0
 HD-
 Text Label 4150 4400 2    60   ~ 0
 HD+
@@ -137,9 +138,9 @@ F 7 "https://www.digikey.com/product-detail/en/vishay-dale/CRCW0805100RFKEA/541-
 	1    8100 4900
 	-1   0    0    1   
 $EndComp
-Text Notes 2850 3400 0    60   ~ 0
+Text Notes 3625 2525 0    60   ~ 0
 Protect from ESD
-Text Notes 2350 4450 0    60   ~ 0
+Text Notes 3325 4700 0    60   ~ 0
 Host USB data
 Text Notes 4700 2700 0    60   ~ 0
 Secure element for EC
@@ -199,7 +200,6 @@ F 7 "http://www.digikey.com/product-detail/en/e-switch/TL3305AF260QG/EG5353CT-ND
 	1    6500 5200
 	1    0    0    -1  
 $EndComp
-NoConn ~ 3050 3650
 Text Label 6650 3400 3    60   ~ 0
 C2CK
 Text Label 6750 3400 3    60   ~ 0
@@ -280,12 +280,6 @@ Wire Wire Line
 Wire Wire Line
 	6700 5600 6700 5800
 Wire Wire Line
-	3100 4250 3100 4500
-Wire Wire Line
-	3250 3650 3250 3550
-Wire Wire Line
-	3450 3650 3450 3550
-Wire Wire Line
 	6450 3400 6450 4100
 Wire Wire Line
 	8100 5050 8100 5250
@@ -300,13 +294,9 @@ Wire Wire Line
 Wire Wire Line
 	4800 5000 4550 5000
 Wire Wire Line
-	4800 4400 3800 4400
+	3375 4400 4800 4400
 Wire Wire Line
-	3800 4400 3800 4250
-Wire Wire Line
-	3800 4250 3400 4250
-Wire Wire Line
-	3100 4500 4800 4500
+	3075 4500 4800 4500
 Wire Wire Line
 	6600 4350 6250 4350
 Wire Wire Line
@@ -418,34 +408,136 @@ Wire Wire Line
 $Comp
 L u2f-fiducial F1
 U 1 1 571C39BB
-P 2600 5450
-F 0 "F1" H 2450 5650 60  0000 C CNN
-F 1 "u2f-fiducial" H 2950 5650 60  0000 C CNN
-F 2 "footprints:u2f-fiducial" H 2600 5450 60  0001 C CNN
-F 3 "" H 2600 5450 60  0000 C CNN
-	1    2600 5450
+P 2775 6125
+F 0 "F1" H 2625 6325 60  0000 C CNN
+F 1 "u2f-fiducial" H 3125 6325 60  0000 C CNN
+F 2 "footprints:u2f-fiducial" H 2775 6125 60  0001 C CNN
+F 3 "" H 2775 6125 60  0000 C CNN
+	1    2775 6125
 	1    0    0    -1  
 $EndComp
 $Comp
 L u2f-fiducial F2
 U 1 1 571C3A1E
-P 3100 5600
-F 0 "F2" H 2950 5800 60  0000 C CNN
-F 1 "u2f-fiducial" H 3450 5800 60  0000 C CNN
-F 2 "footprints:u2f-fiducial" H 3100 5600 60  0001 C CNN
-F 3 "" H 3100 5600 60  0000 C CNN
-	1    3100 5600
+P 3300 6300
+F 0 "F2" H 3150 6500 60  0000 C CNN
+F 1 "u2f-fiducial" H 3650 6500 60  0000 C CNN
+F 2 "footprints:u2f-fiducial" H 3300 6300 60  0001 C CNN
+F 3 "" H 3300 6300 60  0000 C CNN
+	1    3300 6300
 	1    0    0    -1  
 $EndComp
 $Comp
 L u2f-fiducial F3
 U 1 1 571C3A85
-P 3500 5750
-F 0 "F3" H 3350 5950 60  0000 C CNN
-F 1 "u2f-fiducial" H 3850 5950 60  0000 C CNN
-F 2 "footprints:u2f-fiducial" H 3500 5750 60  0001 C CNN
-F 3 "" H 3500 5750 60  0000 C CNN
-	1    3500 5750
+P 3850 6525
+F 0 "F3" H 3700 6725 60  0000 C CNN
+F 1 "u2f-fiducial" H 4200 6725 60  0000 C CNN
+F 2 "footprints:u2f-fiducial" H 3850 6525 60  0001 C CNN
+F 3 "" H 3850 6525 60  0000 C CNN
+	1    3850 6525
 	1    0    0    -1  
 $EndComp
+$Comp
+L DX07P024AJ1R1500 J1
+U 1 1 5AE12773
+P 2325 4350
+F 0 "J1" H 1924 5071 50  0000 L BNN
+F 1 "DX07P024AJ1R1500" H 1924 3547 50  0000 L BNN
+F 2 "footprints:JAE_DX07P024AJ1R1500" H 2325 4350 50  0001 L BNN
+F 3 "Good" H 2325 4350 50  0001 L BNN
+F 4 "DX07P024AJ1R1500" H 2325 4350 50  0001 L BNN "Field4"
+F 5 "1.37 USD" H 2325 4350 50  0001 L BNN "Field5"
+F 6 "JAE Electronics" H 2325 4350 50  0001 L BNN "Field6"
+F 7 "None" H 2325 4350 50  0001 L BNN "Field7"
+F 8 "Cut Tape - Usb Type c Slim Plug" H 2325 4350 50  0001 L BNN "Field8"
+	1    2325 4350
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	3425 1850 3425 1725
+Wire Wire Line
+	3225 1725 3225 1850
+Wire Wire Line
+	3375 2450 3375 4400
+Wire Wire Line
+	3075 2450 3075 4500
+Wire Wire Line
+	2825 4150 3375 4150
+Connection ~ 3375 4150
+Wire Wire Line
+	2825 4250 3075 4250
+Connection ~ 3075 4250
+NoConn ~ 2825 3750
+NoConn ~ 2825 3850
+NoConn ~ 2825 3950
+NoConn ~ 2825 4050
+NoConn ~ 2825 4350
+NoConn ~ 2825 4450
+NoConn ~ 2825 4550
+NoConn ~ 2825 4650
+NoConn ~ 2825 4750
+NoConn ~ 2825 4850
+NoConn ~ 2825 4950
+NoConn ~ 3025 1850
+Text Label 1600 4825 2    60   ~ 0
++5V
+Text Label 1500 3875 2    60   ~ 0
+GND
+Wire Wire Line
+	1750 4100 1750 3750
+Wire Wire Line
+	1750 3750 1825 3750
+Wire Wire Line
+	1825 3900 1750 3900
+Connection ~ 1750 3900
+Wire Wire Line
+	1825 4000 1750 4000
+Connection ~ 1750 4000
+Wire Wire Line
+	1750 4100 1825 4100
+Wire Wire Line
+	1500 3875 1750 3875
+Connection ~ 1750 3875
+Wire Wire Line
+	1825 4700 1750 4700
+Wire Wire Line
+	1750 4700 1750 4950
+Wire Wire Line
+	1750 4950 1825 4950
+Wire Wire Line
+	1825 4875 1750 4875
+Connection ~ 1750 4875
+Wire Wire Line
+	1825 4800 1750 4800
+Connection ~ 1750 4800
+Wire Wire Line
+	1600 4825 1750 4825
+Connection ~ 1750 4825
+NoConn ~ 1825 4475
+$Comp
+L USB-A-UP2-AH-1-TH U1
+U 1 1 5AE141F4
+P 2275 2300
+F 0 "U1" H 2650 2150 60  0000 C CNN
+F 1 "USB-A-UP2-AH-1-TH" H 2000 2225 60  0000 C CNN
+F 2 "footprints:usb-A-plug-UP2-AH-1-TH" H 2275 2300 60  0001 C CNN
+F 3 "" H 2275 2300 60  0001 C CNN
+	1    2275 2300
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2675 2825 3375 2825
+Connection ~ 3375 2825
+Wire Wire Line
+	2675 3000 3075 3000
+Connection ~ 3075 3000
+Text Label 2775 3175 0    60   ~ 0
++5V
+Text Label 2775 2650 0    60   ~ 0
+GND
+Wire Wire Line
+	2775 2650 2675 2650
+Wire Wire Line
+	2775 3175 2675 3175
 $EndSCHEMATC

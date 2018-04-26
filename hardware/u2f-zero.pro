@@ -1,4 +1,4 @@
-update=1/23/2016 12:43:37 PM
+update=4/25/2018 8:28:39 PM
 version=1
 last_client=kicad
 [pcbnew]
@@ -63,3 +63,4 @@ LibName31=library/siliconlabs
 LibName32=library/atmel_cryptoauth
 LibName33=library/discrete
 LibName34=library/debug
+LibName35=library/DX07P024AJ1R1500

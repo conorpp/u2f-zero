@@ -40,11 +40,11 @@
 
     <!-- main part -->
     <xsl:template match="/export">
-        <xsl:text>Reference, Value, Footprint, Datasheet</xsl:text>
+        <xsl:text>Reference,Value,Footprint,Datasheet</xsl:text>
 
             <!-- find all existing table head entries and list each one once -->
             <xsl:for-each select="components/comp/fields/field[generate-id(.) = generate-id(key('headentr',@name)[1])]">
-                <xsl:text>, </xsl:text>
+                <xsl:text>,</xsl:text>
                 <xsl:value-of select="@name"/>
             </xsl:for-each>
             <xsl:text>&nl;</xsl:text>

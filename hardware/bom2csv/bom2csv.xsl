@@ -55,12 +55,17 @@
 
     <!-- the table entries -->
     <xsl:template match="components/comp">
-        <xsl:value-of select="@ref"/><xsl:text>,</xsl:text>
-        <xsl:value-of select="value"/><xsl:text>,</xsl:text>
-        <xsl:value-of select="footprint"/><xsl:text>,</xsl:text>
-        <xsl:value-of select="datasheet"/>
-        <xsl:apply-templates select="fields"/>
-        <xsl:text>&nl;</xsl:text>
+
+        <!-- skip components without extra fields (such as debug pins) -->
+        <xsl:if test="fields">
+            <xsl:value-of select="@ref"/><xsl:text>,</xsl:text>
+            <xsl:value-of select="value"/><xsl:text>,</xsl:text>
+            <xsl:value-of select="footprint"/><xsl:text>,</xsl:text>
+            <xsl:value-of select="datasheet"/>
+            <xsl:apply-templates select="fields"/>
+            <xsl:text>&nl;</xsl:text>
+        </xsl:if>
+
     </xsl:template>
 
     <!-- table entries with dynamic table head -->

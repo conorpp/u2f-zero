@@ -13,7 +13,9 @@ It ends up being $35 for programmer and ~$5/board.  The token should be durable 
 
 Check out [the wiki](https://github.com/conorpp/u2f-zero/wiki) for more on how to [build your own](https://github.com/conorpp/u2f-zero/wiki/Building-a-U2F-Token).
 
+#### Redesign / FIDO 2
 
+FIDO 2 protocol is replacing U2F.  It has more flexibility and support for password-less login.  A new open source FIDO 2 token is being planned (with support for USB, Bluetooth, and NFC).  Discussion for hardware design and usage [is happening here](https://github.com/conorpp/u2f-zero/issues/76), feel free to chip in.  
 
 Security Overview
 -----------------

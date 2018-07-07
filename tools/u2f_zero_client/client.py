@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #
 # Copyright (c) 2016, Conor Patrick
+# Copyright (c) 2018, Nitrokey UG
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without

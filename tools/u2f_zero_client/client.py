@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #
 # Copyright (c) 2016, Conor Patrick
+# Copyright (c) 2018, Nitrokey UG
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -52,8 +53,8 @@ except:
     sys.exit(1)
 
 
-
-cmd_prefix = [0, 0xff,0xff,0xff,0xff]
+cid_broadcast = [0xFF, 0xFF, 0xFF, 0xFF]
+cmd_prefix    = [0] + cid_broadcast
 
 class commands:
     U2F_CONFIG_GET_SERIAL_NUM = 0x80
@@ -71,6 +72,9 @@ class commands:
     U2F_CUSTOM_SEED = 0x22
     U2F_CUSTOM_WIPE = 0x23
     U2F_CUSTOM_WINK = 0x24
+    
+    U2F_HID_INIT = 0x86
+    U2F_HID_PING = 0x81
 
 
 if len(sys.argv) not in [2,3,4,5,6]:
@@ -322,6 +326,94 @@ def do_wink(h):
     cmd = cmd_prefix + [ commands.U2F_CUSTOM_WINK, 0,0]
     h.write(cmd)
 
+def u2fhid_init(h):
+    nonce = [random.randint(0, 0xFF) for i in xrange(0, 8)]
+    cmd = cid_broadcast + [commands.U2F_HID_INIT, 0, 8] + nonce
+    h.write([0] + cmd)
+    ans = h.read(19, 1000)
+    return ans[15:19]
+	
+def get_response_packet_payload(cmd_seq):                # Reads an U2FHID packet, checks it's command/sequence field by the given parameter, returns the payload 
+    ans = h.read(64, 200)                                
+    if len(ans) == 0:                                    # Read timeout
+        return[]
+    else:                                                # Read success
+        print('pkt recvd(%i):' % ans[4])
+        print(" ".join('%03d'%x for x in ans))
+        if ans[4] == cmd_seq:                            # Error check: OK
+            if cmd_seq >= 128:                           # Initialization packet                                
+                return ans[7:]                           # Payload
+            else:                                        # Sequence packet
+                return ans[5:]                           # Payload 
+        die('ERR: cmd/seq field in received packet is %i instead of %i' % (ans[4], cmd_seq)) # Error check: ERR (1st byte of payload is the error code in case of a command packet)
+            
+ 
+def do_ping(h, num):
+    # Init (set U2F HID channel address)
+    cid = u2fhid_init(h)
+    
+    # Prepare ping data
+    dlen = int(num)
+    data = [random.randint(1, 0xFF) for i in xrange(0, dlen)]     # Ping data: random bytes, except 0
+    data_req = data
+    
+    # Send initialization packet of request message
+    cmd = cid + [ commands.U2F_HID_PING, int((dlen & 0xFF00) >> 8), int(dlen & 0x00FF)] + data[0:57] # Send ping command
+    h.write([0] + cmd)
+    print('init. pkt sent(%i):' % cmd[4])
+    print(" ".join('%03d'%x for x in cmd))
+
+    # Request/Response transfer in case of one packet composed message
+    data_resp = []
+    if dlen < 58:                                                 # Message fits into one packet, no continuation packets will be sent
+        data_resp = get_response_packet_payload(commands.U2F_HID_PING)
+    
+    # Request/Response transfer in case of a multiple packet composed message
+    else:                                                         # Message doesnt fit into one packet
+        seq_tx = 0
+        seq_rx = commands.U2F_HID_PING
+        data = data[57:]
+        resp_dlen = 0
+        while len(data) > 0:                                      # Send remaining data of request message in continuation packets                           
+            cmd = cid + [seq_tx] + data[:64 - 5]
+            h.write([0] + cmd)
+            data = data[64 - 5:]
+            print('cont. pkt sent(%i):' % seq_tx)
+            print(" ".join('%03d'%x for x in cmd))
+            seq_tx += 1
+            
+            ans = get_response_packet_payload(seq_rx)             # Collect response message packets in the meantime to avoid input buffer ovf
+            if len(ans):
+                if seq_rx == commands.U2F_HID_PING:
+                    seq_rx = 0
+                else:
+                    seq_rx += 1
+                data_resp += ans
+        print('Collecting remaining  data...')
+        while True:                                               # Collect remaining response message packets after the total request message has been sent                               
+            ans = get_response_packet_payload(seq_rx)
+            if len(ans):
+                if seq_rx == commands.U2F_HID_PING:
+                    seq_rx = 0
+                else:
+                    seq_rx += 1
+                data_resp += ans
+            else:
+                break;
+    resp_dlen = len(data_resp)
+    
+    # Adjust ping data: remove padding zeros from the end
+    for i in reversed(range(resp_dlen)):
+        if data_resp[i] == 0:
+            data_resp.pop(i)
+        else:
+            break
+    
+    # Check ping data (compare sent/received message payloads)
+    if cmp(data_req, data_resp) == 0:
+        print('Ping OK')
+    else:
+        print('Ping ERR')
 
 
 
@@ -362,6 +454,9 @@ if __name__ == '__main__':
     elif action == 'bootloader-destroy':
         h = open_u2f(SN)
         bootloader_destroy(h)
+    elif action == 'ping':
+        h = open_u2f(SN)
+        do_ping(h, sys.argv[2])
     else:
         print( 'error: invalid action: ', action)
         sys.exit(1)

@@ -107,6 +107,14 @@ struct u2f_hid_init_response
 	uint8_t cflags;
 };
 
+struct CID
+{
+	uint32_t cid;
+	uint32_t last_used;
+	uint8_t busy;
+	uint8_t last_cmd;
+};
+
 typedef enum
 {
 	U2FHID_REPLY=0,
@@ -136,6 +144,8 @@ void u2f_hid_flush();
 // It will pass up to U2F protocol if necessary.
 //  @param req the U2F HID message
 void u2f_hid_request(struct u2f_hid_msg* req);
+
+struct CID* get_cid(uint32_t cid);
 
 // app_wink blink a light on the platform
 // must be implemented elsewhere for specific platform used

@@ -52,14 +52,6 @@ typedef enum
 	HID_READY,
 } HID_STATE;
 
-struct CID
-{
-	uint32_t cid;
-	uint32_t last_used;
-	uint8_t busy;
-	uint8_t last_cmd;
-};
-
 static struct hid_layer_param
 {
 	HID_STATE state;
@@ -232,7 +224,7 @@ static int8_t add_new_cid(uint32_t cid)
 	return -1;
 }
 
-static struct CID* get_cid(uint32_t cid)
+struct CID* get_cid(uint32_t cid)
 {
 	uint8_t i;
 	for(i = 0; i < CID_MAX; i++)

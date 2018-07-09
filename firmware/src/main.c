@@ -229,6 +229,7 @@ int16_t main(void) {
 
 				if (state == APP_HID_MSG)
 					state = APP_NOTHING;
+			}
 				break;
 #ifdef U2F_SUPPORT_WINK
 			case APP_WINK:

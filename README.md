@@ -5,6 +5,15 @@ U2F Zero
 
 U2F Zero is an open source U2F token for 2 factor authentication.  It is implemented securely.  It works with Google accounts, Github, Duo, and anything else supporting U2F.  The latest version uses key derivation and has no limit on registrations.
 
+### Update: new FIDO2 token
+
+This project is superseded by the [open source FIDO2 token, solo](https://github.com/SoloKeysSec/solo).  It is still
+in development, but offers:
+
+* FIDO2 + U2F + more secure
+* Easier to build & customize
+* Just as cheap as U2F Zero
+
 ![](http://i.imgur.com/dQpo9wC.jpg "The door keys are not used")
 
 You can easily [build your own](https://github.com/conorpp/u2f-zero/wiki/Building-a-U2F-Token).  You just need to order the 

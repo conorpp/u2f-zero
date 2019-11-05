@@ -5,7 +5,6 @@ in development, but offers:
 
 * FIDO2 + U2F + more secure
 * Easier to build & customize
-* Just as cheap as U2F Zero
 
 U2F Zero is no longer maintained.
 

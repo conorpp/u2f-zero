@@ -40,7 +40,7 @@ except:
     print('python hidapi module is required')
     print('try running: ')
     print('     apt-get install libusb-1.0-0-dev libudev-dev')
-    print('     pip install hidapi')
+    print('     pip install hidapi hid')
     sys.exit(1)
 
 try:
